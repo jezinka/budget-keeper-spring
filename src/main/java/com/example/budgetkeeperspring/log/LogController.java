@@ -17,7 +17,7 @@ public class LogController {
 
     @GetMapping("")
     List<Log> getAll() {
-        return logRepository.findAll();
+        return logRepository.getAll();
     }
 
     @GetMapping("/{type}")
