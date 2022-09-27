@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bootstrap-icons": "^1.9.1",
+    "jquery": "^3.6.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.5.0",
+    "react-bootstrap-icons": "^1.8.4",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.1",
-    "react-scripts": "5.0.1",
-    "jquery": "^3.6.1"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -16,7 +18,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://api:8080/budget",
+  "proxy": "http://localhost:8080/budget",
   "eslintConfig": {
     "extends": [
       "react-app",
