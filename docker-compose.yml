@@ -1,5 +1,20 @@
 version: '3'
 services:
+  db:
+    container_name: db
+    image: linuxserver/mariadb:alpine
+    environment:
+      - MYSQL_DATABASE=budget
+      - MYSQL_USER=budget-keeper
+      - MYSQL_PASSWORD=123Budget#
+    volumes:
+      - "./sql/init:/docker-entrypoint-initdb.d/"
+    networks:
+      - app-test
+    expose:
+      - 3006
+    ports:
+      - "3006:3006"
   api:
     container_name: api
     build: .
@@ -9,6 +24,8 @@ services:
       - "8080:8080"
     networks:
       - app-test
+    depends_on:
+      - db
   react-ui:
     container_name: ui
     build:

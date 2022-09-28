@@ -21,6 +21,14 @@ create table log
     message longtext    null
 );
 
+create table money_amount
+(
+    id     int auto_increment
+        primary key,
+    month  date  not null,
+    amount float not null
+);
+
 create table passive_item
 (
     id             int auto_increment
@@ -57,3 +65,4 @@ create table transaction
     constraint transaction_category_id_fk
         foreign key (category_id) references category (id)
 );
+
