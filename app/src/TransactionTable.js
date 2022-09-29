@@ -6,14 +6,26 @@ import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
 export default function TransactionTable() {
     const [transactions, setTransactions] = useState([]);
 
+    async function reloadTable() {
+        const response = await fetch('/transactions');
+        const data = await response.json();
+        console.log(data.length);
+        setTransactions(data);
+    }
+
     useEffect(() => {
-        fetch('/transactions')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.length);
-                setTransactions(data);
-            })
+        reloadTable();
     }, []);
+
+    async function deleteTransaction(id) {
+        const success = await fetch("/transactions/" + id, {method: 'DELETE'})
+        const data = await success.json();
+        if (data) {
+            reloadTable();
+        }
+    }
+
+    const handleDeleteClick = (e) => deleteTransaction(e.currentTarget.value);
 
     return (
         <Table responsive='sm' striped bordered size="sm">
@@ -38,7 +50,10 @@ export default function TransactionTable() {
                     <td>
                         <Button variant="outline-primary" size="sm"><Pencil/></Button>{' '}
                         <Button variant="outline-primary" size="sm"><ArrowsAngleExpand/></Button>{' '}
-                        <Button variant="outline-primary" size="sm"><Trash/></Button>
+                        <Button variant="outline-primary" size="sm"
+                                value={transaction.id}
+                                onClick={handleDeleteClick}><Trash/>
+                        </Button>
                     </td>
                 </tr>
             )}

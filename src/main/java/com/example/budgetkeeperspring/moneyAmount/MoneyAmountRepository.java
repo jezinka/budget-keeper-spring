@@ -27,14 +27,17 @@ public class MoneyAmountRepository {
                 .addValue("end", end);
 
         return namedParameterJdbcTemplate.queryForObject(
-                "select amount, income, outcome, amount + income + outcome as account_balance " +
-                        "from (select m.amount," +
-                        "             sum(case when t.amount > 0 then t.amount else 0 end) as income, " +
-                        "             sum(case when t.amount < 0 then t.amount else 0 end) as outcome " +
+                "select " +
+                        " amount, " +
+                        " income, " +
+                        " outcome, " +
+                        " (amount + income + outcome) as account_balance " +
+                        "from (select ifnull(sum(case when t.amount > 0 then t.amount else 0 end), 0) as income, " +
+                        "             ifnull(sum(case when t.amount < 0 then t.amount else 0 end), 0) as outcome " +
                         "      from transaction t " +
-                        "               cross join money_amount m " +
-                        "      where transaction_date between :begin and :end " +
-                        "        and month between :begin and :end) z", namedParameters, new MoneyAmountRowMapper());
+                        "      where transaction_date between cast(:begin AS DATE) and cast(:end AS DATE)) balance " +
+                        "         join money_amount " +
+                        "where month between cast(:begin AS DATE) and cast(:end AS DATE);", namedParameters, new MoneyAmountRowMapper());
     }
 }
 

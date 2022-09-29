@@ -5,15 +5,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import static java.time.temporal.TemporalAdjusters.*;
-
-
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-
-import static java.time.LocalTime.now;
 
 @Repository
 public class TransactionRepository {
@@ -29,8 +23,14 @@ public class TransactionRepository {
                         "from transaction t " +
                         "left join category c on t.category_id = c.id " +
                         "where transaction_date between ? and ? " +
+                        "and is_deleted = 0 " +
                         "order by transaction_date asc",
                 BeanPropertyRowMapper.newInstance(Transaction.class),
                 begin, end);
+    }
+
+    public Boolean deleteTransaction(Long id) {
+        int result = jdbcTemplate.update("update transaction set is_deleted = 1 where id = ?", id);
+        return result == 1;
     }
 }
