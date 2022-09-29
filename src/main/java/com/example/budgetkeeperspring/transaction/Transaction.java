@@ -13,9 +13,10 @@ public class Transaction {
 
     private Long id;
 
-    Date transactionDate;
-    String title;
-    String payee;
-    Float amount;
-    String category;
+    private Date transactionDate;
+    private String title;
+    private String payee;
+    private Float amount;
+    private String category;
+    private Long categoryId;
 }

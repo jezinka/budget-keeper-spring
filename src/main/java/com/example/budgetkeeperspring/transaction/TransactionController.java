@@ -17,6 +17,11 @@ public class TransactionController {
         return transactionRepository.findAllForCurrentMonth();
     }
 
+    @GetMapping("/{id}")
+    Transaction getById(@PathVariable Long id) {
+        return transactionRepository.getById(id);
+    }
+
     @DeleteMapping("/{id}")
     Boolean deleteTransaction(@PathVariable Long id) {
         return transactionRepository.deleteTransaction(id);

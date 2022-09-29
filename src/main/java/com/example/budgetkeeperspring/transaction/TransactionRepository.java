@@ -33,4 +33,27 @@ public class TransactionRepository {
         int result = jdbcTemplate.update("update transaction set is_deleted = 1 where id = ?", id);
         return result == 1;
     }
+
+    public Boolean editTransaction(Transaction transaction) {
+        int result = jdbcTemplate.update("update transaction set " +
+                        "transaction_date = ?," +
+                        "title = ?," +
+                        "payee = ?," +
+                        "amount = ?," +
+                        "category_id = ? " +
+                        "where id = ?",
+                transaction.getTransactionDate(),
+                transaction.getTitle(),
+                transaction.getPayee(),
+                transaction.getAmount(),
+                transaction.getCategoryId(),
+                transaction.getId());
+        return result == 1;
+    }
+
+    public Transaction getById(Long id) {
+        return jdbcTemplate.queryForObject("select t.id, transaction_date, title, payee, amount, category_id " +
+                "from transaction t " +
+                "where t.id = ?", BeanPropertyRowMapper.newInstance(Transaction.class), id);
+    }
 }
