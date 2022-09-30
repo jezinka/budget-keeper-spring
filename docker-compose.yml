@@ -23,5 +23,4 @@ services:
       - budget-net
 networks:
   budget-net:
-    driver: bridge
     external: true

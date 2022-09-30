@@ -1,5 +1,5 @@
 # Build stage
-FROM maven:3-openjdk-17-slim AS build
+FROM maven:3 AS build
 COPY pom.xml /app/
 RUN mvn verify --fail-never
 COPY src /app/src
