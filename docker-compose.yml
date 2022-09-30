@@ -1,20 +1,5 @@
 version: '3'
 services:
-  db:
-    container_name: db
-    image: linuxserver/mariadb:alpine
-    environment:
-      - MYSQL_DATABASE=budget
-      - MYSQL_USER=budget-keeper
-      - MYSQL_PASSWORD=123Budget#
-    volumes:
-      - "./sql/init:/docker-entrypoint-initdb.d/"
-    networks:
-      - app-test
-    expose:
-      - 3006
-    ports:
-      - "3006:3006"
   api:
     container_name: api
     build: .
@@ -23,9 +8,7 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - app-test
-    depends_on:
-      - db
+      - budget-net
   react-ui:
     container_name: ui
     build:
@@ -37,8 +20,8 @@ services:
     depends_on:
       - api
     networks:
-      - app-test
+      - budget-net
 networks:
-  app-test:
+  budget-net:
     driver: bridge
-
+    external: true
