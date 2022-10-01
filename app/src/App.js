@@ -1,28 +1,27 @@
 import React from 'react';
-import ErrorLog from './ErrorLog'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'jquery/dist/jquery.min.js'
 import 'bootstrap/dist/js/bootstrap.min.js'
-import TransactionTable from "./TransactionTable";
-import {Col, Container, Row} from "react-bootstrap";
-import MoneyAmount from "./MoneyAmount";
+
+// importing components from react-router-dom package
+import {BrowserRouter as Router, Route, Routes,} from "react-router-dom";
+import CurrentMonth from "./components/CurrentMonth";
+import YearAtTheGlance from "./components/YearAtTheGlance";
+import AnyPeriod from "./components/AnyPeriod";
 
 
 const App = () => {
     return (
-        <Container fluid className="mt-2">
-            <Row>
-                <ErrorLog/>
-            </Row>
-            <Row/>
-            <Row>
-                <Col sm={7}><TransactionTable/></Col>
-                <Col sm={2} className="mt-4">
-                    <MoneyAmount/>
-                </Col>
-            </Row>
-        </Container>
+        <>
+            <Router>
+                <Routes>
+                    <Route exact path="/" element={<CurrentMonth/>}/>
+                    <Route path="/AnyPeriod" element={<AnyPeriod/>}/>
+                    <Route path="/YearAtTheGlance" element={<YearAtTheGlance/>}/>
+                </Routes>
+            </Router>
+        </>
     );
 }
 
