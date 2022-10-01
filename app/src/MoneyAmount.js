@@ -21,11 +21,11 @@ export default function MoneyAmount() {
             </tr>
             <tr>
                 <td>WYDATKI</td>
-                <td>{moneyAmount.income}</td>
+                <td>{moneyAmount.outcome}</td>
             </tr>
             <tr>
                 <td>WPŁYWY</td>
-                <td>{moneyAmount.outcome}</td>
+                <td>{moneyAmount.income}</td>
             </tr>
             <tr>
                 <td>STAN KONTA</td>
