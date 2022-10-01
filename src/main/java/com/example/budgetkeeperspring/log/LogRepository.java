@@ -23,7 +23,8 @@ public class LogRepository {
     }
 
     List<Log> findAllByType(String type) {
-        return jdbcTemplate.query("select id, date, type, message from log where type=?;",
+        return jdbcTemplate.query("select max(id), type, message from log where type=? " +
+                        "group by type, message;",
                 BeanPropertyRowMapper.newInstance(Log.class), type);
     }
 
