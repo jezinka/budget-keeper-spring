@@ -24,7 +24,7 @@ public class TransactionRepository {
                         "left join category c on t.category_id = c.id " +
                         "where transaction_date between ? and ? " +
                         "and is_deleted = 0 " +
-                        "order by transaction_date asc",
+                        "order by amount asc",
                 BeanPropertyRowMapper.newInstance(Transaction.class),
                 begin, end);
     }
