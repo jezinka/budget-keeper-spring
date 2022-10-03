@@ -14,6 +14,6 @@ public class CategoryRepository {
     JdbcTemplate jdbcTemplate;
 
     public List<Category> getAll() {
-        return jdbcTemplate.query("select id, name from category", BeanPropertyRowMapper.newInstance(Category.class));
+        return jdbcTemplate.query("select id, name from category order by name", BeanPropertyRowMapper.newInstance(Category.class));
     }
 }
