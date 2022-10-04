@@ -1,7 +1,7 @@
 import {Col, Container, Row} from "react-bootstrap";
-import ErrorLog from "../ErrorLog";
-import TransactionTable from "../TransactionTable";
-import MoneyAmount from "../MoneyAmount";
+import ErrorLog from "./ErrorLog";
+import TransactionTable from "./TransactionTable";
+import MoneyAmount from "./MoneyAmount";
 import React from "react";
 
 const CurrentMonth = () => {
