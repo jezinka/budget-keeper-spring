@@ -1,0 +1,24 @@
+package com.example.budgetkeeperspring.groupedExpenses;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class GroupedExpensesRepository {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    List<GroupedExpenses> getYearAtGlance(int year) {
+        return jdbcTemplate.query("select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
+                "from transaction t " +
+                "         join category c on t.category_id = c.id " +
+                "where year(transaction_date) = ? " +
+                "  and is_deleted <> 1 " +
+                "group by month, category", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), year);
+    }
+}
