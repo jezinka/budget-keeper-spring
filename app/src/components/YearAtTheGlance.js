@@ -1,8 +1,7 @@
 import {Col, Container, Row} from "react-bootstrap";
 import ErrorLog from "./ErrorLog";
-import TransactionTable from "./TransactionTable";
-import MoneyAmount from "./MoneyAmount";
 import React from "react";
+import YearlyExpenses from "./YearlyExpenses";
 
 const YearAtTheGlance = () => {
     return (
@@ -12,10 +11,9 @@ const YearAtTheGlance = () => {
             </Row>
             <Row/>
             <Row>
-                <Col sm={7}><TransactionTable/></Col>
-                <Col sm={2} className="mt-4">
-                    <MoneyAmount/>
-                </Col>
+                <Col sm={1}></Col>
+                <Col><YearlyExpenses/></Col>
+                <Col sm={1}></Col>
             </Row>
         </Container>
     )

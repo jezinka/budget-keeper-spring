@@ -16,4 +16,11 @@ public class CategoryRepository {
     public List<Category> getAll() {
         return jdbcTemplate.query("select id, name from category order by name", BeanPropertyRowMapper.newInstance(Category.class));
     }
+
+    public List<Category> getActive(int year) {
+        return jdbcTemplate.query("select id, name  " +
+                "from category  " +
+                "where id in (select distinct category_id from transaction where year(transaction_date) = ?)  " +
+                "order by name;", BeanPropertyRowMapper.newInstance(Category.class), year);
+    }
 }

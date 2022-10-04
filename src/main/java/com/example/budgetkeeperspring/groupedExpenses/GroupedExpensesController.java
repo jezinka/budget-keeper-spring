@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,6 +19,9 @@ public class GroupedExpensesController {
     @GetMapping("")
     List<GroupedExpenses> getForCurrentYear() {
         int year = Year.now().getValue();
-        return groupedExpensesRepository.getYearAtGlance(year);
+        List<GroupedExpenses> groupedExpenses = new ArrayList<>(groupedExpensesRepository.getYearAtGlance(year));
+        groupedExpenses.addAll(groupedExpensesRepository.getCategorySumRows(year));
+        groupedExpenses.addAll(groupedExpensesRepository.getMonthSumRows(year));
+        return groupedExpenses;
     }
 }
