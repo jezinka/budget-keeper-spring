@@ -81,7 +81,7 @@ export default function TransactionTable() {
         <>
             <Modal show={showForm} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit transaction</Modal.Title>
+                    <Modal.Title>Edytuj transakcję</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
