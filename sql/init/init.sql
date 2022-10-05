@@ -57,12 +57,23 @@ create table transaction
 (
     id               int auto_increment
         primary key,
-    transaction_date date         null,
-    title            varchar(200) null,
-    payee            varchar(200) null,
-    amount           float        null,
-    category_id      int          null,
+    transaction_date date                 null,
+    title            varchar(200)         null,
+    payee            varchar(200)         null,
+    amount           float                null,
+    category_id      int                  null,
+    is_deleted       tinyint(1) default 0 null,
     constraint transaction_category_id_fk
         foreign key (category_id) references category (id)
+);
+
+create table users
+(
+    user_id  int auto_increment
+        primary key,
+    username varchar(45) not null,
+    password varchar(64) not null,
+    role     varchar(45) not null,
+    enabled  tinyint     null
 );
 
