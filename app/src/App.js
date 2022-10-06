@@ -5,8 +5,8 @@ import 'jquery/dist/jquery.min.js'
 import 'bootstrap/dist/js/bootstrap.min.js'
 
 import {BrowserRouter as Router, Route, Routes,} from "react-router-dom";
-import CurrentMonth from "./components/CurrentMonth";
-import YearAtTheGlance from "./components/YearAtTheGlance";
+import CurrentMonth from "./components/currentMonth/CurrentMonth";
+import YearAtTheGlance from "./components/year/YearAtTheGlance";
 
 
 const App = () => {

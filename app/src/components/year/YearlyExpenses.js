@@ -1,20 +1,12 @@
 import Table from 'react-bootstrap/Table';
 import {useEffect, useState} from "react";
+import Expense from "./Expense";
+import {getMonthName, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH, SUMMARY_STYLE} from "../../Utils";
 
 export default function YearlyExpenses() {
 
-    const SUM_MONTH = 99;
-    const SUM_CATEGORY = 'SUMA';
-
     const [expenses, setExpenses] = useState([]);
     const [categories, setCategories] = useState([]);
-
-    function getMonthName(monthNumber) {
-        const date = new Date();
-        date.setMonth(monthNumber - 1);
-
-        return date.toLocaleString('pl-PL', {month: 'long'});
-    }
 
     async function reloadTable() {
         const response = await fetch('/groupedExpenses');
@@ -33,22 +25,19 @@ export default function YearlyExpenses() {
         reloadTable();
     }, []);
 
-    function ExpenseForMonthAndCategory(currentMonth, currentCategory) {
-        const expense = expenses.find(({month, category}) => month === currentMonth && category === currentCategory);
-        if (expense !== undefined) {
-            return <td>{expense.amount}</td>;
-        }
-        return <td>0.00</td>;
+    function ExpenseForMonthAndCategory(currMonth, currCategory) {
+        const foundExpense = expenses.find(({month, category}) => month === currMonth && category === currCategory);
+        return <Expense expense={foundExpense}/>;
     }
 
     return (<Table responsive='sm' striped bordered size="sm">
         <thead>
         <tr className='table-info'>
             <th></th>
-            {Array.from({length: 12}, (x, i) => (i + 1)).map(month =>
+            {MONTHS_ARRAY.map(month =>
                 <th key={month} style={{textAlign: "center"}}>{getMonthName(month)}</th>
             )}
-            <th>Suma</th>
+            <th style={SUMMARY_STYLE}>{SUM_CATEGORY}</th>
         </tr>
         </thead>
         <tbody>
@@ -56,20 +45,18 @@ export default function YearlyExpenses() {
         {categories.map(currentCategory =>
             <tr key={currentCategory.id}>
                 <td>{currentCategory.name}</td>
-                {Array.from({length: 12}, (x, i) => (i + 1))
-                    .map(currentMonth =>
-                        ExpenseForMonthAndCategory(currentMonth, currentCategory.name)
-                    )}
+                {MONTHS_ARRAY.map(currentMonth =>
+                    ExpenseForMonthAndCategory(currentMonth, currentCategory.name)
+                )}
                 {ExpenseForMonthAndCategory(SUM_MONTH, currentCategory.name)}
             </tr>
         )}
 
-        <tr>
-            <td>SUMA</td>
-            {Array.from({length: 12}, (x, i) => (i + 1))
-                .map(currentMonth =>
-                    ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY)
-                )}
+        <tr style={SUMMARY_STYLE}>
+            <td>{SUM_CATEGORY}</td>
+            {MONTHS_ARRAY.map(currentMonth =>
+                ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY)
+            )}
         </tr>
 
         </tbody>
