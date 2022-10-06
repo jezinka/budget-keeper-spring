@@ -3,7 +3,7 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {GraphUp, PlusLg} from "react-bootstrap-icons";
 import {useState} from "react";
 
-function LiabilityCard({liability}) {
+function LiabilityCard({liability, reloadHandler}) {
     const [showForm, setShowForm] = useState(false);
     const [formState, setFormState] = useState({
         "date": new Date().toISOString().split('T')[0], "liability": -1, "outcome": 0
@@ -15,7 +15,7 @@ function LiabilityCard({liability}) {
 
     async function addOutcome(liability) {
         setFormState({
-            "liability": liability, "date": new Date().toISOString().split('T')[0],
+            "liability": liability, "date": new Date().toISOString().split('T')[0], outcome: 0
         })
         setShowForm(true);
     }
@@ -26,10 +26,11 @@ function LiabilityCard({liability}) {
         const response = await fetch('/liabilities/' + formState.liability, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
-        // const data = await response.json();
-        // if (data) {
-        //     reloadHandler();
-        // }
+        const data = await response.json();
+        if (data) {
+            await reloadHandler();
+            setShowForm(false);
+        }
     }
 
     return (<>
