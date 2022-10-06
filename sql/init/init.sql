@@ -12,6 +12,30 @@ create table category
     name varchar(50) null
 );
 
+create table liability
+(
+    id             int auto_increment
+        primary key,
+    name           varchar(50)          null,
+    start_date     date                 null,
+    end_date       date                 null,
+    bank_id        int                  null,
+    is_crisis_fund tinyint(1) default 0 null,
+    constraint liability_bank_id_fk
+        foreign key (bank_id) references bank (id)
+);
+
+create table liability_lookout
+(
+    id           int auto_increment
+        primary key,
+    date         date  not null,
+    outcome      float not null,
+    liability_id int   null,
+    constraint liability_lookout_passive_item_id_fk
+        foreign key (liability_id) references liability (id)
+);
+
 create table log
 (
     id      int auto_increment
@@ -27,30 +51,6 @@ create table money_amount
         primary key,
     month  date  not null,
     amount float not null
-);
-
-create table passive_item
-(
-    id             int auto_increment
-        primary key,
-    name           varchar(50)          null,
-    start_date     date                 null,
-    end_date       date                 null,
-    bank_id        int                  null,
-    is_crisis_fund tinyint(1) default 0 null,
-    constraint passive_item_bank_id_fk
-        foreign key (bank_id) references bank (id)
-);
-
-create table passive_item_lookout
-(
-    id              int auto_increment
-        primary key,
-    date            date  not null,
-    outcome         float not null,
-    passive_item_id int   null,
-    constraint passive_item_lookout_passive_item_id_fk
-        foreign key (passive_item_id) references passive_item (id)
 );
 
 create table transaction
