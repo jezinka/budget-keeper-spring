@@ -144,13 +144,11 @@ export default function TransactionTable() {
                         <td>{transaction.category}</td>
                         <td>
                             <Button variant="outline-primary" size="sm"
-                                    value={transaction.id}
-                                    onClick={(e) => editTransaction(e.currentTarget.value)}><Pencil/>
+                                    onClick={() => editTransaction(transaction.id)}><Pencil/>
                             </Button>{' '}
                             <Button variant="outline-primary" size="sm"><ArrowsAngleExpand/></Button>{' '}
                             <Button variant="outline-primary" size="sm"
-                                    value={transaction.id}
-                                    onClick={(e) => deleteTransaction(e.currentTarget.value)}><Trash/>
+                                    onClick={() => deleteTransaction(transaction.id)}><Trash/>
                             </Button>
                         </td>
                     </tr>
