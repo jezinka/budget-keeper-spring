@@ -10,3 +10,8 @@ export function getMonthName(monthNumber) {
 
     return date.toLocaleString('pl-PL', {month: 'long'});
 }
+
+export function handleError() {
+    // TODO: show in log panel; global context??
+    console.log("ERROR!");
+}

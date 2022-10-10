@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {Container, Row} from "react-bootstrap";
 import LiabilityCard from "./LiabilityCard";
+import {handleError} from "../../Utils";
 
 export default function LiabilitiesGrid() {
 
@@ -8,8 +9,13 @@ export default function LiabilitiesGrid() {
 
     async function reloadTable() {
         const response = await fetch('/liabilities/');
-        const data = await response.json();
-        setLiabilities(data);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setLiabilities(data)
+            }
+        }
+        return handleError();
     }
 
     useEffect(() => {

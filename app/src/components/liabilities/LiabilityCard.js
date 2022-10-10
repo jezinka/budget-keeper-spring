@@ -2,6 +2,7 @@ import Card from 'react-bootstrap/Card';
 import {Button, Form, Modal} from "react-bootstrap";
 import {GraphUp, PlusLg} from "react-bootstrap-icons";
 import {useState} from "react";
+import {handleError} from "../../Utils";
 
 function LiabilityCard({liability, reloadHandler}) {
     const [showForm, setShowForm] = useState(false);
@@ -24,13 +25,18 @@ function LiabilityCard({liability, reloadHandler}) {
 
     async function submitForm() {
         const response = await fetch('/liabilities/' + formState.liability, {
-            method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
+            method: 'PUT',
+            body: JSON.stringify(formState),
+            headers: {'Content-Type': 'application/json'},
         });
-        const data = await response.json();
-        if (data) {
-            await reloadHandler();
-            setShowForm(false);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setShowForm(false);
+                return await reloadHandler();
+            }
         }
+        handleError();
     }
 
     return (<>

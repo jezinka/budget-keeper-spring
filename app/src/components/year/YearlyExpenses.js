@@ -1,7 +1,7 @@
 import Table from 'react-bootstrap/Table';
 import {useEffect, useState} from "react";
 import Expense from "./Expense";
-import {getMonthName, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH, SUMMARY_STYLE} from "../../Utils";
+import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH, SUMMARY_STYLE} from "../../Utils";
 
 export default function YearlyExpenses() {
 
@@ -10,14 +10,24 @@ export default function YearlyExpenses() {
 
     async function reloadTable() {
         const response = await fetch('/groupedExpenses');
-        const data = await response.json();
-        setExpenses(data);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setExpenses(data)
+            }
+        }
+        return handleError();
     }
 
     async function fetchCategories() {
         const response = await fetch('/categories/getActiveForCurrentYear');
-        const data = await response.json();
-        setCategories(data);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setCategories(data);
+            }
+        }
+        return handleError();
     }
 
     useEffect(() => {

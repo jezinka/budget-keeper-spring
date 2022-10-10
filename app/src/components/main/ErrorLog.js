@@ -5,12 +5,20 @@ export default function ErrorLog() {
     const [show, setShow] = useState(true);
     const [logs, setLogs] = useState([]);
 
-    useEffect(() => {
-        fetch('/logs/ERROR')
-            .then(response => response.json())
-            .then(data => {
+    async function reloadLogs() {
+        const response = await fetch('/logs/ERROR');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
                 setLogs(data);
-            })
+            }
+        } else {
+            setLogs([{id: -1, type: 'ERROR', message: 'Something went wrong!'}]);
+        }
+    }
+
+    useEffect(() => {
+        reloadLogs();
     }, []);
 
     if (show) {

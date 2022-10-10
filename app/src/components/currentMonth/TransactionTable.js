@@ -2,6 +2,7 @@ import Table from 'react-bootstrap/Table';
 import {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
+import {handleError} from "../../Utils";
 
 export default function TransactionTable() {
     const [transactions, setTransactions] = useState([]);
@@ -24,15 +25,26 @@ export default function TransactionTable() {
 
     async function reloadTable() {
         const response = await fetch('/transactions');
-        const data = await response.json();
-        setTransactions(data);
-        setShowForm(false);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setTransactions(data);
+                return setShowForm(false);
+            }
+        }
+        return handleError();
+
     }
 
     async function fetchCategories() {
         const response = await fetch('/categories');
-        const data = await response.json();
-        setCategories(data);
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setCategories(data);
+            }
+        }
+        return handleError();
     }
 
     useEffect(() => {
@@ -41,26 +53,33 @@ export default function TransactionTable() {
     }, []);
 
     async function deleteTransaction(id) {
-        const success = await fetch("/transactions/" + id, {method: 'DELETE'})
-        const data = await success.json();
-        if (data) {
-            reloadTable();
+        const response = await fetch("/transactions/" + id, {method: 'DELETE'})
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return reloadTable();
+            }
         }
+        return handleError();
     }
 
     async function editTransaction(id) {
         const transaction = await fetch("/transactions/" + id, {method: 'GET'})
-        const data = await transaction.json();
-
-        setFormState({
-            "id": id,
-            "transactionDate": data.transactionDate,
-            "title": data.title,
-            "payee": data.payee,
-            "amount": data.amount,
-            "categoryId": data.categoryId ? data.categoryId : -1
-        });
-        setShowForm(true);
+        if (transaction.ok) {
+            const data = await transaction.json();
+            if (data) {
+                setFormState({
+                    "id": id,
+                    "transactionDate": data.transactionDate,
+                    "title": data.title,
+                    "payee": data.payee,
+                    "amount": data.amount,
+                    "categoryId": data.categoryId ? data.categoryId : -1
+                });
+                return setShowForm(true);
+            }
+        }
+        return handleError();
     }
 
     const handleClose = () => setShowForm(false);
@@ -71,10 +90,14 @@ export default function TransactionTable() {
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},
         });
-        const data = await response.json();
-        if (data) {
-            reloadTable();
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return reloadTable();
+            }
         }
+        return handleError();
     }
 
     return (
