@@ -33,6 +33,7 @@ public class TransactionRepositoryIntegrationTest {
 
     @Test
     public void findAllForCurrentMonth_testForEmpty() {
+        prepare();
         List<Transaction> transactions = repository.findAllForCurrentMonth();
         assertEquals(0, transactions.size());
     }
