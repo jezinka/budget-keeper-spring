@@ -1,18 +1,18 @@
-create table bank
+create table IF NOT EXISTS bank
 (
     id   int auto_increment
         primary key,
     name varchar(20) null
 );
 
-create table category
+create table IF NOT EXISTS category
 (
     id   int auto_increment
         primary key,
     name varchar(50) null
 );
 
-create table liability
+create table IF NOT EXISTS liability
 (
     id             int auto_increment
         primary key,
@@ -25,7 +25,7 @@ create table liability
         foreign key (bank_id) references bank (id)
 );
 
-create table liability_lookout
+create table IF NOT EXISTS liability_lookout
 (
     id           int auto_increment
         primary key,
@@ -36,7 +36,7 @@ create table liability_lookout
         foreign key (liability_id) references liability (id)
 );
 
-create table log
+create table IF NOT EXISTS log
 (
     id      int auto_increment
         primary key,
@@ -45,7 +45,7 @@ create table log
     message longtext    null
 );
 
-create table money_amount
+create table IF NOT EXISTS money_amount
 (
     id     int auto_increment
         primary key,
@@ -53,7 +53,7 @@ create table money_amount
     amount float not null
 );
 
-create table transaction
+create table IF NOT EXISTS transaction
 (
     id               int auto_increment
         primary key,
@@ -67,7 +67,7 @@ create table transaction
         foreign key (category_id) references category (id)
 );
 
-create table users
+create table IF NOT EXISTS users
 (
     user_id  int auto_increment
         primary key,
