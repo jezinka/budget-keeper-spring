@@ -6,8 +6,8 @@ import Main from "../main/Main";
 
 const CurrentMonth = () => {
     let body = <>
-        <Col sm={7}><TransactionTable/></Col>
-        <Col sm={2} className="mt-4">
+        <Col><TransactionTable/></Col>
+        <Col sm={2} className="mt-1">
             <MoneyAmount/>
         </Col>
     </>;
