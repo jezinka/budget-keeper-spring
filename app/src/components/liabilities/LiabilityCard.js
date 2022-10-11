@@ -2,12 +2,12 @@ import Card from 'react-bootstrap/Card';
 import {Button, Form, Modal} from "react-bootstrap";
 import {GraphUp, PlusLg} from "react-bootstrap-icons";
 import {useState} from "react";
-import {handleError} from "../../Utils";
+import {getDate, handleError} from "../../Utils";
 
 function LiabilityCard({liability, reloadHandler}) {
     const [showForm, setShowForm] = useState(false);
     const [formState, setFormState] = useState({
-        "date": new Date().toISOString().split('T')[0], "liability": -1, "outcome": 0
+        "date": getDate(), "liability": -1, "outcome": 0
     })
 
     const handleChange = (event) => {
@@ -16,7 +16,7 @@ function LiabilityCard({liability, reloadHandler}) {
 
     async function addOutcome(liability) {
         setFormState({
-            "liability": liability, "date": new Date().toISOString().split('T')[0], outcome: 0
+            "liability": liability, "date": getDate(), outcome: 0,
         })
         setShowForm(true);
     }
