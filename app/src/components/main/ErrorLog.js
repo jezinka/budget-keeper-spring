@@ -2,18 +2,23 @@ import React, {useEffect, useState} from 'react';
 import Alert from 'react-bootstrap/Alert';
 
 export default function ErrorLog() {
-    const [show, setShow] = useState(true);
-    const [logs, setLogs] = useState([]);
+    const [log, setLog] = useState({});
+    const [variant, setVariant] = useState("danger");
 
     async function reloadLogs() {
-        const response = await fetch('/logs/ERROR');
+        const response = await fetch('/logs/');
         if (response.ok) {
             const data = await response.json();
             if (data) {
-                setLogs(data);
+                let displayLog = data.find(({type}) => type === "ERROR");
+                if (displayLog === undefined) {
+                    displayLog = data.find(({type}) => type === "INFO");
+                    setVariant("info")
+                }
+                setLog(displayLog);
             }
         } else {
-            setLogs([{id: -1, type: 'ERROR', message: 'Something went wrong!'}]);
+            setLog({id: -1, type: 'ERROR', message: 'Something went wrong!'});
         }
     }
 
@@ -21,13 +26,16 @@ export default function ErrorLog() {
         reloadLogs();
     }, []);
 
-    if (show) {
+    if (log?.id) {
+        let date = new Date(log.date);
+        let options = {dateStyle: 'medium', timeStyle: 'medium'};
+        const dateFormat = new Intl.DateTimeFormat('default', options);
+
+
         return (
-            logs.map(log =>
-                <Alert variant="danger" onClose={() => setShow(false)} dismissible key={log.id}>
-                    {log.type} - {log.message}
-                </Alert>
-            )
+            <Alert variant={variant} key={log.id}>
+                {dateFormat.format(date)}: {log.type} - {log.message}
+            </Alert>
         );
     }
 }

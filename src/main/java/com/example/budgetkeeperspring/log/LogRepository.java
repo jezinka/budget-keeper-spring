@@ -14,7 +14,9 @@ public class LogRepository {
     JdbcTemplate jdbcTemplate;
 
     List<Log> getAll() {
-        return jdbcTemplate.query("select id, date, type, message from log;",
+        return jdbcTemplate.query("select id, date, type, message from log " +
+                        " where is_deleted != 1 " +
+                        " order by date desc;",
                 BeanPropertyRowMapper.newInstance(Log.class));
     }
 
@@ -23,6 +25,4 @@ public class LogRepository {
                         "group by type, message;",
                 BeanPropertyRowMapper.newInstance(Log.class), type);
     }
-
-    ;
 }

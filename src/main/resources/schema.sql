@@ -38,11 +38,12 @@ create table IF NOT EXISTS liability_lookout
 
 create table IF NOT EXISTS log
 (
-    id      int auto_increment
+    id         int auto_increment
         primary key,
-    date    datetime    null,
-    type    varchar(10) null,
-    message longtext    null
+    date       datetime             null,
+    type       varchar(10)          null,
+    message    longtext             null,
+    is_deleted tinyint(1) default 0 null
 );
 
 create table IF NOT EXISTS money_amount
