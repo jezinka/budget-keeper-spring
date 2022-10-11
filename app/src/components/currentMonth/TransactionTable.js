@@ -14,6 +14,7 @@ export default function TransactionTable() {
         "transactionDate": Date.now(),
         "title": "",
         "payee": "",
+        "baseSplitAmount": 0,
         "amount": 0,
         "categoryId": -1,
         "splitAmount": 0,
@@ -22,6 +23,11 @@ export default function TransactionTable() {
 
     const handleChange = (event) => {
         setFormState({...formState, [event.target.name]: event.target.value});
+    };
+    const handleSplit = (event) => {
+        let value = Number(event.target.value);
+        let newValue = Number((formState.baseSplitAmount - value).toFixed(2))
+        setFormState({...formState, [event.target.name]: value, amount: newValue});
     };
 
     async function reloadTable() {
@@ -69,6 +75,7 @@ export default function TransactionTable() {
                     "title": data.title,
                     "payee": data.payee,
                     "amount": data.amount,
+                    "baseSplitAmount": data.amount,
                     "categoryId": data.categoryId ? data.categoryId : -1
                 });
                 return setShowForm(true);
@@ -82,7 +89,10 @@ export default function TransactionTable() {
         editTransaction(id);
     }
 
-    const handleClose = () => setShowForm(false);
+    const handleClose = () => {
+        setShowForm(false);
+        setSplitFlow(false);
+    }
 
     async function submitForm() {
         const response = await fetch('/transactions/' + formState.id, {
@@ -142,7 +152,11 @@ export default function TransactionTable() {
                                           name="title"
                                           value={formState.title}/>
                         </Col>
-                        <Col sm={{span: 8, offset: 3}}>
+                        <Col sm={3}>
+                            <Form.Control className="m-2" placeholder="Ile:" type="number" disabled
+                                          name="baseSplitAmount" value={formState.baseSplitAmount}/>
+                        </Col>
+                        <Col sm={{span: 8}}>
                             <Form.Control className="m-2"
                                           placeholder="Kto:" type="text" disabled onChange={handleChange}
                                           name="payee"
@@ -151,8 +165,9 @@ export default function TransactionTable() {
                     </Row>
                     <Row>
                         <Col sm={3}>
-                            <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
-                                          name="amount" value={formState.amount}/>
+                            {splitFlow ?
+                                <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
+                                              name="amount" value={formState.amount}/> : ''}
                         </Col>
                         <Col sm={8}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
@@ -163,7 +178,8 @@ export default function TransactionTable() {
                     </Row>
                     {splitFlow ? <Row>
                         <Col sm={3}>
-                            <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
+                            <Form.Control className="m-2" placeholder="Ile:" type="number"
+                                          onChange={handleSplit}
                                           name="splitAmount" value={formState.splitAmount}/>
                         </Col>
                         <Col sm={8}>
