@@ -56,4 +56,16 @@ public class TransactionRepository {
                 "from transaction t " +
                 "where t.id = ?", BeanPropertyRowMapper.newInstance(Transaction.class), id);
     }
+
+    public Boolean createTransaction(Transaction transaction) {
+        int result = jdbcTemplate.update("INSERT INTO transaction" +
+                        " (transaction_date, title, payee, amount, category_id) " +
+                        " VALUES (?, ?, ?, ?, ?);",
+                transaction.getTransactionDate(),
+                transaction.getTitle(),
+                transaction.getPayee(),
+                transaction.getAmount(),
+                transaction.getCategoryId());
+        return result == 1;
+    }
 }

@@ -1,22 +1,23 @@
 import Table from 'react-bootstrap/Table';
 import {useEffect, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
 import {handleError} from "../../Utils";
 
 export default function TransactionTable() {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
-
+    const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
-
     const [formState, setFormState] = useState({
         "id": 0,
         "transactionDate": Date.now(),
         "title": "",
         "payee": "",
         "amount": 0,
-        "categoryId": -1
+        "categoryId": -1,
+        "splitAmount": 0,
+        "splitCategoryId": -1
     })
 
     const handleChange = (event) => {
@@ -25,15 +26,15 @@ export default function TransactionTable() {
 
     async function reloadTable() {
         const response = await fetch('/transactions');
+        setShowForm(false);
+        setSplitFlow(false);
         if (response.ok) {
             const data = await response.json();
             if (data) {
-                setTransactions(data);
-                return setShowForm(false);
+                return setTransactions(data);
             }
         }
         return handleError();
-
     }
 
     async function fetchCategories() {
@@ -54,13 +55,7 @@ export default function TransactionTable() {
 
     async function deleteTransaction(id) {
         const response = await fetch("/transactions/" + id, {method: 'DELETE'})
-        if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                return reloadTable();
-            }
-        }
-        return handleError();
+        return await handleResponse(response);
     }
 
     async function editTransaction(id) {
@@ -82,15 +77,42 @@ export default function TransactionTable() {
         return handleError();
     }
 
+    async function splitTransaction(id) {
+        setSplitFlow(true);
+        editTransaction(id);
+    }
+
     const handleClose = () => setShowForm(false);
 
     async function submitForm() {
         const response = await fetch('/transactions/' + formState.id, {
-            method: 'PUT',
-            body: JSON.stringify(formState),
+            method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
+        });
+
+        return await handleResponse(response)
+    }
+
+    async function submitSplitForm() {
+        const newTransaction = {...formState, amount: formState.splitAmount, categoryId: formState.splitCategoryId};
+
+        const response = await fetch('/transactions/split/' + formState.id, {
+            method: 'POST',
+            body: JSON.stringify([formState, newTransaction]),
             headers: {'Content-Type': 'application/json'},
         });
 
+        return await handleResponse(response);
+    }
+
+    function getCategoriesMap() {
+        let categoriesList = [<option value={-1}></option>];
+        categories.forEach((c) => {
+            categoriesList.push(<option key={c.id} value={c.id}>{c.name}</option>)
+        });
+        return categoriesList
+    }
+
+    async function handleResponse(response) {
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -100,84 +122,98 @@ export default function TransactionTable() {
         return handleError();
     }
 
-    return (
-        <>
-            <Modal show={showForm} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Edytuj transakcję</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Kiedy:</Form.Label>
-                            <Form.Control type="date" onChange={handleChange} name="transactionDate"
+    return (<>
+        <Modal size="lg" show={showForm} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Edytuj transakcję:</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Row>
+                        <Col sm={3}>
+                            <Form.Control className="m-2"
+                                          placeholder="Kiedy:" type="date" disabled onChange={handleChange}
+                                          name="transactionDate"
                                           value={formState.transactionDate}/>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Co:</Form.Label>
-                            <Form.Control type="text" onChange={handleChange} name="title" value={formState.title}/>
-                        </Form.Group>
-                        <Form.Group className="mb-2">
-                            <Form.Label>Kto:</Form.Label>
-                            <Form.Control type="text" onChange={handleChange} name="payee" value={formState.payee}/>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Ile:</Form.Label>
-                            <Form.Control type="number" onChange={handleChange} name="amount" value={formState.amount}/>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Kategoria:</Form.Label>
-                            <Form.Select onChange={handleChange} name="categoryId" value={formState.categoryId}>
-                                <option value={-1}></option>
-                                {categories.map(c =>
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                )}
+                        </Col>
+                        <Col sm={8}>
+                            <Form.Control className="m-2"
+                                          placeholder="Co:" type="text" disabled onChange={handleChange}
+                                          name="title"
+                                          value={formState.title}/>
+                        </Col>
+                        <Col sm={{span: 8, offset: 3}}>
+                            <Form.Control className="m-2"
+                                          placeholder="Kto:" type="text" disabled onChange={handleChange}
+                                          name="payee"
+                                          value={formState.payee}/>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col sm={3}>
+                            <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
+                                          name="amount" value={formState.amount}/>
+                        </Col>
+                        <Col sm={8}>
+                            <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
+                                         name="categoryId" value={formState.categoryId}>
+                                {getCategoriesMap()}
                             </Form.Select>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Zamknij
-                    </Button>
-                    <Button variant="primary" onClick={submitForm}>
-                        Zapisz
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+                        </Col>
+                    </Row>
+                    {splitFlow ? <Row>
+                        <Col sm={3}>
+                            <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
+                                          name="splitAmount" value={formState.splitAmount}/>
+                        </Col>
+                        <Col sm={8}>
+                            <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
+                                         name="splitCategoryId" value={formState.splitCategoryId}>
+                                {getCategoriesMap()}
+                            </Form.Select>
+                        </Col>
+                    </Row> : ''}
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Zamknij
+                </Button>
+                {splitFlow ? '' : <Button variant="primary" onClick={submitForm}> Zapisz </Button>}
+                {splitFlow ? <Button variant="primary" onClick={submitSplitForm}> Rozdziel </Button> : ''}
+            </Modal.Footer>
+        </Modal>
 
-            <Table responsive='sm' striped bordered size="sm">
-                <thead>
-                <tr className='table-info'>
-                    <th>KIEDY</th>
-                    <th>CO</th>
-                    <th>KTO</th>
-                    <th>ILE</th>
-                    <th>KATEGORIA</th>
-                    <th style={{textAlign: "center"}}>*</th>
-                </tr>
-                </thead>
-                <tbody>
-                {transactions.map(transaction =>
-                    <tr key={transaction.id}>
-                        <td>{transaction.transactionDate}</td>
-                        <td>{transaction.title}</td>
-                        <td>{transaction.payee}</td>
-                        <td>{transaction.amount}</td>
-                        <td>{transaction.category}</td>
-                        <td>
-                            <Button variant="outline-primary" size="sm"
-                                    onClick={() => editTransaction(transaction.id)}><Pencil/>
-                            </Button>{' '}
-                            <Button variant="outline-primary" size="sm"><ArrowsAngleExpand/></Button>{' '}
-                            <Button variant="outline-primary" size="sm"
-                                    onClick={() => deleteTransaction(transaction.id)}><Trash/>
-                            </Button>
-                        </td>
-                    </tr>
-                )}
-                </tbody>
-            </Table>
-        </>
-    );
+        <Table responsive='sm' striped bordered size="sm">
+            <thead>
+            <tr className='table-info'>
+                <th>KIEDY</th>
+                <th>CO</th>
+                <th>KTO</th>
+                <th>ILE</th>
+                <th>KATEGORIA</th>
+                <th style={{textAlign: "center"}}>*</th>
+            </tr>
+            </thead>
+            <tbody>
+            {transactions.map(transaction => <tr key={transaction.id}>
+                <td>{transaction.transactionDate}</td>
+                <td>{transaction.title}</td>
+                <td>{transaction.payee}</td>
+                <td>{transaction.amount}</td>
+                <td>{transaction.category}</td>
+                <td>
+                    <Button variant="outline-primary" size="sm"
+                            onClick={() => editTransaction(transaction.id)}><Pencil/>
+                    </Button>{' '}
+                    <Button variant="outline-primary" size="sm"
+                            onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/></Button>{' '}
+                    <Button variant="outline-primary" size="sm"
+                            onClick={() => deleteTransaction(transaction.id)}><Trash/>
+                    </Button>
+                </td>
+            </tr>)}
+            </tbody>
+        </Table>
+    </>);
 }

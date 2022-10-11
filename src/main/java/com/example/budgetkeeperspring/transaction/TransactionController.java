@@ -39,4 +39,20 @@ public class TransactionController {
         }
         return transactionRepository.editTransaction(transaction);
     }
+
+    @PostMapping("/split/{id}")
+    Boolean splitTransaction(@PathVariable Long id, @RequestBody List<Transaction> updateTransactions) {
+        Boolean result = true;
+        Transaction transaction = transactionRepository.getById(id);
+        for (Transaction t : updateTransactions) {
+            transaction.setTransactionDate(t.getTransactionDate());
+            transaction.setTitle(t.getTitle());
+            transaction.setPayee(t.getPayee());
+            transaction.setAmount(t.getAmount());
+            transaction.setCategoryId(t.getCategoryId());
+            result = transactionRepository.createTransaction(transaction) && result;
+        }
+        result = transactionRepository.deleteTransaction(id) && result;
+        return result;
+    }
 }
