@@ -55,4 +55,9 @@ public class TransactionController {
         result = transactionRepository.deleteTransaction(id) && result;
         return result;
     }
+
+    @GetMapping("/withoutCategory")
+    List<Transaction> getAllWithoutCategory() {
+        return transactionRepository.getAllWithoutCategory();
+    }
 }

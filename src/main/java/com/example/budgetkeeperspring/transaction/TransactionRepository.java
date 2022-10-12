@@ -68,4 +68,11 @@ public class TransactionRepository {
                 transaction.getCategoryId());
         return result == 1;
     }
+
+    public List<Transaction> getAllWithoutCategory() {
+        return jdbcTemplate.query("select t.id, transaction_date, substring(title, 1, 50) as title, substring(payee,1, 50) as payee, amount " +
+                "from transaction t " +
+                "where category_id is null and is_deleted = 0 " +
+                "order by transaction_date desc, amount asc", BeanPropertyRowMapper.newInstance(Transaction.class));
+    }
 }

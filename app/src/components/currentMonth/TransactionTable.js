@@ -4,7 +4,7 @@ import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
 import {handleError} from "../../Utils";
 
-export default function TransactionTable() {
+export default function TransactionTable({mode}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
@@ -31,7 +31,8 @@ export default function TransactionTable() {
     };
 
     async function reloadTable() {
-        const response = await fetch('/transactions');
+        const endpoint = '/transactions'.concat(mode === "currentMonth" ? '' : '/withoutCategory')
+        const response = await fetch(endpoint);
         setShowForm(false);
         setSplitFlow(false);
         if (response.ok) {
@@ -115,7 +116,7 @@ export default function TransactionTable() {
     }
 
     function getCategoriesMap() {
-        let categoriesList = [<option value={-1}></option>];
+        let categoriesList = [<option key={-1} value={-1}></option>];
         categories.forEach((c) => {
             categoriesList.push(<option key={c.id} value={c.id}>{c.name}</option>)
         });
@@ -218,12 +219,13 @@ export default function TransactionTable() {
                 <td>{transaction.payee}</td>
                 <td>{transaction.amount}</td>
                 <td>{transaction.category}</td>
-                <td>
+                <td style={{textAlign: "center"}}>
                     <Button variant="outline-primary" size="sm"
                             onClick={() => editTransaction(transaction.id)}><Pencil/>
                     </Button>{' '}
                     <Button variant="outline-primary" size="sm"
-                            onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/></Button>{' '}
+                            onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/>
+                    </Button>{' '}
                     <Button variant="outline-primary" size="sm"
                             onClick={() => deleteTransaction(transaction.id)}><Trash/>
                     </Button>

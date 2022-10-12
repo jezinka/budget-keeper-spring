@@ -8,6 +8,7 @@ import {BrowserRouter as Router, Route, Routes,} from "react-router-dom";
 import CurrentMonth from "./components/currentMonth/CurrentMonth";
 import YearAtTheGlance from "./components/year/YearAtTheGlance";
 import Liabilities from "./components/liabilities/Liabilities";
+import TransactionsWithoutCategory from "./components/transactionsWithoutCategory/TransactionsWithoutCategory";
 
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
                     <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/yearAtTheGlance" element={<YearAtTheGlance/>}/>
                     <Route path="/liabilities" element={<Liabilities/>}/>
+                    <Route path="/withoutCategory" element={<TransactionsWithoutCategory/>}/>
                 </Routes>
             </Router>
         </>
