@@ -4,7 +4,7 @@ import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
 import {handleError} from "../../Utils";
 
-export default function TransactionTable({mode}) {
+export default function TransactionTable({mode, counterHandler}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
@@ -38,6 +38,9 @@ export default function TransactionTable({mode}) {
         if (response.ok) {
             const data = await response.json();
             if (data) {
+                if (counterHandler !== undefined) {
+                    counterHandler(data.length);
+                }
                 return setTransactions(data);
             }
         }
