@@ -40,32 +40,35 @@ public class TransactionRepository {
                         "title = ?," +
                         "payee = ?," +
                         "amount = ?," +
-                        "category_id = ? " +
+                        "category_id = ?," +
+                        "liability_id = ? " +
                         "where id = ?",
                 transaction.getTransactionDate(),
                 transaction.getTitle(),
                 transaction.getPayee(),
                 transaction.getAmount(),
                 transaction.getCategoryId(),
+                transaction.getLiabilityId(),
                 transaction.getId());
         return result == 1;
     }
 
     public Transaction getById(Long id) {
-        return jdbcTemplate.queryForObject("select t.id, transaction_date, title, payee, amount, category_id " +
+        return jdbcTemplate.queryForObject("select t.id, transaction_date, title, payee, amount, category_id, liability_id " +
                 "from transaction t " +
                 "where t.id = ?", BeanPropertyRowMapper.newInstance(Transaction.class), id);
     }
 
     public Boolean createTransaction(Transaction transaction) {
         int result = jdbcTemplate.update("INSERT INTO transaction" +
-                        " (transaction_date, title, payee, amount, category_id) " +
-                        " VALUES (?, ?, ?, ?, ?);",
+                        " (transaction_date, title, payee, amount, category_id, liability_id) " +
+                        " VALUES (?, ?, ?, ?, ?, ?);",
                 transaction.getTransactionDate(),
                 transaction.getTitle(),
                 transaction.getPayee(),
                 transaction.getAmount(),
-                transaction.getCategoryId());
+                transaction.getCategoryId(),
+                transaction.getLiabilityId());
         return result == 1;
     }
 

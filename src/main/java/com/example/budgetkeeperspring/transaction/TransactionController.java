@@ -36,6 +36,7 @@ public class TransactionController {
             transaction.setPayee(updateTransaction.getPayee());
             transaction.setAmount(updateTransaction.getAmount());
             transaction.setCategoryId(updateTransaction.getCategoryId());
+            transaction.setLiabilityId(updateTransaction.getLiabilityId());
         }
         return transactionRepository.editTransaction(transaction);
     }
@@ -50,6 +51,7 @@ public class TransactionController {
             transaction.setPayee(t.getPayee());
             transaction.setAmount(t.getAmount());
             transaction.setCategoryId(t.getCategoryId());
+            transaction.setLiabilityId(t.getLiabilityId());
             result = transactionRepository.createTransaction(transaction) && result;
         }
         result = transactionRepository.deleteTransaction(id) && result;

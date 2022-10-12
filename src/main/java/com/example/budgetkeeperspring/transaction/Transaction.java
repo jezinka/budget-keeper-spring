@@ -19,4 +19,5 @@ public class Transaction {
     private Float amount;
     private String category;
     private Long categoryId;
+    private Long liabilityId;
 }

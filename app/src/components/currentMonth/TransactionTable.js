@@ -9,6 +9,7 @@ export default function TransactionTable({mode, counterHandler}) {
     const [showForm, setShowForm] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [liabilities, setLiabilities] = useState([]);
     const [formState, setFormState] = useState({
         "id": 0,
         "transactionDate": Date.now(),
@@ -17,8 +18,10 @@ export default function TransactionTable({mode, counterHandler}) {
         "baseSplitAmount": 0,
         "amount": 0,
         "categoryId": -1,
+        "liabilityId": -1,
         "splitAmount": 0,
-        "splitCategoryId": -1
+        "splitCategoryId": -1,
+        "splitLiabilityId": -1,
     })
 
     const handleChange = (event) => {
@@ -58,9 +61,21 @@ export default function TransactionTable({mode, counterHandler}) {
         return handleError();
     }
 
+    async function fetchLiabilities() {
+        const response = await fetch('/liabilities');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setLiabilities(data);
+            }
+        }
+        return handleError();
+    }
+
     useEffect(() => {
         reloadTable();
         fetchCategories();
+        fetchLiabilities();
     }, []);
 
     async function deleteTransaction(id) {
@@ -80,7 +95,8 @@ export default function TransactionTable({mode, counterHandler}) {
                     "payee": data.payee,
                     "amount": data.amount,
                     "baseSplitAmount": data.amount,
-                    "categoryId": data.categoryId ? data.categoryId : -1
+                    "categoryId": data.categoryId ? data.categoryId : -1,
+                    "liabilityId": data.liabilityId ? data.liabilityId : -1
                 });
                 return setShowForm(true);
             }
@@ -107,7 +123,12 @@ export default function TransactionTable({mode, counterHandler}) {
     }
 
     async function submitSplitForm() {
-        const newTransaction = {...formState, amount: formState.splitAmount, categoryId: formState.splitCategoryId};
+        const newTransaction = {
+            ...formState,
+            amount: formState.splitAmount,
+            categoryId: formState.splitCategoryId,
+            liabilityId: formState.splitLiabilityId
+        };
 
         const response = await fetch('/transactions/split/' + formState.id, {
             method: 'POST',
@@ -124,6 +145,14 @@ export default function TransactionTable({mode, counterHandler}) {
             categoriesList.push(<option key={c.id} value={c.id}>{c.name}</option>)
         });
         return categoriesList
+    }
+
+    function getLiabilitiesMap() {
+        let liabilitiesList = [<option key={-1} value={-1}></option>];
+        liabilities.forEach((l) => {
+            liabilitiesList.push(<option key={l.id} value={l.id}>{l.name} ({l.bank})</option>)
+        });
+        return liabilitiesList
     }
 
     async function handleResponse(response) {
@@ -178,6 +207,10 @@ export default function TransactionTable({mode, counterHandler}) {
                                          name="categoryId" value={formState.categoryId}>
                                 {getCategoriesMap()}
                             </Form.Select>
+                            <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
+                                         name="liabilityId" value={formState.liabilityId}>
+                                {getLiabilitiesMap()}
+                            </Form.Select>
                         </Col>
                     </Row>
                     {splitFlow ? <Row>
@@ -190,6 +223,10 @@ export default function TransactionTable({mode, counterHandler}) {
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
                                          name="splitCategoryId" value={formState.splitCategoryId}>
                                 {getCategoriesMap()}
+                            </Form.Select>
+                            <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
+                                         name="splitLiabilityId" value={formState.splitLiabilityId}>
+                                {getLiabilitiesMap()}
                             </Form.Select>
                         </Col>
                     </Row> : ''}
