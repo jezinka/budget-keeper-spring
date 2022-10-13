@@ -4,12 +4,14 @@ import Table from "react-bootstrap/Table";
 export default function MoneyAmount() {
     const [moneyAmount, setMoneyAmount] = useState({});
 
+    async function loadData() {
+        const response = await fetch('/moneyAmount')
+        const data = await response.json();
+        setMoneyAmount(data);
+    }
+
     useEffect(() => {
-        fetch('/moneyAmount')
-            .then(response => response.json())
-            .then(data => {
-                setMoneyAmount(data);
-            })
+        loadData();
     }, []);
 
     return (
