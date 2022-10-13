@@ -224,11 +224,13 @@ export default function TransactionTable({mode, counterHandler, filterForm}) {
                                 <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
                                               name="amount" value={formState.amount}/> : ''}
                         </Col>
-                        <Col sm={8}>
+                        <Col sm={4}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
                                          name="categoryId" value={formState.categoryId}>
                                 {getCategoriesMap()}
                             </Form.Select>
+                        </Col>
+                        <Col sm={4}>
                             <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
                                          name="liabilityId" value={formState.liabilityId}>
                                 {getLiabilitiesMap()}
@@ -241,11 +243,13 @@ export default function TransactionTable({mode, counterHandler, filterForm}) {
                                           onChange={handleSplit}
                                           name="splitAmount" value={formState.splitAmount}/>
                         </Col>
-                        <Col sm={8}>
+                        <Col sm={4}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
                                          name="splitCategoryId" value={formState.splitCategoryId}>
                                 {getCategoriesMap()}
                             </Form.Select>
+                        </Col>
+                        <Col sm={4}>
                             <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
                                          name="splitLiabilityId" value={formState.splitLiabilityId}>
                                 {getLiabilitiesMap()}
