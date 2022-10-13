@@ -1,11 +1,24 @@
 import {Col} from "react-bootstrap";
 import TransactionTable from "./TransactionTable";
 import MoneyAmount from "./MoneyAmount";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
-import ExpensesChart from "./ExpensesChart";
+import ExpensesBarChart from "./ExpensesBarChart";
+import ExpensesPieChart from "./ExpensesPieChart";
 
 const CurrentMonth = () => {
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    async function loadData() {
+        const response = await fetch('/groupedExpenses/currentMonthByCategory')
+        const data = await response.json();
+        setData(data);
+    }
+
     let body = <>
         <Col sm={8}>
             <TransactionTable mode="currentMonth"/>
@@ -14,7 +27,8 @@ const CurrentMonth = () => {
             <Col sm={6}>
                 <MoneyAmount/>
             </Col>
-            <ExpensesChart/>
+            <ExpensesBarChart data={data}/>
+            <ExpensesPieChart data={data}/>
         </Col>
     </>;
     return <Main body={body}/>;

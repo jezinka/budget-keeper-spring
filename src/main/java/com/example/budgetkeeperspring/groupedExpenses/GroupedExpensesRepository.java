@@ -42,12 +42,15 @@ public class GroupedExpensesRepository {
     }
 
     List<GroupedExpenses> getGroupedByCategory(LocalDate begin, LocalDate end) {
-        return jdbcTemplate.query("select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
-                "from transaction t " +
-                "         join category c on t.category_id = c.id " +
-                "where transaction_date between ? and ? " +
-                "  and is_deleted <> 1 " +
-                "group by month, category " +
-                "order by amount", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), begin, end);
+        return jdbcTemplate.query("" +
+                "select month, category, abs(amount) as amount " +
+                " from (select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
+                "      from transaction t " +
+                "               join category c on t.category_id = c.id " +
+                "      where transaction_date between ? and ? " +
+                "        and is_deleted <> 1 " +
+                "      group by month, category " +
+                "      order by amount) t " +
+                " where amount < 0 ", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), begin, end);
     }
 }
