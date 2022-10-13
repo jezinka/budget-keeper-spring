@@ -16,7 +16,6 @@ public class TransactionController {
 
     @PostMapping("")
     List getAllTransactions(@RequestBody HashMap filters) {
-        System.out.println(filters);
         return transactionRepository.getAllTransactions(filters);
     }
 
