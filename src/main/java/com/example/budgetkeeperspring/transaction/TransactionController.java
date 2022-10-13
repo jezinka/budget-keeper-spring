@@ -14,7 +14,13 @@ public class TransactionController {
     @Autowired
     TransactionRepository transactionRepository;
 
-    @GetMapping("")
+    @PostMapping("")
+    List getAllTransactions(@RequestBody HashMap filters) {
+        System.out.println(filters);
+        return transactionRepository.getAllTransactions(filters);
+    }
+
+    @GetMapping("/currentMonth")
     List<Transaction> getCurrentMonth() {
         return transactionRepository.findAllForCurrentMonth();
     }
@@ -61,11 +67,5 @@ public class TransactionController {
         }
         result = transactionRepository.deleteTransaction(id) && result;
         return result;
-    }
-
-    @PostMapping("/allTransactions")
-    List getAllTransactions(@RequestBody HashMap filters) {
-        System.out.println(filters);
-        return transactionRepository.getAllTransactions(filters);
     }
 }

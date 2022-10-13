@@ -54,9 +54,9 @@ export default function TransactionTable({mode, counterHandler, filterForm}) {
 
     async function getResponse() {
         if (mode === "currentMonth") {
-            return await fetch("/transactions");
+            return await fetch("/transactions/currentMonth");
         } else {
-            return await fetch('/transactions/allTransactions', {
+            return await fetch('/transactions', {
                 method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
             });
         }
