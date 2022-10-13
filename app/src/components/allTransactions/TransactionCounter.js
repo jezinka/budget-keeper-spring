@@ -5,7 +5,7 @@ const TransactionCounter = ({transactionCounter}) => {
     return <Table responsive='sm' striped bordered size="sm">
         <tbody>
         <tr>
-            <td>Bez kategorii:</td>
+            <td>Przefiltrowanych:</td>
             <td>{transactionCounter}</td>
         </tr>
         </tbody>

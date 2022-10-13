@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 import java.util.List;
 
 @Repository
@@ -72,10 +73,35 @@ public class TransactionRepository {
         return result == 1;
     }
 
-    public List<Transaction> getAllWithoutCategory() {
-        return jdbcTemplate.query("select t.id, transaction_date, substring(title, 1, 50) as title, substring(payee,1, 50) as payee, amount " +
+    List<Transaction> getAllTransactions(HashMap<String, Object> filters) {
+
+        String query = "select t.id, transaction_date, substring(title, 1, 50) as title, substring(payee,1, 50) as payee, amount, c.name as category " +
                 "from transaction t " +
-                "where category_id is null and is_deleted = 0 " +
-                "order by transaction_date desc, amount asc", BeanPropertyRowMapper.newInstance(Transaction.class));
+                "left join category c on t.category_id = c.id " +
+                "where is_deleted = 0 ";
+
+        if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
+            query += " and category_id is null ";
+        }
+        if (filters.getOrDefault("onlyEmptyLiabilities", false).equals(true)) {
+            query += " and liability_id is null ";
+        }
+        if (filters.getOrDefault("onlyOutcome", false).equals(true)) {
+            query += " and amount < 0 ";
+        }
+
+        String titleFilter = (String) filters.getOrDefault("title", "");
+        if (!titleFilter.equals("")) {
+            query += " and title like \"%" + titleFilter + "%\" ";
+        }
+
+        String payeeFilter = (String) filters.getOrDefault("payee", "");
+        if (!payeeFilter.equals("")) {
+            query += " and payee like \"%" + payeeFilter + "%\" ";
+        }
+
+        query += "order by transaction_date desc";
+
+        return jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transaction.class));
     }
 }

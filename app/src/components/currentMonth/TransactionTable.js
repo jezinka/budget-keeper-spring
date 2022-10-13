@@ -1,12 +1,13 @@
 import Table from 'react-bootstrap/Table';
-import {useEffect, useState} from "react";
-import {Button, Col, Form, Modal, Row} from "react-bootstrap";
-import {ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
-import {handleError} from "../../Utils";
+import React, {useEffect, useState} from "react";
+import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
+import {ArrowClockwise, ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
+import {EMPTY_OPTION, handleError} from "../../Utils";
 
-export default function TransactionTable({mode, counterHandler}) {
+export default function TransactionTable({mode, counterHandler, filterForm}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
     const [liabilities, setLiabilities] = useState([]);
@@ -17,11 +18,11 @@ export default function TransactionTable({mode, counterHandler}) {
         "payee": "",
         "baseSplitAmount": 0,
         "amount": 0,
-        "categoryId": -1,
-        "liabilityId": -1,
+        "categoryId": EMPTY_OPTION,
+        "liabilityId": EMPTY_OPTION,
         "splitAmount": 0,
-        "splitCategoryId": -1,
-        "splitLiabilityId": -1,
+        "splitCategoryId": EMPTY_OPTION,
+        "splitLiabilityId": EMPTY_OPTION,
     })
 
     const handleChange = (event) => {
@@ -34,10 +35,11 @@ export default function TransactionTable({mode, counterHandler}) {
     };
 
     async function reloadTable() {
-        const endpoint = '/transactions'.concat(mode === "currentMonth" ? '' : '/withoutCategory')
-        const response = await fetch(endpoint);
+        setShowSpinner(true);
+        const response = await getResponse();
         setShowForm(false);
         setSplitFlow(false);
+        setShowSpinner(false);
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -48,6 +50,16 @@ export default function TransactionTable({mode, counterHandler}) {
             }
         }
         return handleError();
+    }
+
+    async function getResponse() {
+        if (mode === "currentMonth") {
+            return await fetch("/transactions");
+        } else {
+            return await fetch('/transactions/allTransactions', {
+                method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
+            });
+        }
     }
 
     async function fetchCategories() {
@@ -95,8 +107,8 @@ export default function TransactionTable({mode, counterHandler}) {
                     "payee": data.payee,
                     "amount": data.amount,
                     "baseSplitAmount": data.amount,
-                    "categoryId": data.categoryId ? data.categoryId : -1,
-                    "liabilityId": data.liabilityId ? data.liabilityId : -1
+                    "categoryId": data.categoryId ? data.categoryId : EMPTY_OPTION,
+                    "liabilityId": data.liabilityId ? data.liabilityId : EMPTY_OPTION
                 });
                 return setShowForm(true);
             }
@@ -140,7 +152,7 @@ export default function TransactionTable({mode, counterHandler}) {
     }
 
     function getCategoriesMap() {
-        let categoriesList = [<option key={-1} value={-1}></option>];
+        let categoriesList = [<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>];
         categories.forEach((c) => {
             categoriesList.push(<option key={c.id} value={c.id}>{c.name}</option>)
         });
@@ -148,7 +160,7 @@ export default function TransactionTable({mode, counterHandler}) {
     }
 
     function getLiabilitiesMap() {
-        let liabilitiesList = [<option key={-1} value={-1}></option>];
+        let liabilitiesList = [<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>];
         liabilities.forEach((l) => {
             liabilitiesList.push(<option key={l.id} value={l.id}>{l.name} ({l.bank})</option>)
         });
@@ -165,7 +177,17 @@ export default function TransactionTable({mode, counterHandler}) {
         return handleError();
     }
 
+    function refreshButton() {
+        if (mode === 'all') {
+            return <Col sm={1}>
+                <Button onClick={reloadTable}>{showSpinner ? <Spinner size={"sm"} animation="grow"/> :
+                    <ArrowClockwise/>}</Button>
+            </Col>;
+        }
+    }
+
     return (<>
+        {refreshButton()}
         <Modal size="lg" show={showForm} onHide={handleClose}>
             <Modal.Header closeButton>
                 <Modal.Title>Edytuj transakcję:</Modal.Title>

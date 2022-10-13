@@ -11,7 +11,7 @@ const Navigation = () => {
                 <Nav.Link href="/yearAtTheGlance">Cały rok</Nav.Link>
                 <Nav.Link href="/liabilities">Pasywa</Nav.Link>
                 <hr/>
-                <Nav.Link href="/withoutCategory">Bez kategorii</Nav.Link>
+                <Nav.Link href="/allTransactions">Wszystkie transakcje</Nav.Link>
             </Container>
         </Nav>
     )
