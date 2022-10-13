@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.Year;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,5 +25,12 @@ public class GroupedExpensesController {
         groupedExpenses.addAll(groupedExpensesRepository.getCategorySumRows(year));
         groupedExpenses.addAll(groupedExpensesRepository.getMonthSumRows(year));
         return groupedExpenses;
+    }
+
+    @GetMapping("/currentMonthByCategory")
+    List<GroupedExpenses> getGroupedForCurrentMonth() {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        return groupedExpensesRepository.getGroupedByCategory(begin, end);
     }
 }

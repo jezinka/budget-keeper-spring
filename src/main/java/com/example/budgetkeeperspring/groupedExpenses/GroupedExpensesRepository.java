@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -38,5 +39,15 @@ public class GroupedExpensesRepository {
                 "  and is_deleted <> 1 " +
                 "  and category_id is not null " +
                 "group by month", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), year);
+    }
+
+    List<GroupedExpenses> getGroupedByCategory(LocalDate begin, LocalDate end) {
+        return jdbcTemplate.query("select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
+                "from transaction t " +
+                "         join category c on t.category_id = c.id " +
+                "where transaction_date between ? and ? " +
+                "  and is_deleted <> 1 " +
+                "group by month, category " +
+                "order by amount", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), begin, end);
     }
 }
