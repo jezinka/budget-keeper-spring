@@ -11,6 +11,6 @@ public class MoneyAmount {
 
     Float amount;
     Float income;
-    Float outcome;
+    Float expenses;
     Float accountBalance;
 }

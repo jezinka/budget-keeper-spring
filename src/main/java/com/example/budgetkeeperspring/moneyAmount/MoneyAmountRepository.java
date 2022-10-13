@@ -28,10 +28,10 @@ public class MoneyAmountRepository {
                 "select " +
                         " amount, " +
                         " income, " +
-                        " outcome, " +
-                        " (amount + income + outcome) as account_balance " +
+                        " expenses, " +
+                        " (amount + income + expenses) as account_balance " +
                         "from (select ifnull(sum(case when t.amount > 0 then t.amount else 0 end), 0) as income, " +
-                        "             ifnull(sum(case when t.amount < 0 then t.amount else 0 end), 0) as outcome " +
+                        "             ifnull(sum(case when t.amount < 0 then t.amount else 0 end), 0) as expenses " +
                         "      from transaction t " +
                         "      where transaction_date between cast(:begin AS DATE) and cast(:end AS DATE)) balance " +
                         "         join money_amount " +

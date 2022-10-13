@@ -86,7 +86,7 @@ public class TransactionRepository {
         if (filters.getOrDefault("onlyEmptyLiabilities", false).equals(true)) {
             query += " and liability_id is null ";
         }
-        if (filters.getOrDefault("onlyOutcome", false).equals(true)) {
+        if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             query += " and amount < 0 ";
         }
 
