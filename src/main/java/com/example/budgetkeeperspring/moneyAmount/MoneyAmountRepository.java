@@ -33,7 +33,8 @@ public class MoneyAmountRepository {
                         "from (select ifnull(sum(case when t.amount > 0 then t.amount else 0 end), 0) as income, " +
                         "             ifnull(sum(case when t.amount < 0 then t.amount else 0 end), 0) as expenses " +
                         "      from transaction t " +
-                        "      where transaction_date between cast(:begin AS DATE) and cast(:end AS DATE)) balance " +
+                        "      where transaction_date between cast(:begin AS DATE) and cast(:end AS DATE) " +
+                        "         and is_deleted = 0 ) balance " +
                         "         join money_amount " +
                         "where month between cast(:begin AS DATE) and cast(:end AS DATE);",
                 namedParameters,
