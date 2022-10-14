@@ -9,6 +9,8 @@ import CurrentMonth from "./components/currentMonth/CurrentMonth";
 import YearAtTheGlance from "./components/year/YearAtTheGlance";
 import Liabilities from "./components/liabilities/Liabilities";
 import AllTransactions from "./components/allTransactions/AllTransactions";
+import YearAtTheGlanceBarChart from "./components/year/YearAtTheGlanceBarChart";
+import YearAtTheGlancePieChart from "./components/year/YearAtTheGlancePieChart";
 
 
 const App = () => {
@@ -18,6 +20,8 @@ const App = () => {
                 <Routes>
                     <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/yearAtTheGlance" element={<YearAtTheGlance/>}/>
+                    <Route path="/yearAtTheGlanceBarChart" element={<YearAtTheGlanceBarChart/>}/>
+                    <Route path="/yearAtTheGlancePieChart" element={<YearAtTheGlancePieChart/>}/>
                     <Route path="/liabilities" element={<Liabilities/>}/>
                     <Route path="/allTransactions" element={<AllTransactions/>}/>
                 </Routes>

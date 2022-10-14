@@ -18,6 +18,12 @@ public class GroupedExpensesController {
     @Autowired
     GroupedExpensesRepository groupedExpensesRepository;
 
+    @GetMapping("/getPivot")
+    List getForCurrentYearPivot() {
+        int year = Year.now().getValue();
+        return groupedExpensesRepository.getMonthsPivot(year);
+    }
+
     @GetMapping("")
     List<GroupedExpenses> getForCurrentYear() {
         int year = Year.now().getValue();

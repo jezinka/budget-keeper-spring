@@ -45,7 +45,7 @@ export default function YearlyExpenses() {
         <tr className='table-info'>
             <th></th>
             {MONTHS_ARRAY.map(month =>
-                <th key={month} style={{textAlign: "center"}}>{getMonthName(month)}</th>
+                <th key={month} style={{textAlign: "center"}}>{getMonthName(month, 'long')}</th>
             )}
             <th style={SUMMARY_STYLE}>{SUM_CATEGORY}</th>
         </tr>

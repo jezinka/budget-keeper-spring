@@ -1,5 +1,5 @@
 import {useLocation} from "react-router-dom";
-import {Container, Nav} from "react-bootstrap";
+import {Container, Nav, NavDropdown} from "react-bootstrap";
 import React from "react";
 
 const Navigation = () => {
@@ -8,7 +8,11 @@ const Navigation = () => {
              className="flex-column">
             <Container fluid className="mt-2">
                 <Nav.Link href="/">Miesiąc</Nav.Link>
-                <Nav.Link href="/yearAtTheGlance">Cały rok</Nav.Link>
+                <NavDropdown title="Cały rok" id="basic-nav-dropdown">
+                    <NavDropdown.Item href="/yearAtTheGlance">Tabelka</NavDropdown.Item>
+                    <NavDropdown.Item href="/yearAtTheGlanceBarChart">Bar Chart</NavDropdown.Item>
+                    <NavDropdown.Item href="/yearAtTheGlancePieChart">Pie Chart</NavDropdown.Item>
+                </NavDropdown>
                 <Nav.Link href="/liabilities">Pasywa</Nav.Link>
                 <hr/>
                 <Nav.Link href="/allTransactions">Wszystkie transakcje</Nav.Link>
