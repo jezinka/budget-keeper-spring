@@ -10,7 +10,7 @@ import java.util.List;
 @RequestMapping("transactions")
 public class TransactionController {
 
-    private static final int EMPTY_OPTION = -1;
+    private static final Long EMPTY_OPTION = -1L;
     @Autowired
     TransactionRepository transactionRepository;
 
