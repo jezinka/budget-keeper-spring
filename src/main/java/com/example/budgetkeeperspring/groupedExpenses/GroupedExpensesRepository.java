@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -16,8 +15,7 @@ import java.util.stream.IntStream;
 @Repository
 public class GroupedExpensesRepository {
 
-    private static final DateFormatSymbols DFS = new DateFormatSymbols(Locale.getDefault());
-    private static final List<String> EXCLUDED_CATEGORIES = new ArrayList<>(List.of("wypłata", "zwrot"));
+    private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
 
     @Autowired
     JdbcTemplate jdbcTemplate;
