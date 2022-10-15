@@ -10,9 +10,11 @@ import java.util.List;
 @RequestMapping("transactions")
 public class TransactionController {
 
-    private static final Long EMPTY_OPTION = -1L;
     @Autowired
     TransactionRepository transactionRepository;
+
+    @Autowired
+    TransactionService transactionService;
 
     @PostMapping("")
     List getAllTransactions(@RequestBody HashMap filters) {
@@ -36,35 +38,11 @@ public class TransactionController {
 
     @PutMapping("/{id}")
     Boolean editTransaction(@PathVariable Long id, @RequestBody Transaction updateTransaction) {
-        Transaction transaction = transactionRepository.getById(id);
-        if (updateTransaction != null) {
-            setTransactionProperties(updateTransaction, transaction);
-        }
-        return transactionRepository.editTransaction(transaction);
-    }
-
-    private static void setTransactionProperties(Transaction updateTransaction, Transaction transaction) {
-        transaction.setTransactionDate(updateTransaction.getTransactionDate());
-        transaction.setTitle(updateTransaction.getTitle());
-        transaction.setPayee(updateTransaction.getPayee());
-        transaction.setAmount(updateTransaction.getAmount());
-        if (updateTransaction.getCategoryId() != EMPTY_OPTION) {
-            transaction.setCategoryId(updateTransaction.getCategoryId());
-        }
-        if (updateTransaction.getLiabilityId() != EMPTY_OPTION) {
-            transaction.setLiabilityId(updateTransaction.getLiabilityId());
-        }
+        return transactionService.updateTransaction(id, updateTransaction);
     }
 
     @PostMapping("/split/{id}")
     Boolean splitTransaction(@PathVariable Long id, @RequestBody List<Transaction> updateTransactions) {
-        Boolean result = true;
-        Transaction transaction = transactionRepository.getById(id);
-        for (Transaction t : updateTransactions) {
-            setTransactionProperties(t, transaction);
-            result = transactionRepository.createTransaction(transaction) && result;
-        }
-        result = transactionRepository.deleteTransaction(id) && result;
-        return result;
+        return transactionService.splitTransaction(id, updateTransactions);
     }
 }

@@ -20,4 +20,6 @@ public class Transaction {
     private String category;
     private Long categoryId;
     private Long liabilityId;
+
+    private Boolean isDeleted;
 }

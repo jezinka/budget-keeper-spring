@@ -7,9 +7,10 @@ create table IF NOT EXISTS bank
 
 create table IF NOT EXISTS category
 (
-    id   int auto_increment
+    id                   int auto_increment
         primary key,
-    name varchar(50) null
+    name                 varchar(50)          null,
+    use_in_yearly_charts tinyint(1) default 1 null
 );
 
 create table IF NOT EXISTS liability
@@ -58,14 +59,17 @@ create table IF NOT EXISTS transaction
 (
     id               int auto_increment
         primary key,
-    transaction_date date                 null,
+    transaction_date date                 not null,
     title            varchar(200)         null,
     payee            varchar(200)         null,
-    amount           float                null,
+    amount           float                not null,
     category_id      int                  null,
     is_deleted       tinyint(1) default 0 null,
+    liability_id     int                  null,
     constraint transaction_category_id_fk
-        foreign key (category_id) references category (id)
+        foreign key (category_id) references category (id),
+    constraint transaction_liability_null_fk
+        foreign key (liability_id) references liability (id)
 );
 
 create table IF NOT EXISTS users

@@ -55,7 +55,7 @@ public class TransactionRepository {
     }
 
     public Transaction getById(Long id) {
-        return jdbcTemplate.queryForObject("select t.id, transaction_date, title, payee, amount, category_id, liability_id " +
+        return jdbcTemplate.queryForObject("select t.id, transaction_date, title, payee, amount, category_id, liability_id, is_deleted " +
                 "from transaction t " +
                 "where t.id = ?", BeanPropertyRowMapper.newInstance(Transaction.class), id);
     }
