@@ -4,7 +4,7 @@ import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import {ArrowClockwise, ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
 import {EMPTY_OPTION, handleError} from "../../Utils";
 
-export default function TransactionTable({mode, counterHandler, filterForm}) {
+export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [showSpinner, setShowSpinner] = useState(false);
@@ -45,6 +45,9 @@ export default function TransactionTable({mode, counterHandler, filterForm}) {
             if (data) {
                 if (counterHandler !== undefined) {
                     counterHandler(data.length);
+                }
+                if (reloadCharts !== undefined) {
+                    reloadCharts()
                 }
                 return setTransactions(data);
             }

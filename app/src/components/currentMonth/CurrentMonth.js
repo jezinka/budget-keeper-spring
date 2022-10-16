@@ -21,7 +21,7 @@ const CurrentMonth = () => {
 
     let body = <>
         <Col sm={8}>
-            <TransactionTable mode="currentMonth"/>
+            <TransactionTable mode="currentMonth" reloadCharts={loadData}/>
         </Col>
         <Col sm={3} className="mt-1">
             <Col sm={6}>
