@@ -8,7 +8,7 @@ const Navigation = () => {
              className="flex-column">
             <Container fluid className="mt-2">
                 <Nav.Link href="/">Miesiąc</Nav.Link>
-                <NavDropdown title="Cały rok" id="basic-nav-dropdown">
+                <NavDropdown title="Cały rok" id="basic-nav-dropdown" drop={"end"}>
                     <NavDropdown.Item href="/yearAtTheGlance">Tabelka</NavDropdown.Item>
                     <NavDropdown.Item href="/yearAtTheGlanceBarChart">Bar Chart</NavDropdown.Item>
                     <NavDropdown.Item href="/yearAtTheGlancePieChart">Pie Chart</NavDropdown.Item>
