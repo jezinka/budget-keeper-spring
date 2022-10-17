@@ -33,6 +33,20 @@ const LogTable = () => {
         return handleError();
     }
 
+    const dateFormat = new Intl.DateTimeFormat('default', {dateStyle: 'medium', timeStyle: 'medium'});
+
+    function getClassName(log) {
+        let className = [];
+        if (log.isDeleted) {
+            className.push('inactive')
+        }
+        if (log.type === 'ERROR') {
+            className.push('error')
+        }
+
+        return className.join(' ');
+    }
+
     return (<Table responsive='sm' striped bordered size="sm">
         <thead>
         <tr className='table-info'>
@@ -43,8 +57,8 @@ const LogTable = () => {
         </tr>
         </thead>
         <tbody>
-        {logs.map(log => <tr key={log.id} className={log.isDeleted ? 'inactiveLog' : ''}>
-            <td>{log.date}</td>
+        {logs.map(log => <tr key={log.id} className={getClassName(log)}>
+            <td>{dateFormat.format(new Date(log.date))}</td>
             <td>{log.type}</td>
             <td>{log.message}</td>
             <td style={{textAlign: "center"}}>

@@ -2,6 +2,10 @@ div {
     font-size: 12px !important;
 }
 
-.inactiveLog {
+tr.error {
+    background-color: indianred;
+}
+
+tr.inactive {
     text-decoration: line-through;
 }
