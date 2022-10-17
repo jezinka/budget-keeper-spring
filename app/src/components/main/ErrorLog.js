@@ -6,7 +6,7 @@ export default function ErrorLog() {
     const [variant, setVariant] = useState("danger");
 
     async function reloadLogs() {
-        const response = await fetch('/logs/');
+        const response = await fetch('/logs/active');
         if (response.ok) {
             const data = await response.json();
             if (data) {

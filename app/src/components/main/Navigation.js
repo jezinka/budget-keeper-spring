@@ -16,6 +16,7 @@ const Navigation = () => {
                 <Nav.Link href="/liabilities">Pasywa</Nav.Link>
                 <hr/>
                 <Nav.Link href="/allTransactions">Wszystkie transakcje</Nav.Link>
+                <Nav.Link href="/logs">Logi</Nav.Link>
             </Container>
         </Nav>
     )
