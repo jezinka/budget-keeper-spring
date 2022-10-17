@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.groupedExpenses;
 
+import com.example.budgetkeeperspring.YearlyFilter;
 import org.junit.After;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -39,9 +40,10 @@ class GroupedExpensesControllerTest {
     void getForCurrentYear_empty() {
         // given:
         prepare();
+        YearlyFilter yearlyFilter = new YearlyFilter(2022);
 
         // when:
-        List<GroupedExpenses> transactionList = controller.getForCurrentYear();
+        List<GroupedExpenses> transactionList = controller.getForSelectedYear(yearlyFilter);
 
         // then:
         assertEquals(0, transactionList.size());
@@ -52,11 +54,12 @@ class GroupedExpensesControllerTest {
         // given:
         prepare();
         int currentMonth = LocalDate.now().getMonthValue();
+        YearlyFilter yearlyFilter = new YearlyFilter(2022);
         jdbcTemplate.execute("INSERT INTO category (id, name) VALUES (1, 'A');");
         jdbcTemplate.execute("INSERT INTO transaction (id, transaction_date, title, payee, amount, category_id) VALUES (3821, now(), 'BLIK', '', -43.28, 1);");
 
         // when:
-        List<GroupedExpenses> transactionList = controller.getForCurrentYear();
+        List<GroupedExpenses> transactionList = controller.getForSelectedYear(yearlyFilter);
 
         // then:
         assertEquals(3, transactionList.size());
@@ -70,6 +73,7 @@ class GroupedExpensesControllerTest {
         // given:
         prepare();
         int currentMonth = LocalDate.now().getMonthValue();
+        YearlyFilter yearlyFilter = new YearlyFilter(2022);
         String op = currentMonth == JANUARY.getValue() ? "DATE_ADD" : "DATE_SUB";
 
         jdbcTemplate.execute("INSERT INTO category (id, name) VALUES (1, 'A');");
@@ -79,7 +83,7 @@ class GroupedExpensesControllerTest {
         jdbcTemplate.execute("INSERT INTO transaction (id, transaction_date, title, payee, amount, category_id) VALUES (2, now(), 'BLIK', '', -20, 2);");
 
         // when:
-        List<GroupedExpenses> transactionList = controller.getForCurrentYear();
+        List<GroupedExpenses> transactionList = controller.getForSelectedYear(yearlyFilter);
 
         // then:
         assertEquals(7, transactionList.size());

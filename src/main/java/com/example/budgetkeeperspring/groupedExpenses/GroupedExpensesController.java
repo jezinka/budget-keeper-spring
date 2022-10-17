@@ -1,12 +1,10 @@
 package com.example.budgetkeeperspring.groupedExpenses;
 
+import com.example.budgetkeeperspring.YearlyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +16,16 @@ public class GroupedExpensesController {
     @Autowired
     GroupedExpensesRepository groupedExpensesRepository;
 
-    @GetMapping("/getPivot")
-    List getForCurrentYearPivot() {
-        int year = Year.now().getValue();
-        return groupedExpensesRepository.getMonthsPivot(year);
+    @PostMapping("/getPivot")
+    List getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
+        return groupedExpensesRepository.getMonthsPivot(filter.getYear());
     }
 
-    @GetMapping("")
-    List<GroupedExpenses> getForCurrentYear() {
-        int year = Year.now().getValue();
-        List<GroupedExpenses> groupedExpenses = new ArrayList<>(groupedExpensesRepository.getYearAtGlance(year));
-        groupedExpenses.addAll(groupedExpensesRepository.getCategorySumRows(year));
-        groupedExpenses.addAll(groupedExpensesRepository.getMonthSumRows(year));
+    @PostMapping("")
+    List<GroupedExpenses> getForSelectedYear(@RequestBody YearlyFilter filter) {
+        List<GroupedExpenses> groupedExpenses = new ArrayList<>(groupedExpensesRepository.getYearAtGlance(filter.getYear()));
+        groupedExpenses.addAll(groupedExpensesRepository.getCategorySumRows(filter.getYear()));
+        groupedExpenses.addAll(groupedExpensesRepository.getMonthSumRows(filter.getYear()));
         return groupedExpenses;
     }
 

@@ -1,11 +1,9 @@
 package com.example.budgetkeeperspring.category;
 
+import com.example.budgetkeeperspring.YearlyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Year;
 import java.util.List;
 
 @RestController
@@ -20,9 +18,8 @@ public class CategoryController {
         return categoryRepository.getAll();
     }
 
-    @GetMapping("/getActiveForCurrentYear")
-    List<Category> getActiveForCurrentYear() {
-        int year = Year.now().getValue();
-        return categoryRepository.getActive(year);
+    @PostMapping("/getActiveForSelectYear")
+    List<Category> getActiveForSelectedYear(@RequestBody YearlyFilter yearlyFilter) {
+        return categoryRepository.getActive(yearlyFilter.getYear());
     }
 }
