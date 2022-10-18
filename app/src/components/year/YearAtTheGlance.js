@@ -3,12 +3,7 @@ import YearlyExpenses from "./YearlyExpenses";
 import Main from "../main/Main";
 
 const YearAtTheGlance = () => {
-
-    let body = <>
-        <YearlyExpenses/>
-    </>;
-
-    return <Main body={body}/>
+    return <Main body={<YearlyExpenses/>}/>
 }
 
 export default YearAtTheGlance;

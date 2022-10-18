@@ -89,6 +89,15 @@ public class TransactionRepository {
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             query += " and amount < 0 ";
         }
+        if (filters.get("year") != null) {
+            query += " and year(transaction_date) = " + filters.get("year");
+        }
+        if (filters.get("month") != null) {
+            query += " and month(transaction_date) = " + filters.get("month");
+        }
+        if (filters.get("category") != null) {
+            query += " and c.name = \"" + filters.get("category") + "\"";
+        }
 
         String titleFilter = (String) filters.getOrDefault("title", "");
         if (!titleFilter.equals("")) {
@@ -100,7 +109,7 @@ public class TransactionRepository {
             query += " and payee like \"%" + payeeFilter + "%\" ";
         }
 
-        query += "order by transaction_date desc";
+        query += " order by transaction_date desc";
 
         return jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transaction.class));
     }

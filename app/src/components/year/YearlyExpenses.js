@@ -1,8 +1,8 @@
 import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
 import Expense from "./Expense";
-import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH, SUMMARY_STYLE} from "../../Utils";
-import {Button, Col, Form, Spinner} from "react-bootstrap";
+import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
+import {Button, Col, Form, Modal, Spinner} from "react-bootstrap";
 import {ArrowClockwise} from "react-bootstrap-icons";
 
 export default function YearlyExpenses() {
@@ -11,6 +11,10 @@ export default function YearlyExpenses() {
     const [categories, setCategories] = useState([]);
     const [showSpinner, setShowSpinner] = useState(false);
     const [formState, setFormState] = useState({year: new Date().getFullYear()});
+    const [transactionsDetails, setTransactionsDetails] = useState([]);
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     const handleChange = (event) => {
         setFormState({...formState, [event.target.name]: event.target.value});
@@ -59,10 +63,18 @@ export default function YearlyExpenses() {
 
     function ExpenseForMonthAndCategory(currMonth, currCategory) {
         const foundExpense = expenses.find(({month, category}) => month === currMonth && category === currCategory);
-        return <Expense expense={foundExpense}/>;
+        if (foundExpense !== undefined) {
+            return <Expense expense={foundExpense} year={formState.year}
+                            modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
+        }
+        return <td>0.00</td>
     }
 
     return (<>
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton> <Modal.Title>Transakcje</Modal.Title> </Modal.Header>
+            <Modal.Body>{transactionsDetails}</Modal.Body>
+        </Modal>
         <Col sm={1}>
             <Form>
                 <Form.Select className="m-2" size="sm" placeholder="Rok:" onChange={handleChange}
@@ -77,14 +89,14 @@ export default function YearlyExpenses() {
                 <ArrowClockwise/>}</Button>
         </Col>
         <Col sm={11}>
-            <Table responsive='sm' striped bordered size="sm">
+            <Table id="yearly" responsive='sm' striped bordered size="sm">
                 <thead>
                 <tr className='table-info'>
                     <th></th>
                     {MONTHS_ARRAY.map(month =>
                         <th key={month} style={{textAlign: "center"}}>{getMonthName(month, 'long')}</th>
                     )}
-                    <th style={SUMMARY_STYLE}>{SUM_CATEGORY}</th>
+                    <th className="summary">{SUM_CATEGORY}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -99,7 +111,7 @@ export default function YearlyExpenses() {
                     </tr>
                 )}
 
-                <tr style={SUMMARY_STYLE}>
+                <tr>
                     <td>{SUM_CATEGORY}</td>
                     {MONTHS_ARRAY.map(currentMonth =>
                         ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY)

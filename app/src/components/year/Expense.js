@@ -1,17 +1,37 @@
-import {SUM_MONTH, SUMMARY_STYLE} from "../../Utils";
+import {SUM_CATEGORY, SUM_MONTH} from "../../Utils";
+import Table from "react-bootstrap/Table";
 
-const Expense = ({expense}) => {
+const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
 
-    if (expense === undefined) {
-        return <td>0.00</td>;
-    }
+    const renderTooltip = async () => {
+        if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY) {
+            return
+        }
 
-    if (expense.month === SUM_MONTH) {
-        return <td style={SUMMARY_STYLE}>{expense.amount}</td>
-    }
+        const response = await fetch('/transactions', {
+            method: "POST",
+            body: JSON.stringify({month: expense.month, year: year, category: expense.category}),
+            headers: {'Content-Type': 'application/json'},
+        });
+        const data = await response.json()
+        modalHandler();
+        modalContentHandler(<Table>
+            <tbody>
+            {data.map((row) => {
+                return <tr>
+                    <td>{row.transactionDate}</td>
+                    <td>{row.title}</td>
+                    <td>{row.amount}</td>
+                </tr>
+            })}
 
-    return <td>{expense.amount}</td>;
+            </tbody>
+        </Table>)
+    };
 
+    return (
+        <td onClick={renderTooltip}>{expense.amount}</td>
+    );
 }
 
 export default Expense;

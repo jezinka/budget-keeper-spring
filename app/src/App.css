@@ -9,3 +9,9 @@ tr.error {
 tr.inactive {
     text-decoration: line-through;
 }
+
+#yearly.table td:last-of-type,
+#yearly.table tr:last-of-type {
+    background-color: #77e0be !important;
+    font-weight: bold;
+}
