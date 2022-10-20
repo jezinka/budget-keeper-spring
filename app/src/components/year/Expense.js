@@ -1,4 +1,4 @@
-import {SUM_CATEGORY, SUM_MONTH} from "../../Utils";
+import {formatNumber, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
 import Table from "react-bootstrap/Table";
 
 const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
@@ -21,7 +21,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
                 return <tr>
                     <td>{row.transactionDate}</td>
                     <td>{row.title}</td>
-                    <td>{row.amount}</td>
+                    <td style={{textAlign: 'right'}}>{formatNumber(row.amount)}</td>
                 </tr>
             })}
 
@@ -30,7 +30,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
     };
 
     return (
-        <td onClick={renderTooltip}>{expense.amount}</td>
+        <td style={{textAlign: 'right'}} onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
     );
 }
 

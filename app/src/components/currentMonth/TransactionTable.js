@@ -2,7 +2,7 @@ import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
 import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import {ArrowClockwise, ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
-import {EMPTY_OPTION, handleError} from "../../Utils";
+import {EMPTY_OPTION, formatNumber, handleError} from "../../Utils";
 
 export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
@@ -286,7 +286,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 <td>{transaction.transactionDate}</td>
                 <td>{transaction.title}</td>
                 <td>{transaction.payee}</td>
-                <td>{transaction.amount}</td>
+                <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
                 <td>{transaction.category}</td>
                 <td style={{textAlign: "center"}}>
                     <Button variant="outline-primary" size="sm"

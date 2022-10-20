@@ -67,7 +67,7 @@ export default function YearlyExpenses() {
             return <Expense expense={foundExpense} year={formState.year}
                             modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
         }
-        return <td>0.00</td>
+        return <td style={{textAlign: 'right'}}>0,00</td>
     }
 
     return (<>
