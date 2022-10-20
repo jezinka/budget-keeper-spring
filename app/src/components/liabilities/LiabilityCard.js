@@ -2,7 +2,7 @@ import Card from 'react-bootstrap/Card';
 import {Button, Form, Modal} from "react-bootstrap";
 import {GraphUp, PlusLg} from "react-bootstrap-icons";
 import {useState} from "react";
-import {EMPTY_OPTION, getDate, handleError} from "../../Utils";
+import {EMPTY_OPTION, formatNumber, getDate, handleError} from "../../Utils";
 
 function LiabilityCard({liability, reloadHandler}) {
     const [showForm, setShowForm] = useState(false);
@@ -72,7 +72,7 @@ function LiabilityCard({liability, reloadHandler}) {
             <Card.Header>{liability.bank}</Card.Header>
             <Card.Body>
                 <Card.Title>{liability.name}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">{liability.outcome}</Card.Subtitle>
+                <Card.Subtitle className="mb-2 text-muted">{formatNumber(liability.outcome)}</Card.Subtitle>
                 <Button size='sm' variant="primary" className="m-1"
                         onClick={() => addOutcome(liability.id)}><PlusLg/></Button>
                 <Button size='sm' variant="primary" className="m-1"><GraphUp/></Button>

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
+import {formatNumber} from "../../Utils";
 
 export default function MoneyAmount() {
     const [moneyAmount, setMoneyAmount] = useState({});
@@ -19,19 +20,19 @@ export default function MoneyAmount() {
             <tbody>
             <tr>
                 <td>NA WEJŚCIU</td>
-                <td>{moneyAmount.amount}</td>
+                <td>{formatNumber(moneyAmount.amount)}</td>
             </tr>
             <tr>
                 <td>WYDATKI</td>
-                <td>{moneyAmount.expenses}</td>
+                <td>{formatNumber(moneyAmount.expenses)}</td>
             </tr>
             <tr>
                 <td>WPŁYWY</td>
-                <td>{moneyAmount.income}</td>
+                <td>{formatNumber(moneyAmount.income)}</td>
             </tr>
             <tr>
                 <td>STAN KONTA</td>
-                <td>{moneyAmount.accountBalance}</td>
+                <td>{formatNumber(moneyAmount.accountBalance)}</td>
             </tr>
             </tbody>
         </Table>);
