@@ -1,10 +1,16 @@
 import {useEffect, useState} from "react";
 import {Container, Row} from "react-bootstrap";
 import LiabilityCard from "./LiabilityCard";
-import {handleError} from "../../Utils";
+import {EMPTY_OPTION, getDate, handleError} from "../../Utils";
+import AddOutcomeForm from "./AddOutcomeForm";
+import GraphModal from "./GraphModal";
 
 export default function LiabilitiesGrid() {
-
+    const [showForm, setShowForm] = useState(false);
+    const [showGraph, setShowGraph] = useState(false);
+    const [formState, setFormState] = useState({
+        "date": getDate(), "liability": EMPTY_OPTION, "outcome": 0
+    })
     const [liabilities, setLiabilities] = useState([]);
 
     async function reloadTable() {
@@ -22,13 +28,22 @@ export default function LiabilitiesGrid() {
         reloadTable();
     }, []);
 
-    return (
-        <Container>
-            <Row lg={4}>
-                {liabilities.map(liability =>
-                    <LiabilityCard liability={liability} reloadHandler={reloadTable}/>
-                )}
-            </Row>
-        </Container>
+    return (<>
+            <AddOutcomeForm formState={formState} setFormState={setFormState}
+                            showForm={showForm} setShowForm={setShowForm}
+                            reloadHandler={reloadTable}/>
+            <GraphModal showGraph={showGraph} setShowGraph={setShowGraph} liabilityId={formState.liability}/>
+            <Container>
+                <Row lg={4}>
+                    {liabilities.map(liability =>
+                        <LiabilityCard liability={liability}
+                                       formState={formState}
+                                       setFormState={setFormState}
+                                       setShowForm={setShowForm}
+                                       setShowGraph={setShowGraph}/>
+                    )}
+                </Row>
+            </Container>
+        </>
     );
 }

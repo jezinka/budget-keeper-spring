@@ -31,4 +31,9 @@ public class LiabilityRepository {
                 lookout.date, lookout.outcome, id);
         return result == 1;
     }
+
+    public List<LiabilityLookout> getLookouts(Long id) {
+        return jdbcTemplate.query("select id, date, outcome from liability_lookout where liability_id = ?",
+                BeanPropertyRowMapper.newInstance(LiabilityLookout.class), id);
+    }
 }

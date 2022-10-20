@@ -5,6 +5,8 @@ export const SUM_CATEGORY = 'SUMA';
 export const EMPTY_OPTION = -1;
 
 export const MONTHS_ARRAY = Array.from({length: 12}, (x, i) => (i + 1));
+export const DATE_TIME_FORMAT = new Intl.DateTimeFormat('default', {dateStyle: 'medium', timeStyle: 'medium'});
+export const DATE_FORMAT = new Intl.DateTimeFormat('default', {dateStyle: 'short'});
 
 export function getDate() {
     return new Date().toISOString().split('T')[0];
