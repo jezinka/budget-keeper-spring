@@ -2,7 +2,7 @@ import {Button} from "react-bootstrap";
 import {Trash} from "react-bootstrap-icons";
 import Table from "react-bootstrap/Table";
 import React, {useEffect, useState} from "react";
-import {handleError} from "../../Utils";
+import {DATE_TIME_FORMAT, handleError} from "../../Utils";
 
 const LogTable = () => {
     const [logs, setLogs] = useState([]);
@@ -33,8 +33,6 @@ const LogTable = () => {
         return handleError();
     }
 
-    const dateFormat = new Intl.DateTimeFormat('default', {dateStyle: 'medium', timeStyle: 'medium'});
-
     function getClassName(log) {
         let className = [];
         if (log.isDeleted) {
@@ -58,7 +56,7 @@ const LogTable = () => {
         </thead>
         <tbody>
         {logs.map(log => <tr key={log.id} className={getClassName(log)}>
-            <td>{dateFormat.format(new Date(log.date))}</td>
+            <td>{DATE_TIME_FORMAT.format(new Date(log.date))}</td>
             <td>{log.type}</td>
             <td>{log.message}</td>
             <td style={{textAlign: "center"}}>

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Alert from 'react-bootstrap/Alert';
+import {DATE_TIME_FORMAT} from "../../Utils";
 
 export default function ErrorLog() {
     const [log, setLog] = useState({});
@@ -28,13 +29,9 @@ export default function ErrorLog() {
 
     if (log?.id) {
         let date = new Date(log.date);
-        let options = {dateStyle: 'medium', timeStyle: 'medium'};
-        const dateFormat = new Intl.DateTimeFormat('default', options);
-
-
         return (
             <Alert variant={variant} key={log.id}>
-                {dateFormat.format(date)}: {log.type} - {log.message}
+                {DATE_TIME_FORMAT.format(date)}: {log.type} - {log.message}
             </Alert>
         );
     }
