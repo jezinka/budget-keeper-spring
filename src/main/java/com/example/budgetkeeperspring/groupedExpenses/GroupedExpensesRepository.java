@@ -75,4 +75,12 @@ public class GroupedExpensesRepository {
                 "  and year(transaction_date) = ?" +
                 " group by category;", year);
     }
+
+    public List getDailyExpenses(LocalDate begin, LocalDate end) {
+        return jdbcTemplate.queryForList("select day(transaction_date) as day, round(abs(sum(amount)), 2) as amount " +
+                "from transaction " +
+                "where transaction_date between ? and ? " +
+                "and amount < 0 " +
+                "group by day(transaction_date)", begin, end);
+    }
 }

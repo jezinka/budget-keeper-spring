@@ -16,7 +16,7 @@ const ExpensesPieChart = ({data}) => {
     }
 
     return (
-        <PieChart width={400} height={300}>
+        <PieChart width={600} height={400}>
             <Pie
                 data={prepareData()}
                 cx="50%"
@@ -25,7 +25,7 @@ const ExpensesPieChart = ({data}) => {
                 dataKey="amount"
                 fill="#6BBDFF"
                 label={renderCustomizedLabel}>
-                <LabelList dataKey="category" position="outside" stroke={"black"} offset={20}/>
+                <LabelList dataKey="category" position="outside" stroke={"black"} offset={25}/>
             </Pie>
         </PieChart>
     )

@@ -5,6 +5,7 @@ import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
 import ExpensesPieChart from "./ExpensesPieChart";
+import DailyBarChart from "./DailyBarChart";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([])
@@ -27,6 +28,7 @@ const CurrentMonth = () => {
             <Col sm={6}>
                 <MoneyAmount/>
             </Col>
+            <DailyBarChart/>
             <ExpensesBarChart data={data}/>
             <ExpensesPieChart data={data}/>
         </Col>

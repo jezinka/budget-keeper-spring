@@ -39,4 +39,11 @@ public class GroupedExpensesController {
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return groupedExpensesRepository.getGroupedByCategory(begin, end);
     }
+
+    @GetMapping("/dailyExpenses")
+    List getDailyForMonth() {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        return groupedExpensesRepository.getDailyExpenses(begin, end);
+    }
 }
