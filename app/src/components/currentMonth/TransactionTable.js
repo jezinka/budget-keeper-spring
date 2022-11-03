@@ -229,7 +229,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                         </Col>
                         <Col sm={4}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
-                                         name="categoryId" value={formState.categoryId}>
+                                         name="categoryId" value={formState.categoryId}
+                                         autoFocus>
                                 {getCategoriesMap()}
                             </Form.Select>
                         </Col>
@@ -265,7 +266,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 <Button variant="secondary" onClick={handleClose}>
                     Zamknij
                 </Button>
-                {splitFlow ? '' : <Button variant="primary" onClick={submitForm}> Zapisz </Button>}
+                {splitFlow ? '' :
+                    <Button variant="primary" onClick={submitForm}> Zapisz </Button>}
                 {splitFlow ? <Button variant="primary" onClick={submitSplitForm}> Rozdziel </Button> : ''}
             </Modal.Footer>
         </Modal>

@@ -39,7 +39,8 @@ const AddOutcomeForm = ({formState, setFormState, setShowForm, showForm, reloadH
                 <Form.Group className="mb-3">
                     <Form.Label>Ile:</Form.Label>
                     <Form.Control type="number" onChange={handleChange} name="outcome"
-                                  value={formState.outcome}/>
+                                  value={formState.outcome}
+                                  autoFocus/>
                 </Form.Group>
             </Form>
         </Modal.Body>
