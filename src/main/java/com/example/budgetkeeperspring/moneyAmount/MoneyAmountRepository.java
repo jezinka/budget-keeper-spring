@@ -16,6 +16,17 @@ public class MoneyAmountRepository {
     @Autowired
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    boolean addMoneyAmountForCurrentMonth(Float amount) {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("begin", begin)
+                .addValue("amount", amount);
+
+        int insertQuery = namedParameterJdbcTemplate.update("insert into money_amount (month, amount) values (:begin, :amount)", namedParameters);
+        return insertQuery == 1;
+    }
+
     MoneyAmount findMoneyAmountForCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
