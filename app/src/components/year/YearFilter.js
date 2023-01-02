@@ -7,11 +7,15 @@ const YearFilter = ({formState, formHandler}) => {
         formHandler({...formState, [event.target.name]: event.target.value});
     };
 
+    let firstYear = 2021;
+    let currentYear = new Date().getFullYear();
+    const yearList = Array.from({length: currentYear - firstYear + 1}, (_, i) => currentYear - i)
+
     return <Col sm={1}>
         <Form>
             <Form.Select className="m-2" size="sm" placeholder="Rok:" onChange={handleChange}
                          name="year" value={formState.year}>
-                {[2022, 2021].map((year) => <option key={year} value={year}>{year}</option>)}
+                {yearList.map((year) => <option key={year} value={year}>{year}</option>)}
             </Form.Select>
         </Form>
     </Col>;
