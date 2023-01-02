@@ -66,7 +66,7 @@ export default function YearlyExpenses() {
             <Modal.Body>{transactionsDetails}</Modal.Body>
         </Modal>
         <YearFilter formState={formState} formHandler={setFormState}/>
-        <SpinnerLoadButton loadData={reloadTable}/>
+        <SpinnerLoadButton loadData={reloadPageComponents}/>
         <Col sm={11}>
             <Table id="yearly" responsive='sm' striped bordered size="sm">
                 <thead>
