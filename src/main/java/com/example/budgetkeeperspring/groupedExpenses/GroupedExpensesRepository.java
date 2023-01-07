@@ -80,7 +80,7 @@ public class GroupedExpensesRepository {
         return jdbcTemplate.queryForList("select day(transaction_date) as day, round(abs(sum(amount)), 2) as amount " +
                 "from transaction " +
                 "where transaction_date between ? and ? " +
-                "and amount < 0 " +
+                "and amount < 0 and is_deleted = 0 " +
                 "group by day(transaction_date)", begin, end);
     }
 }
