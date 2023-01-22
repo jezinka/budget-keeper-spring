@@ -5,8 +5,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,17 +15,9 @@ public class TransactionRepository {
     JdbcTemplate jdbcTemplate;
 
     List<Transaction> findAllForCurrentMonth() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
-        return jdbcTemplate.query("select t.id, transaction_date, substring(title, 1, 50) as title, substring(payee,1, 50) as payee, amount, c.name as category " +
-                        "from transaction t " +
-                        "left join category c on t.category_id = c.id " +
-                        "where transaction_date between ? and ? " +
-                        "and is_deleted = 0 " +
-                        "order by amount asc",
-                BeanPropertyRowMapper.newInstance(Transaction.class),
-                begin, end);
+        return jdbcTemplate.query("select * from current_month_transactions order by amount desc",
+                BeanPropertyRowMapper.newInstance(Transaction.class));
     }
 
     public Boolean deleteTransaction(Long id) {
@@ -75,10 +65,8 @@ public class TransactionRepository {
 
     List<Transaction> getAllTransactions(HashMap<String, Object> filters) {
 
-        String query = "select t.id, transaction_date, substring(title, 1, 50) as title, substring(payee,1, 50) as payee, amount, c.name as category " +
-                "from transaction t " +
-                "left join category c on t.category_id = c.id " +
-                "where is_deleted = 0 ";
+        String query = "select * from transactions_category " +
+                "where 1=1  ";
 
         if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
             query += " and category_id is null ";
@@ -96,7 +84,7 @@ public class TransactionRepository {
             query += " and month(transaction_date) = " + filters.get("month");
         }
         if (filters.get("category") != null) {
-            query += " and c.name = \"" + filters.get("category") + "\"";
+            query += " and category = \"" + filters.get("category") + "\"";
         }
 
         String titleFilter = (String) filters.getOrDefault("title", "");

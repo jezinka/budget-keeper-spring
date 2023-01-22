@@ -28,27 +28,9 @@ public class MoneyAmountRepository {
     }
 
     MoneyAmount findMoneyAmountForCurrentMonth() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-
-        SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("begin", begin)
-                .addValue("end", end);
-
         return namedParameterJdbcTemplate.queryForObject(
-                "select " +
-                        " amount, " +
-                        " income, " +
-                        " expenses, " +
-                        " (amount + income + expenses) as account_balance " +
-                        "from (select ifnull(sum(case when t.amount > 0 then t.amount else 0 end), 0) as income, " +
-                        "             ifnull(sum(case when t.amount < 0 then t.amount else 0 end), 0) as expenses " +
-                        "      from transaction t " +
-                        "      where transaction_date between cast(:begin AS DATE) and cast(:end AS DATE) " +
-                        "         and is_deleted = 0 ) balance " +
-                        "         join money_amount " +
-                        "where month between cast(:begin AS DATE) and cast(:end AS DATE);",
-                namedParameters,
+                "select * from current_month_money_amount;",
+                new MapSqlParameterSource(),
                 BeanPropertyRowMapper.newInstance(MoneyAmount.class));
     }
 }

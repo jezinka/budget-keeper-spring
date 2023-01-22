@@ -21,28 +21,23 @@ public class GroupedExpensesRepository {
     JdbcTemplate jdbcTemplate;
 
     List<GroupedExpenses> getYearAtGlance(int year) {
-        return jdbcTemplate.query("select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
-                "from transaction t " +
-                "         join category c on t.category_id = c.id " +
+        return jdbcTemplate.query("select month(transaction_date) as month, category, round(sum(amount), 2) as amount " +
+                "from transactions_category " +
                 "where year(transaction_date) = ? " +
-                "  and is_deleted <> 1 " +
                 "group by month, category", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), year);
     }
 
     public List<GroupedExpenses> getCategorySumRows(int year) {
-        return jdbcTemplate.query("select 99 as month, c.name as category, round(sum(amount), 2) as amount " +
-                "from transaction t " +
-                "         join category c on t.category_id = c.id " +
+        return jdbcTemplate.query("select 99 as month, category, round(sum(amount), 2) as amount " +
+                "from transactions_category " +
                 "where year(transaction_date) = ? " +
-                "  and is_deleted <> 1 " +
                 "group by category", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), year);
     }
 
     public List<GroupedExpenses> getMonthSumRows(int year) {
         return jdbcTemplate.query("select month(transaction_date) as month, 'SUMA' as category, round(sum(amount), 2) as amount " +
-                "from transaction t " +
+                "from transactions_category " +
                 "where year(transaction_date) = ? " +
-                "  and is_deleted <> 1 " +
                 "  and category_id is not null " +
                 "group by month", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), year);
     }
@@ -50,11 +45,9 @@ public class GroupedExpensesRepository {
     List<GroupedExpenses> getGroupedByCategory(LocalDate begin, LocalDate end) {
         return jdbcTemplate.query("" +
                 "select month, category, abs(amount) as amount " +
-                " from (select month(transaction_date) as month, c.name as category, round(sum(amount), 2) as amount " +
-                "      from transaction t " +
-                "               join category c on t.category_id = c.id " +
+                " from (select month(transaction_date) as month, category, round(sum(amount), 2) as amount " +
+                "      from transactions_category " +
                 "      where transaction_date between ? and ? " +
-                "        and is_deleted <> 1 " +
                 "      group by month, category " +
                 "      order by amount) t " +
                 " where amount < 0 ", BeanPropertyRowMapper.newInstance(GroupedExpenses.class), begin, end);
@@ -64,14 +57,12 @@ public class GroupedExpensesRepository {
 
         String[] shortMonths = DFS.getShortMonths();
         String pivotColumns = IntStream.range(1, shortMonths.length).mapToObj(monthIdx ->
-                "round(sum(IF(month(transaction_date) = " + monthIdx + ", t.amount, 0)),2) as " + shortMonths[monthIdx - 1]
+                "round(sum(IF(month(transaction_date) = " + monthIdx + ", amount, 0)),2) as " + shortMonths[monthIdx - 1]
         ).collect(Collectors.joining(", "));
 
-        return jdbcTemplate.queryForList("select c.name as category, " + pivotColumns +
-                " from transaction t " +
-                "         left join category c on t.category_id = c.id " +
-                " where is_deleted = 0 " +
-                " and c.use_in_yearly_charts = 1" +
+        return jdbcTemplate.queryForList("select category, " + pivotColumns +
+                " from transactions_category " +
+                " where use_in_yearly_charts = 1" +
                 "  and year(transaction_date) = ?" +
                 " group by category;", year);
     }
