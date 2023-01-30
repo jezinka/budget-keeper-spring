@@ -16,7 +16,12 @@ public class TransactionRepository {
 
     List<Transaction> findAllForCurrentMonth() {
 
-        return jdbcTemplate.query("select * from current_month_transactions order by amount desc",
+        return jdbcTemplate.query("select * " +
+                        "from current_month_transactions " +
+                        "ORDER BY CASE " +
+                        "             WHEN category is null THEN -1000000 + amount " +
+                        "             ELSE amount " +
+                        "             END;",
                 BeanPropertyRowMapper.newInstance(Transaction.class));
     }
 
