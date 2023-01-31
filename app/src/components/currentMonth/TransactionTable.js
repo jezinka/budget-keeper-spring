@@ -57,9 +57,9 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     async function getResponse() {
         if (mode === "currentMonth") {
-            return await fetch("/transactions/currentMonth");
+            return await fetch("/expenses/currentMonth");
         } else {
-            return await fetch('/transactions', {
+            return await fetch('/expenses', {
                 method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
             });
         }
@@ -94,12 +94,12 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }, []);
 
     async function deleteTransaction(id) {
-        const response = await fetch("/transactions/" + id, {method: 'DELETE'})
+        const response = await fetch("/expenses/" + id, {method: 'DELETE'})
         return await handleResponse(response);
     }
 
     async function editTransaction(id) {
-        const transaction = await fetch("/transactions/" + id, {method: 'GET'})
+        const transaction = await fetch("/expenses/" + id, {method: 'GET'})
         if (transaction.ok) {
             const data = await transaction.json();
             if (data) {
@@ -130,7 +130,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function submitForm() {
-        const response = await fetch('/transactions/' + formState.id, {
+        const response = await fetch('/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
@@ -145,7 +145,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             liabilityId: formState.splitLiabilityId
         };
 
-        const response = await fetch('/transactions/split/' + formState.id, {
+        const response = await fetch('/expenses/split/' + formState.id, {
             method: 'POST',
             body: JSON.stringify([formState, newTransaction]),
             headers: {'Content-Type': 'application/json'},

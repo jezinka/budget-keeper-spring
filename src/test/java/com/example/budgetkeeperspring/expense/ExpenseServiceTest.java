@@ -1,4 +1,4 @@
-package com.example.budgetkeeperspring.transaction;
+package com.example.budgetkeeperspring.expense;
 
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:integration-test.properties")
-class TransactionServiceTest {
+class ExpenseServiceTest {
 
     @Autowired
-    TransactionService service;
+    ExpenseService service;
 
     @Autowired
-    TransactionRepository transactionRepository;
+    ExpenseRepository expenseRepository;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -42,21 +42,21 @@ class TransactionServiceTest {
         prepare();
         // given:
         Long id = 3821L;
-        Transaction t1 = transactionRepository.getById(id);
+        Expense t1 = expenseRepository.getById(id);
         t1.setAmount(-10.20f);
         t1.setCategoryId(1L);
-        Transaction t2 = transactionRepository.getById(id);
+        Expense t2 = expenseRepository.getById(id);
         t2.setAmount(null);
         t1.setCategoryId(2L);
-        List<Transaction> transactionList = new ArrayList<>(List.of(t1, t2));
+        List<Expense> expenseList = new ArrayList<>(List.of(t1, t2));
 
         // when:
-        Boolean result = service.splitTransaction(id, transactionList);
+        Boolean result = service.splitExpanse(id, expenseList);
 
         // then:
         assertEquals(false, result);
-        Transaction t = transactionRepository.getById(id);
-        assertEquals(false, t.getIsDeleted());
+        Expense t = expenseRepository.getById(id);
+        assertEquals(false, t.getDeleted());
         assertEquals(1, jdbcTemplate.queryForObject("select count(*) from transaction", Integer.class));
     }
 }

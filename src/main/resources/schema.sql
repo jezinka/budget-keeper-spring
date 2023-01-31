@@ -55,7 +55,7 @@ create table IF NOT EXISTS money_amount
     amount float not null
 );
 
-create table IF NOT EXISTS transaction
+create table IF NOT EXISTS expense
 (
     id               int auto_increment
         primary key,
