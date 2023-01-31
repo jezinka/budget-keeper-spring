@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.expense;
 
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +10,8 @@ import javax.persistence.Id;
 import java.sql.Date;
 
 @Entity
-@SQLDelete(sql = "UPDATE expense SET is_deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE expense SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Expense {
 
     @Id
@@ -20,11 +22,10 @@ public class Expense {
     private String title;
     private String payee;
     private Float amount;
-    private String category;
     private Long categoryId;
     private Long liabilityId;
 
-    private Boolean isDeleted;
+    private Boolean deleted;
 
     public Long getId() {
         return id;
@@ -66,14 +67,6 @@ public class Expense {
         this.amount = amount;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public Long getCategoryId() {
         return categoryId;
     }
@@ -91,10 +84,14 @@ public class Expense {
     }
 
     public Boolean getDeleted() {
-        return isDeleted;
+        return deleted;
     }
 
     public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+        this.deleted = deleted;
+    }
+
+    public int getTransactionDay() {
+        return transactionDate.getDate();
     }
 }
