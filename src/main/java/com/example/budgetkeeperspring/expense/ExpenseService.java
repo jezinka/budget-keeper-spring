@@ -4,8 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ExpenseService {
@@ -51,7 +55,16 @@ public class ExpenseService {
         }
     }
 
-    public List findAll(HashMap filters) {
+    public Map getDailyExpenses(LocalDate begin, LocalDate end) {
+        List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(Date.valueOf(begin), Date.valueOf(end));
+
+        return expenses.stream()
+                .filter(e -> e.getAmount() < 0)
+                .collect(Collectors.groupingBy(Expense::getTransactionDay,
+                        Collectors.summingDouble(e -> Math.abs(e.getAmount()))));
+    }
+
+    public List<Expense> findAll(HashMap filters) {
         return expenseRepository.findAll();
 //       String query = "select * from transactions_category " +
 //                "where 1=1  ";
