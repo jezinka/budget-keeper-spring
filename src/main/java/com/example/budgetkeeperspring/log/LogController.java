@@ -19,7 +19,7 @@ public class LogController {
 
     @GetMapping("/active")
     List<Log> getAllActive() {
-        return logRepository.findByIsDeletedFalseOrderByDateDesc();
+        return logRepository.findByDeletedIsFalseOrderByDateDesc();
     }
 
     @DeleteMapping("/{id}")

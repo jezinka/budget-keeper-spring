@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import java.util.Date;
 
 @Entity
-@SQLDelete(sql = "UPDATE log SET is_deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE log SET deleted = true WHERE id=?")
 public class Log {
 
     @Id
@@ -19,7 +19,7 @@ public class Log {
     private Date date;
     private String type;
     private String message;
-    private Boolean isDeleted = Boolean.FALSE;
+    private Boolean deleted = Boolean.FALSE;
 
     public void setId(Long id) {
         this.id = id;
@@ -54,10 +54,10 @@ public class Log {
     }
 
     public Boolean getDeleted() {
-        return isDeleted;
+        return deleted;
     }
 
     public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+        this.deleted = deleted;
     }
 }
