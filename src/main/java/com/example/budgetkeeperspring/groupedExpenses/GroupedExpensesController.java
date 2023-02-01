@@ -1,49 +1,46 @@
 package com.example.budgetkeeperspring.groupedExpenses;
 
 import com.example.budgetkeeperspring.YearlyFilter;
+import com.example.budgetkeeperspring.expense.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("groupedExpenses")
 public class GroupedExpensesController {
 
     @Autowired
-    GroupedExpensesRepository groupedExpensesRepository;
+    ExpenseService expenseService;
+
+    @Autowired
+    ExpensesCategoryService expensesCategoryService;
 
     @PostMapping("/getPivot")
-    List getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
-        return groupedExpensesRepository.getMonthsPivot(filter.getYear());
+    Map getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
+        return expensesCategoryService.getMonthsPivot(filter.getYear());
     }
 
     @PostMapping("")
-    List<GroupedExpenses> getForSelectedYear(@RequestBody YearlyFilter filter) {
-        List<GroupedExpenses> groupedExpenses = new ArrayList<>(groupedExpensesRepository.getYearAtGlance(filter.getYear()));
-        groupedExpenses.addAll(groupedExpensesRepository.getCategorySumRows(filter.getYear()));
-        groupedExpenses.addAll(groupedExpensesRepository.getMonthSumRows(filter.getYear()));
-        return groupedExpenses;
+    Map getForSelectedYear(@RequestBody YearlyFilter filter) {
+        return expensesCategoryService.getYearAtGlance(filter.getYear());
     }
 
     @GetMapping("/currentMonthByCategory")
-    List<GroupedExpenses> getGroupedForCurrentMonth() {
+    Map getGroupedForCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-        return groupedExpensesRepository.getGroupedByCategory(begin, end);
+        return expensesCategoryService.getGroupedByCategory(Date.valueOf(begin), Date.valueOf(end));
     }
 
     @GetMapping("/dailyExpenses")
-    List getDailyForMonth() {
+    Map getDailyForMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-        return groupedExpensesRepository.getDailyExpenses(begin, end);
+        return expenseService.getDailyExpenses(begin, end);
     }
 }
