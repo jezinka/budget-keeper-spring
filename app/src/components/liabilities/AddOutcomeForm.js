@@ -4,7 +4,7 @@ import {handleError} from "../../Utils";
 const AddOutcomeForm = ({formState, setFormState, setShowForm, showForm, reloadHandler}) => {
 
     async function submitForm() {
-        const response = await fetch('/liabilities/' + formState.liability, {
+        const response = await fetch('/liabilityLookouts/' + formState.liability, {
             method: 'PUT',
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},

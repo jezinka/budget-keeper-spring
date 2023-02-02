@@ -1,7 +1,7 @@
 import Card from 'react-bootstrap/Card';
 import {Button} from "react-bootstrap";
 import {GraphUp, PlusLg} from "react-bootstrap-icons";
-import {formatNumber, getDate} from "../../Utils";
+import {DATE_FORMAT, formatNumber, getDate} from "../../Utils";
 
 function LiabilityCard({liability, formState, setShowForm, setFormState, setShowGraph}) {
 
@@ -17,16 +17,16 @@ function LiabilityCard({liability, formState, setShowForm, setFormState, setShow
 
     return (<>
         <Card style={{width: '18rem'}} className="m-2">
-            <Card.Header>{liability.bank}</Card.Header>
+            <Card.Header>{liability.liability.bank.name}</Card.Header>
             <Card.Body>
-                <Card.Title>{liability.name}</Card.Title>
+                <Card.Title>{liability.liability.name}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{formatNumber(liability.outcome)}</Card.Subtitle>
                 <Button size='sm' variant="primary" className="m-1"
                         onClick={() => addOutcome(liability.id)}><PlusLg/></Button>
                 <Button size='sm' variant="primary" className="m-1"
                         onClick={() => showGraph(liability.id)}><GraphUp/></Button>
             </Card.Body>
-            <Card.Footer>{liability.date}</Card.Footer>
+            <Card.Footer>{DATE_FORMAT.format(new Date(liability.date))}</Card.Footer>
         </Card>
     </>);
 }
