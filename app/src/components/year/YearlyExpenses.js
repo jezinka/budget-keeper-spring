@@ -17,7 +17,7 @@ export default function YearlyExpenses() {
     const handleShow = () => setShow(true);
 
     async function reloadTable() {
-        const response = await fetch('/expenses/', {
+        const response = await fetch('/expenses/yearAtTheGlance', {
             method: "POST", body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'}
         });
         if (response.ok) {
@@ -52,8 +52,13 @@ export default function YearlyExpenses() {
     }, []);
 
     function ExpenseForMonthAndCategory(currMonth, currCategory) {
-        const foundExpense = expenses.find(({month, category}) => month === currMonth && category === currCategory);
-        if (foundExpense !== undefined) {
+        if (currMonth in expenses && currCategory in expenses[currMonth]) {
+            const foundExpense = {
+                month: currMonth,
+                category: currCategory,
+                amount: expenses[currMonth][currCategory]
+            };
+
             return <Expense expense={foundExpense} year={formState.year}
                             modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
         }

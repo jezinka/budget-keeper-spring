@@ -109,7 +109,7 @@ public class ExpenseService {
 
         Map<Integer, Map<String, Double>> collect = yearlyExpenses.stream().collect(groupingBy(
                 Expense::getTransactionMonth,
-                groupingBy(e -> e.getCategory().getName(), Collectors.summingDouble(Expense::getAmount))));
+                groupingBy(Expense::getCategoryName, Collectors.summingDouble(Expense::getAmount))));
 
         collect.put(99, getCategorySummary(yearlyExpenses));
         collect.forEach((month, categories) ->
@@ -119,14 +119,14 @@ public class ExpenseService {
     }
 
     private Map<String, Double> getCategorySummary(List<Expense> yearlyExpenses) {
-        List<String> categories = yearlyExpenses.stream().map(e -> e.getCategory().getName()).distinct().toList();
+        List<String> categories = yearlyExpenses.stream().map(Expense::getCategoryName).distinct().toList();
 
         Map<String, Double> categorySum = new HashMap<>();
         for (String c : categories) {
             categorySum.put(c,
                     yearlyExpenses
                             .stream()
-                            .filter(e -> e.getCategory().getName() == c)
+                            .filter(e -> e.getCategoryName() == c)
                             .mapToDouble(Expense::getAmount).sum());
         }
         return categorySum;
@@ -138,7 +138,7 @@ public class ExpenseService {
 
         return yearlyExpenses.stream().collect(groupingBy(
                         Expense::getTransactionMonth,
-                        groupingBy(e -> e.getCategory().getName(), Collectors.summingDouble(Expense::getAmount))))
+                        groupingBy(Expense::getCategoryName, Collectors.summingDouble(Expense::getAmount))))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(e -> shortMonths[e.getKey() - 1], Map.Entry::getValue));
@@ -150,7 +150,7 @@ public class ExpenseService {
 
         return yearlyExpenses
                 .stream()
-                .collect(groupingBy(e -> e.getCategory().getName(),
+                .collect(groupingBy(Expense::getCategoryName,
                         Collectors.summingDouble(Expense::getAmount)));
     }
 }

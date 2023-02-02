@@ -71,6 +71,13 @@ public class Expense {
         return category;
     }
 
+    public String getCategoryName() {
+        if (category != null) {
+            return category.getName();
+        }
+        return "";
+    }
+
     public void setCategory(Category category) {
         this.category = category;
     }
