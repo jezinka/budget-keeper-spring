@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.log;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,12 +15,12 @@ public class LogController {
 
     @GetMapping("")
     List<Log> getAll() {
-        return logRepository.findAll();
+        return logRepository.findAll(Sort.by(Sort.Direction.DESC, "date"));
     }
 
     @GetMapping("/active")
     List<Log> getAllActive() {
-        return logRepository.findByDeletedIsFalseOrderByDateDesc();
+        return logRepository.findByDeletedIsFalse(Sort.by(Sort.Direction.DESC, "date"));
     }
 
     @DeleteMapping("/{id}")

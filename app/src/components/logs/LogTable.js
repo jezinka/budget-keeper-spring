@@ -25,17 +25,14 @@ const LogTable = () => {
     async function deleteLog(id) {
         const response = await fetch('/logs/' + id, {method: "DELETE"});
         if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                return loadData();
-            }
+            return loadData();
         }
         return handleError();
     }
 
     function getClassName(log) {
         let className = [];
-        if (log.isDeleted) {
+        if (log.deleted) {
             className.push('inactive')
         }
         if (log.type === 'ERROR') {
