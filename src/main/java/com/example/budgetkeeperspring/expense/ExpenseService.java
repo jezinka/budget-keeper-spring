@@ -1,7 +1,6 @@
 package com.example.budgetkeeperspring.expense;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -34,18 +33,13 @@ public class ExpenseService {
     }
 
     Boolean splitExpanse(Long id, List<Expense> updateExpenses) {
-        try {
-            Expense expense = expenseRepository.getById(id);
-            for (Expense e : updateExpenses) {
-                setTransactionProperties(expense, e);
-                expenseRepository.save(e);
-            }
-            expenseRepository.deleteById(id);
-            return true;
-
-        } catch (DataIntegrityViolationException exception) {
-            return false;
+        Expense expense = expenseRepository.getById(id);
+        for (Expense e : updateExpenses) {
+            setTransactionProperties(expense, e);
+            expenseRepository.save(e);
         }
+        expenseRepository.deleteById(id);
+        return true;
     }
 
     private static void setTransactionProperties(Expense updateExpense, Expense expense) {
@@ -53,7 +47,7 @@ public class ExpenseService {
         expense.setTitle(updateExpense.getTitle());
         expense.setPayee(updateExpense.getPayee());
         expense.setAmount(updateExpense.getAmount());
-        if (updateExpense.getCategory() != null) {
+        if (updateExpense.getCategory().getId() != EMPTY_OPTION) {
             expense.setCategory(updateExpense.getCategory());
         }
         if (updateExpense.getLiabilityId() != EMPTY_OPTION) {
@@ -71,7 +65,7 @@ public class ExpenseService {
     }
 
     public List<Expense> findAll(HashMap filters) {
-        return expenseRepository.findAll();
+        return expenseRepository.retrieveAll();
 //       String query = "select * from transactions_category " +
 //                "where 1=1  ";
 //
@@ -144,7 +138,7 @@ public class ExpenseService {
 
         return yearlyExpenses.stream().collect(groupingBy(
                         Expense::getTransactionMonth,
-                        groupingBy(Expense::getCategory, Collectors.summingDouble(Expense::getAmount))))
+                        groupingBy(e -> e.getCategory().getName(), Collectors.summingDouble(Expense::getAmount))))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(e -> shortMonths[e.getKey() - 1], Map.Entry::getValue));
@@ -156,7 +150,7 @@ public class ExpenseService {
 
         return yearlyExpenses
                 .stream()
-                .collect(groupingBy(Expense::getCategory,
+                .collect(groupingBy(e -> e.getCategory().getName(),
                         Collectors.summingDouble(Expense::getAmount)));
     }
 }

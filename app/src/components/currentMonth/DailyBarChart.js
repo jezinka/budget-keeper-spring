@@ -9,7 +9,7 @@ const DailyBarChart = () => {
     }, []);
 
     async function loadData() {
-        const response = await fetch('/groupedExpenses/dailyExpenses')
+        const response = await fetch('/expenses/dailyExpenses')
         const data = await response.json();
         setData(data);
     }

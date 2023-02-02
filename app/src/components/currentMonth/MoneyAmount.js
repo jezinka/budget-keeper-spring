@@ -73,7 +73,7 @@ export default function MoneyAmount() {
                         <tbody>
                         <tr>
                             <td>NA WEJŚCIU</td>
-                            <td>{formatNumber(moneyAmount.amount)}</td>
+                            <td>{formatNumber(moneyAmount.start)}</td>
                         </tr>
                         <tr>
                             <td>WYDATKI</td>
@@ -81,7 +81,7 @@ export default function MoneyAmount() {
                         </tr>
                         <tr>
                             <td>WPŁYWY</td>
-                            <td>{formatNumber(moneyAmount.income)}</td>
+                            <td>{formatNumber(moneyAmount.incomes)}</td>
                         </tr>
                         <tr>
                             <td>STAN KONTA</td>

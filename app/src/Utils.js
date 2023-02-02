@@ -25,10 +25,10 @@ export function handleError() {
 }
 
 export function addSumPerMonth(data) {
-    data.forEach((record) => {
+    Object.keys(data).map(function (key) {
         const months = MONTHS_ARRAY.map(m => getMonthName(m, 'short'));
-        record.sum = Object.keys(record).filter(k => months.includes(k))
-            .map((d) => record[d])
+        data.sum = Object.keys(data[key]).filter(k => months.includes(k))
+            .map((d) => data[d])
             .reduce((a, b) => a + b, 0);
     })
 }
@@ -49,6 +49,12 @@ export const renderCustomizedLabel = ({cx, cy, midAngle, innerRadius, outerRadiu
     </text>);
 };
 
-export function getSumFromMap(list, key) {
-    return list.map((d) => d[key]).reduce((a, b) => a + b, 0);
+export function getSumFromMap(list) {
+    return getValues(list).reduce((a, b) => a + b, 0);
+}
+
+export function getValues(list) {
+    return Object.keys(list).map(function (key) {
+        return list[key];
+    });
 }

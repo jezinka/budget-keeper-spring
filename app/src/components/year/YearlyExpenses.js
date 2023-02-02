@@ -17,7 +17,7 @@ export default function YearlyExpenses() {
     const handleShow = () => setShow(true);
 
     async function reloadTable() {
-        const response = await fetch('/groupedExpenses', {
+        const response = await fetch('/expenses/', {
             method: "POST", body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'}
         });
         if (response.ok) {

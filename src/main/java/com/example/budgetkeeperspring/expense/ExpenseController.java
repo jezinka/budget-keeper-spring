@@ -28,7 +28,9 @@ public class ExpenseController {
 
     @GetMapping("/currentMonth")
     List<Expense> getCurrentMonth() {
-        return expenseRepository.findAllForCurrentMonth();
+        Date begin = Date.valueOf(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
+        Date end = Date.valueOf(LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
+        return expenseRepository.findAllForCurrentMonth(begin, end);
     }
 
     @GetMapping("/{id}")

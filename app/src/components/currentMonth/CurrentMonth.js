@@ -15,7 +15,7 @@ const CurrentMonth = () => {
     }, []);
 
     async function loadData() {
-        const response = await fetch('/groupedExpenses/currentMonthByCategory')
+        const response = await fetch('/expenses/currentMonthByCategory')
         const data = await response.json();
         setData(data);
     }
