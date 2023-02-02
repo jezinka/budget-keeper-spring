@@ -1,59 +1,26 @@
 package com.example.budgetkeeperspring.moneyAmount;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CurrentMonthMoneyAmount {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private Float amount;
+    private float start;
+    private float incomes;
+    private float expenses;
+    private float accountBalance;
 
-    private Float income;
-    private Float expenses;
-    private Float accountBalance;
-
-    public Long getId() {
-        return id;
+    public float getAccountBalance() {
+        return start + incomes + expenses;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Float getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Float amount) {
-        this.amount = amount;
-    }
-
-    public Float getIncome() {
-        return income;
-    }
-
-    public void setIncome(Float income) {
-        this.income = income;
-    }
-
-    public Float getExpenses() {
-        return expenses;
-    }
-
-    public void setExpenses(Float expenses) {
+    CurrentMonthMoneyAmount(float start, float incomes, float expenses) {
+        this.start = start;
+        this.incomes = incomes;
         this.expenses = expenses;
-    }
-
-    public Float getAccountBalance() {
-        return accountBalance;
-    }
-
-    public void setAccountBalance(Float accountBalance) {
-        this.accountBalance = accountBalance;
     }
 }
