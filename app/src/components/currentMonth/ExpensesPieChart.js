@@ -1,14 +1,14 @@
 import React from "react";
 import {LabelList, Pie, PieChart} from "recharts";
-import {getSumFromMap, getValues, renderCustomizedLabel} from "../../Utils";
+import {getSumFromMap, renderCustomizedLabel} from "../../Utils";
 
 const ExpensesPieChart = ({data}) => {
 
     const prepareData = () => {
 
         const sum = getSumFromMap(data, 'amount');
-        const filteredData = getValues(data).filter((d) => {
-            return d / sum >= 0.02
+        const filteredData = data.filter((d) => {
+            return d.amount / sum >= 0.02
         });
 
         filteredData.push({category: 'inne', amount: sum - getSumFromMap(filteredData, 'amount')});

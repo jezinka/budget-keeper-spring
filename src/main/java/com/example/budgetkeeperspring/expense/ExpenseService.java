@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -55,13 +56,16 @@ public class ExpenseService {
         }
     }
 
-    public Map getDailyExpenses(LocalDate begin, LocalDate end) {
+    public List getDailyExpenses(LocalDate begin, LocalDate end) {
         List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(Date.valueOf(begin), Date.valueOf(end));
+        List<DailyExpenses> list = new ArrayList<>();
 
-        return expenses.stream()
+        expenses.stream()
                 .filter(e -> e.getAmount() < 0)
                 .collect(Collectors.groupingBy(Expense::getTransactionDay,
-                        Collectors.summingDouble(e -> Math.abs(e.getAmount()))));
+                        Collectors.summingDouble(e -> Math.abs(e.getAmount()))))
+                .forEach((key, value) -> list.add(new DailyExpenses(key, value.floatValue())));
+        return list;
     }
 
     public List<Expense> findAll(HashMap filters) {
@@ -132,25 +136,40 @@ public class ExpenseService {
         return categorySum;
     }
 
-    public Map getMonthsPivot(int year) {
+    public List getMonthsPivot(int year) {
+        List<Map<String, Object>> list = new ArrayList<>();
         String[] shortMonths = DFS.getShortMonths();
         List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
 
-        return yearlyExpenses.stream().collect(groupingBy(
-                        Expense::getTransactionMonth,
-                        groupingBy(Expense::getCategoryName, Collectors.summingDouble(Expense::getAmount))))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(e -> shortMonths[e.getKey() - 1], Map.Entry::getValue));
+        yearlyExpenses.stream().collect(groupingBy(
+                        Expense::getCategoryName,
+                        groupingBy(Expense::getTransactionMonth, Collectors.summingDouble(Expense::getAmount))))
+                .forEach((category, entry) -> {
+                    Map chartEntry = new HashMap();
+                    chartEntry.put("category", category);
+                    for (Map.Entry<Integer, Double> e : entry.entrySet()) {
+                        Integer month = e.getKey();
+                        Double amount = e.getValue();
+                        chartEntry.put(shortMonths[month - 1], amount.floatValue());
+                    }
+                    list.add(chartEntry);
+                });
+
+        return list;
     }
 
-    Map getGroupedByCategory(Date begin, Date end) {
-
+    List getGroupedByCategory(Date begin, Date end) {
+        List<MonthCategoryAmount> list = new ArrayList<>();
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 
-        return yearlyExpenses
+        yearlyExpenses
                 .stream()
-                .collect(groupingBy(Expense::getCategoryName,
-                        Collectors.summingDouble(Expense::getAmount)));
+                .collect(groupingBy(Expense::getTransactionMonth,
+                        groupingBy(Expense::getCategoryName,
+                                Collectors.summingDouble(Expense::getAmount))))
+                .forEach((month, value) -> value.forEach((category, amount) ->
+                        list.add(new MonthCategoryAmount(month, category, (float) Math.abs(amount))))
+                );
+        return list;
     }
 }

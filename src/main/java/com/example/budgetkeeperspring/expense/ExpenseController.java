@@ -2,7 +2,14 @@ package com.example.budgetkeeperspring.expense;
 
 import com.example.budgetkeeperspring.YearlyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -55,7 +62,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/getPivot")
-    Map getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
+    List getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
         return expenseService.getMonthsPivot(filter.getYear());
     }
 
@@ -65,14 +72,14 @@ public class ExpenseController {
     }
 
     @GetMapping("/currentMonthByCategory")
-    Map getGroupedForCurrentMonth() {
+    List getGroupedForCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseService.getGroupedByCategory(Date.valueOf(begin), Date.valueOf(end));
     }
 
     @GetMapping("/dailyExpenses")
-    Map getDailyForMonth() {
+    List getDailyForMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseService.getDailyExpenses(begin, end);
