@@ -5,16 +5,22 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class ExpenseService {
 
     private static final Long EMPTY_OPTION = -1L;
+    private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
+
     @Autowired
     ExpenseRepository expenseRepository;
 
@@ -47,8 +53,8 @@ public class ExpenseService {
         expense.setTitle(updateExpense.getTitle());
         expense.setPayee(updateExpense.getPayee());
         expense.setAmount(updateExpense.getAmount());
-        if (updateExpense.getCategoryId() != EMPTY_OPTION) {
-            expense.setCategoryId(updateExpense.getCategoryId());
+        if (updateExpense.getCategory() != null) {
+            expense.setCategory(updateExpense.getCategory());
         }
         if (updateExpense.getLiabilityId() != EMPTY_OPTION) {
             expense.setLiabilityId(updateExpense.getLiabilityId());
@@ -101,5 +107,56 @@ public class ExpenseService {
 //        query += " order by transaction_date desc";
 //
 //        return jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Expense.class));
+    }
+
+
+    Map<Integer, Map<String, Double>> getYearAtGlance(int year) {
+        List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
+
+        Map<Integer, Map<String, Double>> collect = yearlyExpenses.stream().collect(groupingBy(
+                Expense::getTransactionMonth,
+                groupingBy(e -> e.getCategory().getName(), Collectors.summingDouble(Expense::getAmount))));
+
+        collect.put(99, getCategorySummary(yearlyExpenses));
+        collect.forEach((month, categories) ->
+                categories.put("SUMA", categories.values().stream().reduce(Double::sum).get())
+        );
+        return collect;
+    }
+
+    private Map<String, Double> getCategorySummary(List<Expense> yearlyExpenses) {
+        List<String> categories = yearlyExpenses.stream().map(e -> e.getCategory().getName()).distinct().toList();
+
+        Map<String, Double> categorySum = new HashMap<>();
+        for (String c : categories) {
+            categorySum.put(c,
+                    yearlyExpenses
+                            .stream()
+                            .filter(e -> e.getCategory().getName() == c)
+                            .mapToDouble(Expense::getAmount).sum());
+        }
+        return categorySum;
+    }
+
+    public Map getMonthsPivot(int year) {
+        String[] shortMonths = DFS.getShortMonths();
+        List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
+
+        return yearlyExpenses.stream().collect(groupingBy(
+                        Expense::getTransactionMonth,
+                        groupingBy(Expense::getCategory, Collectors.summingDouble(Expense::getAmount))))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(e -> shortMonths[e.getKey() - 1], Map.Entry::getValue));
+    }
+
+    Map getGroupedByCategory(Date begin, Date end) {
+
+        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+
+        return yearlyExpenses
+                .stream()
+                .collect(groupingBy(Expense::getCategory,
+                        Collectors.summingDouble(Expense::getAmount)));
     }
 }

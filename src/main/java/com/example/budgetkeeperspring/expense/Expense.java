@@ -1,12 +1,10 @@
 package com.example.budgetkeeperspring.expense;
 
+import com.example.budgetkeeperspring.category.Category;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Date;
 
 @Entity
@@ -22,7 +20,9 @@ public class Expense {
     private String title;
     private String payee;
     private Float amount;
-    private Long categoryId;
+
+    @ManyToOne()
+    private Category category;
     private Long liabilityId;
 
     private Boolean deleted;
@@ -67,12 +67,12 @@ public class Expense {
         this.amount = amount;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Long getLiabilityId() {
@@ -93,5 +93,9 @@ public class Expense {
 
     public int getTransactionDay() {
         return transactionDate.getDate();
+    }
+
+    public int getTransactionMonth() {
+        return transactionDate.getMonth() + 1;
     }
 }

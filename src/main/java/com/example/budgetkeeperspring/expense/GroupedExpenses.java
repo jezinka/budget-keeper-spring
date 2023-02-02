@@ -1,4 +1,4 @@
-package com.example.budgetkeeperspring.groupedExpenses;
+package com.example.budgetkeeperspring.expense;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

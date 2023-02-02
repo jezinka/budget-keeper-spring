@@ -11,8 +11,11 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-    @Query("select cmt from CurrentMonthExpenses cmt ORDER BY CASE WHEN cmt.category is null THEN (-1000000 + cmt.amount) ELSE cmt.amount END")
-    List<CurrentMonthExpenses> findAllForCurrentMonth();
+    @Query("select e from Expense e join e.category ORDER BY CASE WHEN e.category is null THEN (-1000000 + e.amount) ELSE e.amount END")
+    List<Expense> findAllForCurrentMonth();
 
-    List<Expense> findAllByTransactionDateBetween(@Param("begin") Date begin, @Param("end") Date end);
+    @Query("select e from Expense e join e.category where function('year', e.transactionDate) = :year")
+    List<Expense> findAllByYear(@Param("year") int year);
+
+    List<Expense> findAllByTransactionDateBetween(Date begin, Date end);
 }

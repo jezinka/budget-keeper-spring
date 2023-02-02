@@ -1,10 +1,15 @@
 package com.example.budgetkeeperspring.expense;
 
+import com.example.budgetkeeperspring.YearlyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("expenses")
@@ -22,7 +27,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/currentMonth")
-    List<CurrentMonthExpenses> getCurrentMonth() {
+    List<Expense> getCurrentMonth() {
         return expenseRepository.findAllForCurrentMonth();
     }
 
@@ -45,5 +50,29 @@ public class ExpenseController {
     @PostMapping("/split/{id}")
     Boolean splitExpanse(@PathVariable Long id, @RequestBody List<Expense> updateExpenses) {
         return expenseService.splitExpanse(id, updateExpenses);
+    }
+
+    @PostMapping("/getPivot")
+    Map getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
+        return expenseService.getMonthsPivot(filter.getYear());
+    }
+
+    @PostMapping("/yearAtTheGlance")
+    Map getForSelectedYear(@RequestBody YearlyFilter filter) {
+        return expenseService.getYearAtGlance(filter.getYear());
+    }
+
+    @GetMapping("/currentMonthByCategory")
+    Map getGroupedForCurrentMonth() {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        return expenseService.getGroupedByCategory(Date.valueOf(begin), Date.valueOf(end));
+    }
+
+    @GetMapping("/dailyExpenses")
+    Map getDailyForMonth() {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        return expenseService.getDailyExpenses(begin, end);
     }
 }
