@@ -1,16 +1,28 @@
 package com.example.budgetkeeperspring.moneyAmount;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.sql.Date;
+
+@Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class MoneyAmount {
 
-    Float amount;
-    Float income;
-    Float expenses;
-    Float accountBalance;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private Date date;
+    private Float amount;
+
+    public MoneyAmount(Date date, Float amount) {
+        this.date = date;
+        this.amount = amount;
+    }
 }

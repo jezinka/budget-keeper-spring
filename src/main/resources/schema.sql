@@ -55,7 +55,7 @@ create table IF NOT EXISTS money_amount
     amount float not null
 );
 
-create table IF NOT EXISTS transaction
+create table IF NOT EXISTS expense
 (
     id               int auto_increment
         primary key,
@@ -66,9 +66,9 @@ create table IF NOT EXISTS transaction
     category_id      int                  null,
     is_deleted       tinyint(1) default 0 null,
     liability_id     int                  null,
-    constraint transaction_category_id_fk
+    constraint expense_category_id_fk
         foreign key (category_id) references category (id),
-    constraint transaction_liability_null_fk
+    constraint expense_liability_id_fk
         foreign key (liability_id) references liability (id)
 );
 

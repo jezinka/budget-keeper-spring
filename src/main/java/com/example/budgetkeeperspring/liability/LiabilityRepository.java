@@ -1,31 +1,15 @@
 package com.example.budgetkeeperspring.liability;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class LiabilityRepository {
+public interface LiabilityRepository extends JpaRepository<Liability, Long> {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    List<Liability> getAll() {
-        return jdbcTemplate.query("select * from latest_liability_value;", BeanPropertyRowMapper.newInstance(Liability.class));
-    }
-
-    public boolean addLookout(Long id, LiabilityLookout lookout) {
-        int result = jdbcTemplate.update("insert into liability_lookout(date, outcome, liability_id) " +
-                        "values (?, ?, ?)",
-                lookout.date, lookout.outcome, id);
-        return result == 1;
-    }
-
-    public List<LiabilityLookout> getLookouts(Long id) {
-        return jdbcTemplate.query("select id, date, outcome from liability_lookout where liability_id = ?",
-                BeanPropertyRowMapper.newInstance(LiabilityLookout.class), id);
-    }
+    @Override
+    @Query("select l from Liability l join fetch l.bank")
+    List<Liability> findAll();
 }

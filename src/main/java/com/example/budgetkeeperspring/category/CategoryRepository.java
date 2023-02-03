@@ -1,26 +1,15 @@
 package com.example.budgetkeeperspring.category;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class CategoryRepository {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    public List<Category> getAll() {
-        return jdbcTemplate.query("select id, name from category order by name", BeanPropertyRowMapper.newInstance(Category.class));
-    }
-
-    public List<Category> getActive(int year) {
-        return jdbcTemplate.query("select id, name  " +
-                "from category  " +
-                "where id in (select distinct category_id from transaction where year(transaction_date) = ?)  " +
-                "order by name;", BeanPropertyRowMapper.newInstance(Category.class), year);
-    }
+    @Query("select c from Category c where exists (select e from Expense e where function('year', e.transactionDate) = :year) order by c.name")
+    List<Category> findActiveForYear(@Param("year") int year);
 }

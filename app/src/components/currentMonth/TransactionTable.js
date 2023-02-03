@@ -57,9 +57,9 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     async function getResponse() {
         if (mode === "currentMonth") {
-            return await fetch("/transactions/currentMonth");
+            return await fetch("/expenses/currentMonth");
         } else {
-            return await fetch('/transactions', {
+            return await fetch('/expenses', {
                 method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
             });
         }
@@ -94,12 +94,12 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }, []);
 
     async function deleteTransaction(id) {
-        const response = await fetch("/transactions/" + id, {method: 'DELETE'})
+        const response = await fetch("/expenses/" + id, {method: 'DELETE'})
         return await handleResponse(response);
     }
 
     async function editTransaction(id) {
-        const transaction = await fetch("/transactions/" + id, {method: 'GET'})
+        const transaction = await fetch("/expenses/" + id, {method: 'GET'})
         if (transaction.ok) {
             const data = await transaction.json();
             if (data) {
@@ -110,8 +110,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                     "payee": data.payee,
                     "amount": data.amount,
                     "baseSplitAmount": data.amount,
-                    "categoryId": data.categoryId ? data.categoryId : EMPTY_OPTION,
-                    "liabilityId": data.liabilityId ? data.liabilityId : EMPTY_OPTION
+                    "categoryId": data.category ? data.category.id : EMPTY_OPTION,
+                    "liabilityId": data.liability ? data.liability.id : EMPTY_OPTION
                 });
                 return setShowForm(true);
             }
@@ -130,7 +130,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function submitForm() {
-        const response = await fetch('/transactions/' + formState.id, {
+        formState.category = {id: formState.categoryId};
+        const response = await fetch('/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
@@ -138,16 +139,24 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function submitSplitForm() {
-        const newTransaction = {
-            ...formState,
-            amount: formState.splitAmount,
-            categoryId: formState.splitCategoryId,
-            liabilityId: formState.splitLiabilityId
-        };
+        const splittedTransactions = [
+            {
+                ...formState,
+                id: null,
+                amount: formState.splitAmount,
+                category: {id: formState.splitCategoryId},
+                liabilityId: formState.splitLiabilityId
+            },
+            {
+                ...formState,
+                id: null,
+                category: {id: formState.categoryId}
+            }
+        ]
 
-        const response = await fetch('/transactions/split/' + formState.id, {
+        const response = await fetch('/expenses/split/' + formState.id, {
             method: 'POST',
-            body: JSON.stringify([formState, newTransaction]),
+            body: JSON.stringify(splittedTransactions),
             headers: {'Content-Type': 'application/json'},
         });
 
@@ -165,7 +174,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     function getLiabilitiesMap() {
         let liabilitiesList = [<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>];
         liabilities.forEach((l) => {
-            liabilitiesList.push(<option key={l.id} value={l.id}>{l.name} ({l.bank})</option>)
+            liabilitiesList.push(<option key={l.id}
+                                         value={l.id}>{l.name} ({l.bank != null ? l.bank.name : ''})</option>)
         });
         return liabilitiesList
     }
@@ -286,10 +296,10 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             <tbody>
             {transactions.map(transaction => <tr key={transaction.id}>
                 <td>{transaction.transactionDate}</td>
-                <td>{transaction.title}</td>
-                <td>{transaction.payee}</td>
+                <td>{transaction.title.substring(0, 50)}</td>
+                <td>{transaction.payee.substring(0, 50)}</td>
                 <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-                <td>{transaction.category}</td>
+                <td>{transaction.category != null ? transaction.category.name : ''}</td>
                 <td style={{textAlign: "center"}}>
                     <Button variant="outline-primary" size="sm"
                             onClick={() => editTransaction(transaction.id)}><Pencil/>

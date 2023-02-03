@@ -14,7 +14,7 @@ export default function LiabilitiesGrid() {
     const [liabilities, setLiabilities] = useState([]);
 
     async function reloadTable() {
-        const response = await fetch('/liabilities/');
+        const response = await fetch('/liabilityLookouts/');
         if (response.ok) {
             const data = await response.json();
             if (data) {

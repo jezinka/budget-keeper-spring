@@ -2,10 +2,6 @@ package com.example.budgetkeeperspring.liability;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,18 +14,9 @@ public class LiabilityController {
     @Autowired
     LiabilityRepository liabilityRepository;
 
+
     @GetMapping("")
-    List<Liability> getAll() {
-        return liabilityRepository.getAll();
-    }
-
-    @PutMapping("/{id}")
-    Boolean add(@PathVariable Long id, @RequestBody LiabilityLookout lookout) {
-        return liabilityRepository.addLookout(id, lookout);
-    }
-
-    @PostMapping("/getLookouts/{id}")
-    List<LiabilityLookout> getLookouts(@PathVariable Long id) {
-        return liabilityRepository.getLookouts(id);
+    List<Liability> getLiabilities() {
+        return liabilityRepository.findAll();
     }
 }

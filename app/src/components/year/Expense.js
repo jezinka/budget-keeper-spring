@@ -8,7 +8,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
             return
         }
 
-        const response = await fetch('/transactions', {
+        const response = await fetch('/expenses', {
             method: "POST",
             body: JSON.stringify({month: expense.month, year: year, category: expense.category}),
             headers: {'Content-Type': 'application/json'},
