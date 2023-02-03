@@ -11,16 +11,16 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-    @Query("select e from Expense e left join e.category where e.transactionDate between :begin and :end ORDER BY CASE WHEN e.category is null THEN (-1000000 + e.amount) ELSE e.amount END")
+    @Query("select e, c from Expense e left join e.category c where e.transactionDate between :begin and :end ORDER BY CASE WHEN e.category is null THEN (-1000000 + e.amount) ELSE e.amount END")
     List<Expense> findAllForCurrentMonth(Date begin, Date end);
 
     @Query("select e, c from Expense e left join e.category c where function('year', e.transactionDate) = :year")
     List<Expense> findAllByYear(@Param("year") int year);
 
-    @Query("select e from Expense e left join e.category where e.transactionDate between :begin and :end")
+    @Query("select e, c from Expense e left join e.category c where e.transactionDate between :begin and :end")
     List<Expense> findAllByTransactionDateBetween(Date begin, Date end);
 
-    @Query("select e from Expense e left join e.category where e.id = :id")
+    @Query("select e, c from Expense e left join e.category c where e.id = :id")
     Expense getById(Long id);
 
     @Query("select e, c from Expense e left join e.category c order by e.transactionDate desc ")
