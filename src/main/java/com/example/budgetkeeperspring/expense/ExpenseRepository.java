@@ -12,7 +12,7 @@ import java.util.List;
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e, c from Expense e left join e.category c where e.transactionDate between :begin and :end ORDER BY CASE WHEN e.category is null THEN (-1000000 + e.amount) ELSE e.amount END")
-    List<Expense> findAllForCurrentMonth(Date begin, Date end);
+    List<Expense> findAllForTimePeriod(Date begin, Date end);
 
     @Query("select e, c from Expense e left join e.category c where function('year', e.transactionDate) = :year")
     List<Expense> findAllByYear(@Param("year") int year);
