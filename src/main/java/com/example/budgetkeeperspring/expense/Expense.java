@@ -4,7 +4,11 @@ import com.example.budgetkeeperspring.category.Category;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.sql.Date;
 
 @Entity
@@ -104,5 +108,9 @@ public class Expense {
 
     public int getTransactionMonth() {
         return transactionDate.getMonth() + 1;
+    }
+
+    public int getTransactionYear() {
+        return transactionDate.getYear() + 1;
     }
 }

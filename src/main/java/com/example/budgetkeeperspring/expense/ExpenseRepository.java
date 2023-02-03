@@ -23,6 +23,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("select e from Expense e left join e.category where e.id = :id")
     Expense getById(Long id);
 
-    @Query("select e from Expense e left join e.category c")
+    @Query("select e, c from Expense e left join e.category c order by e.transactionDate desc ")
     List<Expense> retrieveAll();
 }

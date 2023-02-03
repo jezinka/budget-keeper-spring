@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -68,43 +69,42 @@ public class ExpenseService {
         return list;
     }
 
-    public List<Expense> findAll(HashMap filters) {
-        return expenseRepository.retrieveAll();
-//       String query = "select * from transactions_category " +
-//                "where 1=1  ";
-//
-//        if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
-//            query += " and category_id is null ";
-//        }
-//        if (filters.getOrDefault("onlyEmptyLiabilities", false).equals(true)) {
-//            query += " and liability_id is null ";
-//        }
-//        if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
-//            query += " and amount < 0 ";
-//        }
-//        if (filters.get("year") != null) {
-//            query += " and year(transaction_date) = " + filters.get("year");
-//        }
-//        if (filters.get("month") != null) {
-//            query += " and month(transaction_date) = " + filters.get("month");
-//        }
-//        if (filters.get("category") != null) {
-//            query += " and category = \"" + filters.get("category") + "\"";
-//        }
-//
-//        String titleFilter = (String) filters.getOrDefault("title", "");
-//        if (!titleFilter.equals("")) {
-//            query += " and title like \"%" + titleFilter + "%\" ";
-//        }
-//
-//        String payeeFilter = (String) filters.getOrDefault("payee", "");
-//        if (!payeeFilter.equals("")) {
-//            query += " and payee like \"%" + payeeFilter + "%\" ";
-//        }
-//
-//        query += " order by transaction_date desc";
-//
-//        return jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Expense.class));
+    public List<Expense> findAll(HashMap<String, Object> filters) {
+        List<Predicate<Expense>> allPredicates = new ArrayList<>();
+
+        if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
+            allPredicates.add(p -> p.getCategory() == null);
+        }
+        if (filters.getOrDefault("onlyEmptyLiabilities", false).equals(true)) {
+            allPredicates.add(p -> p.getLiabilityId() == null);
+        }
+        if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
+            allPredicates.add(p -> p.getAmount() < 0);
+        }
+        if (filters.get("year") != null) {
+            allPredicates.add(p -> p.getTransactionYear() == (int) filters.get("year"));
+        }
+        if (filters.get("month") != null) {
+            allPredicates.add(p -> p.getTransactionMonth() == (int) filters.get("month"));
+        }
+        if (filters.get("category") != null) {
+            allPredicates.add(p -> p.getCategoryName() == filters.get("category").toString());
+        }
+        if (!filters.getOrDefault("title", "").equals("")) {
+            allPredicates.add(p -> p.getTitle().toLowerCase().contains(filters.get("title").toString().toLowerCase()));
+        }
+        if (!filters.getOrDefault("payee", "").equals("")) {
+            allPredicates.add(p -> p.getPayee().toLowerCase().contains(filters.get("payee").toString().toLowerCase()));
+        }
+
+        if (allPredicates.size() == 0) {
+            allPredicates.add(p -> true);
+        }
+
+        return expenseRepository.retrieveAll()
+                .stream()
+                .filter(allPredicates.stream().reduce(x -> true, Predicate::and))
+                .toList();
     }
 
 
