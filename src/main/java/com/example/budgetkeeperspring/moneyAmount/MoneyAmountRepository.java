@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 
 @Repository
-public interface MoneyAmountRepository extends JpaRepository<MoneyAmount, Long> {
+public interface MoneyAmountRepository extends JpaRepository<MoneyAmount, Date> {
 
     MoneyAmount findFirstByDate(Date date);
 }
