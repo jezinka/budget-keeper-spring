@@ -3,7 +3,11 @@ package com.example.budgetkeeperspring.moneyAmount;
 import com.example.budgetkeeperspring.expense.Expense;
 import com.example.budgetkeeperspring.expense.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -51,7 +55,13 @@ public class MoneyAmountController {
     Boolean addMoneyAmountForCurrentMonth(@RequestBody HashMap newAmount) {
         Float amount = Float.valueOf(newAmount.get("amount").toString());
         Date begin = Date.valueOf(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
-        MoneyAmount moneyAmount = new MoneyAmount(begin, amount);
+
+        MoneyAmount moneyAmount = moneyAmountRepository.findFirstByDate(begin);
+        if (moneyAmount != null) {
+            moneyAmount.setAmount(amount);
+        } else {
+            moneyAmount = new MoneyAmount(begin, amount);
+        }
         moneyAmountRepository.save(moneyAmount);
         return true;
     }
