@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.expense;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.Date;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
@@ -34,12 +35,9 @@ public class ExpenseService {
         return true;
     }
 
+    @Transactional
     Boolean splitExpanse(Long id, List<Expense> updateExpenses) {
-        Expense expense = expenseRepository.getById(id);
-        for (Expense e : updateExpenses) {
-            setTransactionProperties(expense, e);
-            expenseRepository.save(e);
-        }
+        expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
         return true;
     }

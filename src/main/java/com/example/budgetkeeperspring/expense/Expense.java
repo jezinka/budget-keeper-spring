@@ -29,7 +29,7 @@ public class Expense {
     private Category category;
     private Long liabilityId;
 
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     public Long getId() {
         return id;
