@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -70,8 +71,10 @@ public class ExpenseServiceTest {
 
         // when:
         service.splitExpanse(e.getId(), expenseList);
+        List<Expense> all = expenseRepository.findAll();
 
         // then:
-        assertEquals(2, expenseRepository.findAll().size());
+        assertEquals(2, all.size());
+        assertTrue(all.stream().noneMatch(expense -> expense.getId() == e.getId()));
     }
 }
