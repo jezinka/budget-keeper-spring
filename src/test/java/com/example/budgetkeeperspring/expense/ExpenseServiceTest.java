@@ -70,7 +70,7 @@ public class ExpenseServiceTest {
         List<Expense> expenseList = new ArrayList<>(List.of(t1, t2));
 
         // when:
-        service.splitExpanse(e.getId(), expenseList);
+        service.splitExpense(e.getId(), expenseList);
         List<Expense> all = expenseRepository.findAll();
 
         // then:

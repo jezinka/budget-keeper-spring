@@ -36,7 +36,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    Boolean splitExpanse(Long id, List<Expense> updateExpenses) {
+    Boolean splitExpense(Long id, List<Expense> updateExpenses) {
         expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
         return true;

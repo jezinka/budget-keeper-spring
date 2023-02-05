@@ -29,7 +29,7 @@ public class ExpenseController {
     ExpenseService expenseService;
 
     @PostMapping("")
-    List getAllExpanses(@RequestBody HashMap filters) {
+    List getAllExpenses(@RequestBody HashMap filters) {
         return expenseService.findAll(filters);
     }
 
@@ -46,19 +46,19 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    Boolean deleteExpanse(@PathVariable Long id) {
+    Boolean deleteExpense(@PathVariable Long id) {
         expenseRepository.deleteById(id);
         return true;
     }
 
     @PutMapping("/{id}")
-    Boolean editExpanse(@PathVariable Long id, @RequestBody Expense updateExpense) {
+    Boolean editExpense(@PathVariable Long id, @RequestBody Expense updateExpense) {
         return expenseService.updateTransaction(id, updateExpense);
     }
 
     @PostMapping("/split/{id}")
-    Boolean splitExpanse(@PathVariable Long id, @RequestBody List<Expense> updateExpenses) {
-        return expenseService.splitExpanse(id, updateExpenses);
+    Boolean splitExpense(@PathVariable Long id, @RequestBody List<Expense> updateExpenses) {
+        return expenseService.splitExpense(id, updateExpenses);
     }
 
     @PostMapping("/getPivot")
