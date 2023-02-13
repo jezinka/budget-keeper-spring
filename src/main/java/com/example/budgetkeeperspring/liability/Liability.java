@@ -2,7 +2,11 @@ package com.example.budgetkeeperspring.liability;
 
 import com.example.budgetkeeperspring.bank.Bank;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.sql.Date;
 
 @Entity

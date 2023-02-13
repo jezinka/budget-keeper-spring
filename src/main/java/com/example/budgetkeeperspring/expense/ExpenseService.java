@@ -48,15 +48,15 @@ public class ExpenseService {
         expense.setTitle(updateExpense.getTitle());
         expense.setPayee(updateExpense.getPayee());
         expense.setAmount(updateExpense.getAmount());
-        if (updateExpense.getCategory().getId() != EMPTY_OPTION) {
+        if (!updateExpense.getCategory().getId().equals(EMPTY_OPTION)) {
             expense.setCategory(updateExpense.getCategory());
         }
-        if (updateExpense.getLiabilityId() != EMPTY_OPTION) {
+        if (!updateExpense.getLiabilityId().equals(EMPTY_OPTION)) {
             expense.setLiabilityId(updateExpense.getLiabilityId());
         }
     }
 
-    public List getDailyExpenses(LocalDate begin, LocalDate end) {
+    public List<DailyExpenses> getDailyExpenses(LocalDate begin, LocalDate end) {
         List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(Date.valueOf(begin), Date.valueOf(end));
         List<DailyExpenses> list = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class ExpenseService {
             allPredicates.add(p -> p.getTransactionMonth() == (int) filters.get("month"));
         }
         if (filters.get("category") != null) {
-            allPredicates.add(p -> p.getCategoryName() == filters.get("category").toString());
+            allPredicates.add(p -> p.getCategoryName().equals(filters.get("category").toString()));
         }
         if (!filters.getOrDefault("title", "").equals("")) {
             allPredicates.add(p -> p.getTitle().toLowerCase().contains(filters.get("title").toString().toLowerCase()));
@@ -96,7 +96,7 @@ public class ExpenseService {
             allPredicates.add(p -> p.getPayee().toLowerCase().contains(filters.get("payee").toString().toLowerCase()));
         }
 
-        if (allPredicates.size() == 0) {
+        if (allPredicates.isEmpty()) {
             allPredicates.add(p -> true);
         }
 
@@ -129,13 +129,13 @@ public class ExpenseService {
             categorySum.put(c,
                     yearlyExpenses
                             .stream()
-                            .filter(e -> e.getCategoryName() == c)
+                            .filter(e -> e.getCategoryName().equals(c))
                             .mapToDouble(Expense::getAmount).sum());
         }
         return categorySum;
     }
 
-    public List getMonthsPivot(int year) {
+    public List<Map<String, Object>> getMonthsPivot(int year) {
         List<Map<String, Object>> list = new ArrayList<>();
         String[] shortMonths = DFS.getShortMonths();
         List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
@@ -144,7 +144,7 @@ public class ExpenseService {
                         Expense::getCategoryName,
                         groupingBy(Expense::getTransactionMonth, Collectors.summingDouble(Expense::getAmount))))
                 .forEach((category, entry) -> {
-                    Map chartEntry = new HashMap();
+                    HashMap chartEntry = new HashMap();
                     chartEntry.put("category", category);
                     for (Map.Entry<Integer, Double> e : entry.entrySet()) {
                         Integer month = e.getKey();
@@ -157,7 +157,7 @@ public class ExpenseService {
         return list;
     }
 
-    List getGroupedByCategory(Date begin, Date end) {
+    List<MonthCategoryAmount> getGroupedByCategory(Date begin, Date end) {
         List<MonthCategoryAmount> list = new ArrayList<>();
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 

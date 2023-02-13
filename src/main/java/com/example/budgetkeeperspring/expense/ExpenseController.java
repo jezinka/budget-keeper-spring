@@ -30,7 +30,7 @@ public class ExpenseController {
     }
 
     @PostMapping("")
-    List getAllExpenses(@RequestBody HashMap filters) {
+    List<Expense> getAllExpenses(@RequestBody HashMap<String, Object> filters) {
         return expenseService.findAll(filters);
     }
 
@@ -63,24 +63,24 @@ public class ExpenseController {
     }
 
     @PostMapping("/getPivot")
-    List getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
+    List<Map<String, Object>> getForSelectedYearPivot(@RequestBody YearlyFilter filter) {
         return expenseService.getMonthsPivot(filter.getYear());
     }
 
     @PostMapping("/yearAtTheGlance")
-    Map getForSelectedYear(@RequestBody YearlyFilter filter) {
+    Map<Integer, Map<String, Double>> getForSelectedYear(@RequestBody YearlyFilter filter) {
         return expenseService.getYearAtGlance(filter.getYear());
     }
 
     @GetMapping("/currentMonthByCategory")
-    List getGroupedForCurrentMonth() {
+    List<MonthCategoryAmount> getGroupedForCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseService.getGroupedByCategory(Date.valueOf(begin), Date.valueOf(end));
     }
 
     @GetMapping("/dailyExpenses")
-    List getDailyForMonth() {
+    List<DailyExpenses> getDailyForMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseService.getDailyExpenses(begin, end);
