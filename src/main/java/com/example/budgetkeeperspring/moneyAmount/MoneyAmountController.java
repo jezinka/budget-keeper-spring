@@ -2,7 +2,6 @@ package com.example.budgetkeeperspring.moneyAmount;
 
 import com.example.budgetkeeperspring.expense.Expense;
 import com.example.budgetkeeperspring.expense.ExpenseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +18,13 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequestMapping("moneyAmount")
 public class MoneyAmountController {
 
-    @Autowired
-    MoneyAmountRepository moneyAmountRepository;
+    private final MoneyAmountRepository moneyAmountRepository;
+    private final ExpenseRepository expenseRepository;
 
-    @Autowired
-    ExpenseRepository expenseRepository;
+    public MoneyAmountController(MoneyAmountRepository moneyAmountRepository, ExpenseRepository expenseRepository) {
+        this.moneyAmountRepository = moneyAmountRepository;
+        this.expenseRepository = expenseRepository;
+    }
 
     @GetMapping("")
     CurrentMonthMoneyAmount getCurrentMonth() {

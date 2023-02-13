@@ -1,6 +1,5 @@
 package com.example.budgetkeeperspring.expense;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,9 +21,11 @@ public class ExpenseService {
 
     private static final Long EMPTY_OPTION = -1L;
     private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
+    private final ExpenseRepository expenseRepository;
 
-    @Autowired
-    ExpenseRepository expenseRepository;
+    public ExpenseService(ExpenseRepository expenseRepository) {
+        this.expenseRepository = expenseRepository;
+    }
 
     Boolean updateTransaction(Long id, Expense updateExpense) {
         Expense expense = expenseRepository.getById(id);

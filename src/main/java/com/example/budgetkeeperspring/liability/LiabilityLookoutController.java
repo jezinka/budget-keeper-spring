@@ -1,7 +1,11 @@
 package com.example.budgetkeeperspring.liability;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.function.Function;
@@ -11,8 +15,11 @@ import java.util.stream.Collectors;
 @RequestMapping("liabilityLookouts")
 public class LiabilityLookoutController {
 
-    @Autowired
-    LiabilityLookoutRepository liabilityLookoutRepository;
+    private final LiabilityLookoutRepository liabilityLookoutRepository;
+
+    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository) {
+        this.liabilityLookoutRepository = liabilityLookoutRepository;
+    }
 
     @PutMapping("")
     Boolean add(@RequestBody LiabilityLookout liabilityLookout) {

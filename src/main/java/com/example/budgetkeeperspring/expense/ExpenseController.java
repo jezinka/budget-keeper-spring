@@ -1,7 +1,6 @@
 package com.example.budgetkeeperspring.expense;
 
 import com.example.budgetkeeperspring.YearlyFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +21,13 @@ import java.util.Map;
 @RequestMapping("expenses")
 public class ExpenseController {
 
-    @Autowired
-    ExpenseRepository expenseRepository;
+    private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
 
-    @Autowired
-    ExpenseService expenseService;
+    public ExpenseController(ExpenseRepository expenseRepository, ExpenseService expenseService) {
+        this.expenseRepository = expenseRepository;
+        this.expenseService = expenseService;
+    }
 
     @PostMapping("")
     List getAllExpenses(@RequestBody HashMap filters) {

@@ -1,8 +1,11 @@
 package com.example.budgetkeeperspring.category;
 
 import com.example.budgetkeeperspring.YearlyFilter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -10,8 +13,11 @@ import java.util.List;
 @RequestMapping("categories")
 public class CategoryController {
 
-    @Autowired
-    CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+
+    public CategoryController(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     @GetMapping("")
     List<Category> getAll() {
