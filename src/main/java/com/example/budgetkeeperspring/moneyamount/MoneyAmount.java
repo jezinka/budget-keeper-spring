@@ -1,4 +1,4 @@
-package com.example.budgetkeeperspring.moneyAmount;
+package com.example.budgetkeeperspring.moneyamount;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

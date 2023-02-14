@@ -1,4 +1,4 @@
-package com.example.budgetkeeperspring.moneyAmount;
+package com.example.budgetkeeperspring.moneyamount;
 
 import com.example.budgetkeeperspring.expense.Expense;
 import com.example.budgetkeeperspring.expense.ExpenseRepository;
