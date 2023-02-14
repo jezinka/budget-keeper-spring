@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.expense;
 
 import com.example.budgetkeeperspring.category.Category;
+import lombok.Data;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -9,8 +10,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
+@Data
 @Entity
 @SQLDelete(sql = "UPDATE expense SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
@@ -20,60 +23,16 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Date transactionDate;
+    private LocalDate transactionDate;
     private String title;
     private String payee;
-    private Float amount;
+    private BigDecimal amount;
 
     @ManyToOne()
     private Category category;
     private Long liabilityId;
 
     private Boolean deleted = false;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Date getTransactionDate() {
-        return transactionDate;
-    }
-
-    public void setTransactionDate(Date transactionDate) {
-        this.transactionDate = transactionDate;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getPayee() {
-        return payee;
-    }
-
-    public void setPayee(String payee) {
-        this.payee = payee;
-    }
-
-    public Float getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Float amount) {
-        this.amount = amount;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
 
     public String getCategoryName() {
         if (category != null) {
@@ -82,35 +41,15 @@ public class Expense {
         return "";
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Long getLiabilityId() {
-        return liabilityId;
-    }
-
-    public void setLiabilityId(Long liabilityId) {
-        this.liabilityId = liabilityId;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public int getTransactionDay() {
-        return transactionDate.getDate();
+        return transactionDate.getDayOfMonth();
     }
 
     public int getTransactionMonth() {
-        return transactionDate.getMonth() + 1;
+        return transactionDate.getMonthValue();
     }
 
     public int getTransactionYear() {
-        return transactionDate.getYear() + 1;
+        return transactionDate.getYear();
     }
 }

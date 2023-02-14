@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
@@ -36,8 +36,8 @@ public class ExpenseController {
 
     @GetMapping("/currentMonth")
     List<Expense> getCurrentMonth() {
-        Date begin = Date.valueOf(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
-        Date end = Date.valueOf(LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseRepository.findAllForTimePeriod(begin, end);
     }
 
@@ -68,7 +68,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/yearAtTheGlance")
-    Map<Integer, Map<String, Double>> getForSelectedYear(@RequestBody YearlyFilter filter) {
+    Map<Integer, Map<String, BigDecimal>> getForSelectedYear(@RequestBody YearlyFilter filter) {
         return expenseService.getYearAtGlance(filter.getYear());
     }
 
@@ -76,7 +76,7 @@ public class ExpenseController {
     List<MonthCategoryAmount> getGroupedForCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-        return expenseService.getGroupedByCategory(Date.valueOf(begin), Date.valueOf(end));
+        return expenseService.getGroupedByCategory(begin, end);
     }
 
     @GetMapping("/dailyExpenses")

@@ -5,7 +5,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -13,10 +14,10 @@ import java.sql.Date;
 public class MoneyAmount {
 
     @Id
-    private Date date;
-    private Float amount;
+    private LocalDate date;
+    private BigDecimal amount;
 
-    public MoneyAmount(Date date, Float amount) {
+    public MoneyAmount(LocalDate date, BigDecimal amount) {
         this.date = date;
         this.amount = amount;
     }

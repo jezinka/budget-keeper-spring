@@ -12,7 +12,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,8 +44,8 @@ public class ExpenseServiceTest {
         Category categoryB = categoryRepository.save(new Category("B"));
 
         Expense e = new Expense();
-        e.setAmount(-15.70f);
-        e.setTransactionDate(Date.valueOf("2023-10-14"));
+        e.setAmount(BigDecimal.valueOf(-15.70));
+        e.setTransactionDate(LocalDate.of(2023, 10, 14));
         e.setCategory(categoryA);
         expenseRepository.save(e);
     }
@@ -57,13 +58,13 @@ public class ExpenseServiceTest {
         Expense t1 = new Expense();
         BeanUtils.copyProperties(e, t1);
         t1.setId(null);
-        t1.setAmount(-10.20f);
+        t1.setAmount(BigDecimal.valueOf(-10.20));
         t1.setDeleted(false);
 
         Expense t2 = new Expense();
         BeanUtils.copyProperties(e, t2);
         t2.setId(null);
-        t2.setAmount(-5.50f);
+        t2.setAmount(BigDecimal.valueOf(-5.50));
         t2.setCategory(categoryRepository.findByName("B"));
         t2.setDeleted(false);
 
@@ -75,6 +76,6 @@ public class ExpenseServiceTest {
 
         // then:
         assertEquals(2, all.size());
-        assertTrue(all.stream().noneMatch(expense -> expense.getId() == e.getId()));
+        assertTrue(all.stream().noneMatch(expense -> expense.getId().equals(e.getId())));
     }
 }

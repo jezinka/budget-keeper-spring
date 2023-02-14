@@ -3,11 +3,12 @@ package com.example.budgetkeeperspring.expense;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Date;
+import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
 
 @Service
 public class ExpenseService {
@@ -57,13 +59,13 @@ public class ExpenseService {
     }
 
     public List<DailyExpenses> getDailyExpenses(LocalDate begin, LocalDate end) {
-        List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(Date.valueOf(begin), Date.valueOf(end));
+        List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
         List<DailyExpenses> list = new ArrayList<>();
 
         expenses.stream()
-                .filter(e -> e.getAmount() < 0)
+                .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
                 .collect(Collectors.groupingBy(Expense::getTransactionDay,
-                        Collectors.summingDouble(e -> Math.abs(e.getAmount()))))
+                        reducing(BigDecimal.ZERO, e -> e.getAmount().abs(), BigDecimal::add)))
                 .forEach((key, value) -> list.add(new DailyExpenses(key, value.floatValue())));
         return list;
     }
@@ -78,7 +80,7 @@ public class ExpenseService {
             allPredicates.add(p -> p.getLiabilityId() == null);
         }
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
-            allPredicates.add(p -> p.getAmount() < 0);
+            allPredicates.add(p -> p.getAmount().compareTo(new BigDecimal(0)) < 0);
         }
         if (filters.get("year") != null) {
             allPredicates.add(p -> p.getTransactionYear() == (int) filters.get("year"));
@@ -107,30 +109,32 @@ public class ExpenseService {
     }
 
 
-    Map<Integer, Map<String, Double>> getYearAtGlance(int year) {
+    Map<Integer, Map<String, BigDecimal>> getYearAtGlance(int year) {
         List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
 
-        Map<Integer, Map<String, Double>> collect = yearlyExpenses.stream().collect(groupingBy(
+        Map<Integer, Map<String, BigDecimal>> collect = yearlyExpenses.stream().collect(groupingBy(
                 Expense::getTransactionMonth,
-                groupingBy(Expense::getCategoryName, Collectors.summingDouble(Expense::getAmount))));
+                groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
+                        Expense::getAmount, BigDecimal::add))));
 
         collect.put(99, getCategorySummary(yearlyExpenses));
         collect.forEach((month, categories) ->
-                categories.put("SUMA", categories.values().stream().reduce(Double::sum).get())
+                categories.put("SUMA", categories.values().stream().reduce(BigDecimal::add).get())
         );
         return collect;
     }
 
-    private Map<String, Double> getCategorySummary(List<Expense> yearlyExpenses) {
+    private Map<String, BigDecimal> getCategorySummary(List<Expense> yearlyExpenses) {
         List<String> categories = yearlyExpenses.stream().map(Expense::getCategoryName).distinct().toList();
 
-        Map<String, Double> categorySum = new HashMap<>();
+        Map<String, BigDecimal> categorySum = new HashMap<>();
         for (String c : categories) {
             categorySum.put(c,
                     yearlyExpenses
                             .stream()
                             .filter(e -> e.getCategoryName().equals(c))
-                            .mapToDouble(Expense::getAmount).sum());
+                            .map(Expense::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add));
         }
         return categorySum;
     }
@@ -142,14 +146,15 @@ public class ExpenseService {
 
         yearlyExpenses.stream().collect(groupingBy(
                         Expense::getCategoryName,
-                        groupingBy(Expense::getTransactionMonth, Collectors.summingDouble(Expense::getAmount))))
+                        groupingBy(Expense::getTransactionMonth, reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add))))
                 .forEach((category, entry) -> {
-                    HashMap chartEntry = new HashMap();
+                    Map<String, Object> chartEntry = new LinkedHashMap<>();
                     chartEntry.put("category", category);
-                    for (Map.Entry<Integer, Double> e : entry.entrySet()) {
+                    for (Map.Entry<Integer, BigDecimal> e : entry.entrySet()) {
                         Integer month = e.getKey();
-                        Double amount = e.getValue();
-                        chartEntry.put(shortMonths[month - 1], amount.floatValue());
+                        BigDecimal amount = e.getValue();
+                        chartEntry.put(shortMonths[month - 1], amount);
                     }
                     list.add(chartEntry);
                 });
@@ -157,7 +162,7 @@ public class ExpenseService {
         return list;
     }
 
-    List<MonthCategoryAmount> getGroupedByCategory(Date begin, Date end) {
+    List<MonthCategoryAmount> getGroupedByCategory(LocalDate begin, LocalDate end) {
         List<MonthCategoryAmount> list = new ArrayList<>();
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 
@@ -165,9 +170,10 @@ public class ExpenseService {
                 .stream()
                 .collect(groupingBy(Expense::getTransactionMonth,
                         groupingBy(Expense::getCategoryName,
-                                Collectors.summingDouble(Expense::getAmount))))
+                                reducing(BigDecimal.ZERO,
+                                        Expense::getAmount, BigDecimal::add))))
                 .forEach((month, value) -> value.forEach((category, amount) ->
-                        list.add(new MonthCategoryAmount(month, category, (float) Math.abs(amount))))
+                        list.add(new MonthCategoryAmount(month, category, amount.abs())))
                 );
         return list;
     }
