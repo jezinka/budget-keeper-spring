@@ -68,7 +68,7 @@ public class ExpenseService {
                 .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
                 .collect(Collectors.groupingBy(Expense::getTransactionDay,
                         reducing(BigDecimal.ZERO, e -> e.getAmount().abs(), BigDecimal::add)))
-                .forEach((key, value) -> list.add(new DailyExpenses(key, value.floatValue())));
+                .forEach((key, value) -> list.add(new DailyExpenses(key, value)));
         return list;
     }
 
