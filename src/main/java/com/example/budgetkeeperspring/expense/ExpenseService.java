@@ -23,6 +23,8 @@ public class ExpenseService {
 
     private static final Long EMPTY_OPTION = -1L;
     private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
+    private static final String CATEGORY = "category";
+
     private final ExpenseRepository expenseRepository;
 
     public ExpenseService(ExpenseRepository expenseRepository) {
@@ -70,7 +72,7 @@ public class ExpenseService {
         return list;
     }
 
-    public List<Expense> findAll(HashMap<String, Object> filters) {
+    public List<Expense> findAll(Map<String, Object> filters) {
         List<Predicate<Expense>> allPredicates = new ArrayList<>();
 
         if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
@@ -88,8 +90,8 @@ public class ExpenseService {
         if (filters.get("month") != null) {
             allPredicates.add(p -> p.getTransactionMonth() == (int) filters.get("month"));
         }
-        if (filters.get("category") != null) {
-            allPredicates.add(p -> p.getCategoryName().equals(filters.get("category").toString()));
+        if (filters.get(CATEGORY) != null) {
+            allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
         }
         if (!filters.getOrDefault("title", "").equals("")) {
             allPredicates.add(p -> p.getTitle().toLowerCase().contains(filters.get("title").toString().toLowerCase()));
@@ -150,7 +152,7 @@ public class ExpenseService {
                                 Expense::getAmount, BigDecimal::add))))
                 .forEach((category, entry) -> {
                     Map<String, Object> chartEntry = new LinkedHashMap<>();
-                    chartEntry.put("category", category);
+                    chartEntry.put(CATEGORY, category);
                     for (Map.Entry<Integer, BigDecimal> e : entry.entrySet()) {
                         Integer month = e.getKey();
                         BigDecimal amount = e.getValue();
