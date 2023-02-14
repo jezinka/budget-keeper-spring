@@ -53,13 +53,13 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    Boolean editExpense(@PathVariable Long id, @RequestBody Expense updateExpense) {
+    Boolean editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
         return expenseService.updateTransaction(id, updateExpense);
     }
 
     @PostMapping("/split/{id}")
-    Boolean splitExpense(@PathVariable Long id, @RequestBody List<Expense> updateExpenses) {
-        return expenseService.splitExpense(id, updateExpenses);
+    Boolean splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
+        return expenseService.splitExpense(id, expenseDTOS);
     }
 
     @PostMapping("/getPivot")

@@ -130,7 +130,6 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function submitForm() {
-        formState.category = {id: formState.categoryId};
         const response = await fetch('/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });

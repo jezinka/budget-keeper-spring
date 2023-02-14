@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.reducing;
 @Service
 public class ExpenseService {
 
-    private static final Long EMPTY_OPTION = -1L;
     private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
     private static final String CATEGORY = "category";
 
@@ -31,33 +30,23 @@ public class ExpenseService {
         this.expenseRepository = expenseRepository;
     }
 
-    Boolean updateTransaction(Long id, Expense updateExpense) {
-        Expense expense = expenseRepository.getById(id);
-        if (updateExpense != null) {
-            setTransactionProperties(updateExpense, expense);
+    Boolean updateTransaction(Long id, ExpenseDTO updateExpense) {
+        boolean expenseExists = expenseRepository.existsById(id);
+        if (expenseExists) {
+            Expense expense = Mapper.mapFromDto(updateExpense);
+            expense.setId(id);
+            expenseRepository.save(expense);
+            return true;
         }
-        expenseRepository.save(expense);
-        return true;
+        return false;
     }
 
     @Transactional
-    Boolean splitExpense(Long id, List<Expense> updateExpenses) {
+    Boolean splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
+        List<Expense> updateExpenses = updateExpensesDTOs.stream().map(Mapper::mapFromDto).toList();
         expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
         return true;
-    }
-
-    private static void setTransactionProperties(Expense updateExpense, Expense expense) {
-        expense.setTransactionDate(updateExpense.getTransactionDate());
-        expense.setTitle(updateExpense.getTitle());
-        expense.setPayee(updateExpense.getPayee());
-        expense.setAmount(updateExpense.getAmount());
-        if (!updateExpense.getCategory().getId().equals(EMPTY_OPTION)) {
-            expense.setCategory(updateExpense.getCategory());
-        }
-        if (!updateExpense.getLiabilityId().equals(EMPTY_OPTION)) {
-            expense.setLiabilityId(updateExpense.getLiabilityId());
-        }
     }
 
     public List<DailyExpenses> getDailyExpenses(LocalDate begin, LocalDate end) {
