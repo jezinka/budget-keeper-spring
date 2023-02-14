@@ -43,7 +43,7 @@ public class ExpenseController {
 
     @GetMapping("/{id}")
     Expense getById(@PathVariable Long id) {
-        return expenseRepository.getById(id);
+        return expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
