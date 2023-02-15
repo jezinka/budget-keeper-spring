@@ -14,7 +14,7 @@ class BankRepositoryTest {
     BankRepository repository;
 
     @Test
-    public void findByIdShouldReturnEntity() {
+    public void findAllShouldReturnEntity() {
 
         Bank entity = new Bank();
         entity.setName("TestBank");
