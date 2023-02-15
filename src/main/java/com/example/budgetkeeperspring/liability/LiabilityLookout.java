@@ -1,53 +1,25 @@
 package com.example.budgetkeeperspring.liability;
 
+import lombok.Data;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
+@Data
 @Entity
 public class LiabilityLookout {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    Date date;
-    Float outcome;
+    private LocalDate date;
+    private BigDecimal outcome;
 
     @ManyToOne()
     Liability liability;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public Float getOutcome() {
-        return outcome;
-    }
-
-    public void setOutcome(Float outcome) {
-        this.outcome = outcome;
-    }
-
-    public Liability getLiability() {
-        return liability;
-    }
-
-    public void setLiability(Liability liability) {
-        this.liability = liability;
-    }
 }

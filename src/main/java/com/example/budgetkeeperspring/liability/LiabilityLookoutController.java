@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("liabilityLookouts")
 public class LiabilityLookoutController {
 
     private final LiabilityLookoutRepository liabilityLookoutRepository;
+    private final LiabilityLookoutService liabilityLookoutService;
 
-    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository) {
+    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository, LiabilityLookoutService liabilityLookoutService) {
         this.liabilityLookoutRepository = liabilityLookoutRepository;
+        this.liabilityLookoutService = liabilityLookoutService;
     }
 
     @PutMapping("")
@@ -29,11 +29,7 @@ public class LiabilityLookoutController {
 
     @GetMapping("")
     List<LiabilityLookout> getLatest() {
-        return liabilityLookoutRepository.retrieveAll().stream()
-                .collect(Collectors.toMap(LiabilityLookout::getLiability,
-                        Function.identity(),
-                        (LiabilityLookout d1, LiabilityLookout d2) -> d1.getDate().after(d2.getDate()) ? d1 : d2))
-                .values().stream().toList();
+        return liabilityLookoutService.getLatest();
     }
 
     @GetMapping("/getLookouts/{id}")
