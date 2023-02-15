@@ -41,14 +41,23 @@ public class Expense {
     }
 
     public int getTransactionDay() {
-        return transactionDate.getDayOfMonth();
+        if (transactionDate != null) {
+            return transactionDate.getDayOfMonth();
+        }
+        return -1;
     }
 
     public int getTransactionMonth() {
-        return transactionDate.getMonthValue();
+        if (transactionDate != null) {
+            return transactionDate.getMonthValue();
+        }
+        return -1;
     }
 
     public int getTransactionYear() {
-        return transactionDate.getYear();
+        if (transactionDate != null) {
+            return transactionDate.getYear();
+        }
+        return -1;
     }
 }
