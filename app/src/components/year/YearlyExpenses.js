@@ -30,7 +30,7 @@ export default function YearlyExpenses() {
     }
 
     async function fetchCategories() {
-        const response = await fetch('/categories/getActiveForSelectYear', {
+        const response = await fetch('/categories/getActiveForSelectedYear', {
             method: "POST", body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'}
         });
         if (response.ok) {

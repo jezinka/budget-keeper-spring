@@ -24,7 +24,7 @@ public class CategoryController {
         return categoryRepository.findAll();
     }
 
-    @PostMapping("/getActiveForSelectYear")
+    @PostMapping("/getActiveForSelectedYear")
     List<Category> getActiveForSelectedYear(@RequestBody YearlyFilter yearlyFilter) {
         return categoryRepository.findActiveForYear(yearlyFilter.getYear());
     }
