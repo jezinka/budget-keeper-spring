@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 
 
@@ -33,10 +35,8 @@ class ExpenseRepositoryTest {
         expenseA.setTransactionDate(LocalDate.of(2020, 12, 1));
         repository.save(expenseB);
 
-
         List<Expense> all = repository.retrieveAll();
-        assert all.size() == 1;
-        assert all.stream().noneMatch(Expense::getDeleted);
-
+        assertEquals(1, all.size());
+        assertTrue(all.stream().noneMatch(Expense::getDeleted));
     }
 }

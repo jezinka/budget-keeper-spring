@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -139,7 +140,7 @@ class ExpenseServiceTest {
         List<DailyExpenses> result = expenseService.getDailyExpenses(any(), any());
 
         assertEquals(2, result.size());
-        assert result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(170)) && p.getDay() == 12);
-        assert result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(20)) && p.getDay() == 13);
+        assertTrue(result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(170)) && p.getDay() == 12));
+        assertTrue(result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(20)) && p.getDay() == 13));
     }
 }

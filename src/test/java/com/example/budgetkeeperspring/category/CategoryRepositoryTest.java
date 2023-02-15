@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CategoryRepositoryTest {
@@ -24,7 +27,7 @@ class CategoryRepositoryTest {
 
     @Test
     public void findActiveCategoryShouldReturnEmptyListForNoExpenses() {
-        assert repository.findActiveForYear(2023).size() == 0;
+        assertEquals(0, repository.findActiveForYear(2023).size());
     }
 
     @Test
@@ -46,7 +49,7 @@ class CategoryRepositoryTest {
 
         List<Category> activeForYear = repository.findActiveForYear(2019);
 
-        assert activeForYear.size() == 1;
-        assert activeForYear.stream().allMatch(c -> c.equals(b));
+        assertEquals(1, activeForYear.size());
+        assertTrue(activeForYear.stream().allMatch(c -> c.equals(b)));
     }
 }

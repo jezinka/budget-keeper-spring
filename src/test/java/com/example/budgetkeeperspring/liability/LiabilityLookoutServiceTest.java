@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,8 +48,8 @@ class LiabilityLookoutServiceTest {
 
         List<LiabilityLookout> result = liabilityLookoutService.getLatest();
 
-        assert result.size() == 1;
-        assert result.stream().allMatch(ll -> ll.getOutcome().equals(BigDecimal.valueOf(-12.99)));
+        assertEquals(1, result.size());
+        assertTrue(result.stream().allMatch(ll -> ll.getOutcome().equals(BigDecimal.valueOf(-12.99))));
 
     }
 }
