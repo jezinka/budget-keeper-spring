@@ -30,7 +30,6 @@ public class Expense {
 
     @ManyToOne()
     private Category category;
-    private Long liabilityId;
 
     private Boolean deleted = false;
 

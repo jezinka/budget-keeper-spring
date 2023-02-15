@@ -67,9 +67,6 @@ public class ExpenseService {
         if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
             allPredicates.add(p -> p.getCategory() == null);
         }
-        if (filters.getOrDefault("onlyEmptyLiabilities", false).equals(true)) {
-            allPredicates.add(p -> p.getLiabilityId() == null);
-        }
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             allPredicates.add(p -> p.getAmount().compareTo(new BigDecimal(0)) < 0);
         }

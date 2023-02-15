@@ -7,7 +7,7 @@ import TransactionCounter from "./TransactionCounter";
 const AllTransactions = () => {
     const [transactionCounter, setTransactionCounter] = useState(0);
     const [filterFormState, setFilterFormState] = useState({
-        onlyEmptyCategories: false, onlyEmptyLiabilities: false, onlyExpenses: false, title: "", payee: ""
+        onlyEmptyCategories: false, onlyExpenses: false, title: "", payee: ""
     });
 
     const handleFilterChange = (event) => {
@@ -30,11 +30,6 @@ const AllTransactions = () => {
                                     type="switch"
                                     id="onlyEmptyCategories"
                                     label="Only empty categories" value={filterFormState.onlyEmptyCategories}/>
-
-                        <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyEmptyLiabilities"
-                                    type="switch"
-                                    id="onlyEmptyLiabilities"
-                                    label="Only empty liabilities" value={filterFormState.onlyEmptyLiabilities}/>
 
                         <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
                                     id="onlyExpenses"

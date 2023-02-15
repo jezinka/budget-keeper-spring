@@ -22,11 +22,6 @@ public class Mapper {
         } else {
             expense.setCategory(null);
         }
-        if (!Objects.equals(expenseDTO.getLiabilityId(), EMPTY_OPTION)) {
-            expense.setLiabilityId(expenseDTO.getLiabilityId());
-        } else {
-            expense.setLiabilityId(null);
-        }
         return expense;
     }
 }

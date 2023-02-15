@@ -71,7 +71,6 @@ class ExpenseServiceTest {
 
         Expense d = new Expense();
         d.setAmount(BigDecimal.valueOf(-120));
-        d.setLiabilityId(12L);
 
         when(expenseRepository
                 .retrieveAll())
@@ -81,7 +80,6 @@ class ExpenseServiceTest {
 
         List<Expense> result = expenseService.findAll(Map.of(
                 "onlyEmptyCategories", true,
-                "onlyEmptyLiabilities", true,
                 "onlyExpenses", true,
                 "year", 2023,
                 "month", 1,
