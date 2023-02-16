@@ -35,7 +35,7 @@ public class LiabilityLookoutController {
     }
 
     @GetMapping("")
-    List<LiabilityLookout> getLatest() {
+    List<LiabilityLookoutDTO> getLatest() {
         return liabilityLookoutService.getLatest();
     }
 

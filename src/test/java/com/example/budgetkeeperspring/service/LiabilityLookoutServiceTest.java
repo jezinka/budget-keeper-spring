@@ -1,12 +1,16 @@
 package com.example.budgetkeeperspring.service;
 
+import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
 import com.example.budgetkeeperspring.entity.Liability;
 import com.example.budgetkeeperspring.entity.LiabilityLookout;
+import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +27,9 @@ class LiabilityLookoutServiceTest {
 
     @Mock
     LiabilityLookoutRepository liabilityLookoutRepository;
+
+    @Spy
+    private LiabilityLookoutMapper liabilityLookoutMapper = Mappers.getMapper(LiabilityLookoutMapper.class);
 
     @Autowired
     @InjectMocks
@@ -49,7 +56,7 @@ class LiabilityLookoutServiceTest {
                 .retrieveAll())
                 .thenReturn(List.of(llA, llAa));
 
-        List<LiabilityLookout> result = liabilityLookoutService.getLatest();
+        List<LiabilityLookoutDTO> result = liabilityLookoutService.getLatest();
 
         assertEquals(1, result.size());
         assertTrue(result.stream().allMatch(ll -> ll.getOutcome().equals(BigDecimal.valueOf(-12.99))));
