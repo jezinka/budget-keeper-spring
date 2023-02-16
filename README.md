@@ -1,4 +1,7 @@
-# budget-keeper-spring
-Web app for budget-keeper 
+# Budget keeper (Spring/React part)
 
-![image](https://user-images.githubusercontent.com/6199108/219314261-18f2f9b4-7772-4f36-ac43-932d840b2c47.png)
+Web app for budget-keeper
+
+![image](https://user-images.githubusercontent.com/6199108/219319413-33bd3ecc-594f-447e-991f-861b11ec40bf.png)
+
+Python part: https://github.com/jezinka/budget-keeper
