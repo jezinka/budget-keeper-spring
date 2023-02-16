@@ -52,4 +52,33 @@ class CategoryRepositoryTest {
         assertEquals(1, activeForYear.size());
         assertTrue(activeForYear.stream().allMatch(c -> c.equals(b)));
     }
+
+    @Test
+    @Transactional
+    public void findActiveCategoryShouldReturnDistinctCategories() {
+        Category a = repository.save(new Category("testA"));
+        Category b = repository.save(new Category("testB"));
+
+        Expense expenseA = new Expense();
+        expenseA.setCategory(a);
+        expenseA.setAmount(BigDecimal.valueOf(-1.99));
+        expenseA.setTransactionDate(LocalDate.of(2020, 12, 1));
+        expenseRepository.save(expenseA);
+
+        Expense expenseB = new Expense();
+        expenseB.setCategory(b);
+        expenseB.setAmount(BigDecimal.valueOf(-1.99));
+        expenseB.setTransactionDate(LocalDate.of(2020, 12, 1));
+        expenseRepository.save(expenseB);
+
+        Expense expenseC = new Expense();
+        expenseC.setCategory(b);
+        expenseC.setAmount(BigDecimal.valueOf(-1.99));
+        expenseC.setTransactionDate(LocalDate.of(2020, 12, 31));
+        expenseRepository.save(expenseC);
+
+        List<Category> activeForYear = repository.findActiveForYear(2020);
+
+        assertEquals(2, activeForYear.size());
+    }
 }

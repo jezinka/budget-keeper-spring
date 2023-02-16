@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query("select e.category from Expense e where function('year', e.transactionDate) = :year order by e.category.name")
+    @Query("select distinct e.category from Expense e where function('year', e.transactionDate) = :year order by e.category.name")
     List<Category> findActiveForYear(@Param("year") int year);
 }
