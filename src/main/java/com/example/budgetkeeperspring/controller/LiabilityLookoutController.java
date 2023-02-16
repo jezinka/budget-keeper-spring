@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.controller;
 
+import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
 import com.example.budgetkeeperspring.entity.LiabilityLookout;
+import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import com.example.budgetkeeperspring.service.LiabilityLookoutService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,15 +20,17 @@ public class LiabilityLookoutController {
 
     private final LiabilityLookoutRepository liabilityLookoutRepository;
     private final LiabilityLookoutService liabilityLookoutService;
+    private final LiabilityLookoutMapper liabilityLookoutMapper;
 
-    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository, LiabilityLookoutService liabilityLookoutService) {
+    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository, LiabilityLookoutService liabilityLookoutService, LiabilityLookoutMapper liabilityLookoutMapper) {
         this.liabilityLookoutRepository = liabilityLookoutRepository;
         this.liabilityLookoutService = liabilityLookoutService;
+        this.liabilityLookoutMapper = liabilityLookoutMapper;
     }
 
     @PutMapping("")
-    Boolean add(@RequestBody LiabilityLookout liabilityLookout) {
-        liabilityLookoutRepository.save(liabilityLookout);
+    Boolean add(@RequestBody LiabilityLookoutDTO liabilityLookoutDTO) {
+        liabilityLookoutRepository.save(liabilityLookoutMapper.mapToEntity(liabilityLookoutDTO));
         return true;
     }
 
