@@ -1,29 +1,21 @@
 package com.example.budgetkeeperspring.mapper;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.Objects;
+@Mapper(componentModel = "spring")
+public interface ExpenseMapper {
 
-public class ExpenseMapper {
+    @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
+    @Mapping(source = "categoryId", target = "category.id")
+    @Mapping(source = "categoryName", target = "category.name")
+    Expense mapToEntity(ExpenseDTO expenseDTO);
 
+    @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
+    @Mapping(source = "category.id", target = "categoryId")
+    @Mapping(source = "category.name", target = "categoryName")
+    ExpenseDTO mapToDTO(Expense expense);
 
-    private static final Long EMPTY_OPTION = -1L;
-
-    public static Expense mapFromDto(ExpenseDTO expenseDTO) {
-        Expense expense = new Expense();
-        expense.setTransactionDate(expenseDTO.getTransactionDate());
-        expense.setTitle(expenseDTO.getTitle());
-        expense.setPayee(expenseDTO.getPayee());
-        expense.setAmount(expenseDTO.getAmount());
-        if (!Objects.equals(expenseDTO.getCategoryId(), EMPTY_OPTION)) {
-            Category category = new Category();
-            category.setId(expenseDTO.getCategoryId());
-            expense.setCategory(category);
-        } else {
-            expense.setCategory(null);
-        }
-        return expense;
-    }
 }

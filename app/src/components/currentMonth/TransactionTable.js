@@ -10,7 +10,6 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     const [showSpinner, setShowSpinner] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
-    const [liabilities, setLiabilities] = useState([]);
     const [formState, setFormState] = useState({
         "id": 0,
         "transactionDate": Date.now(),
@@ -19,10 +18,8 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         "baseSplitAmount": 0,
         "amount": 0,
         "categoryId": EMPTY_OPTION,
-        "liabilityId": EMPTY_OPTION,
         "splitAmount": 0,
-        "splitCategoryId": EMPTY_OPTION,
-        "splitLiabilityId": EMPTY_OPTION,
+        "splitCategoryId": EMPTY_OPTION
     })
 
     const handleChange = (event) => {
@@ -76,21 +73,9 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         return handleError();
     }
 
-    async function fetchLiabilities() {
-        const response = await fetch('/liabilities');
-        if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                return setLiabilities(data);
-            }
-        }
-        return handleError();
-    }
-
     useEffect(() => {
         reloadTable();
         fetchCategories();
-        fetchLiabilities();
     }, []);
 
     async function deleteTransaction(id) {
@@ -110,8 +95,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                     "payee": data.payee,
                     "amount": data.amount,
                     "baseSplitAmount": data.amount,
-                    "categoryId": data.category ? data.category.id : EMPTY_OPTION,
-                    "liabilityId": data.liability ? data.liability.id : EMPTY_OPTION
+                    "categoryId": data.categoryId ? data.categoryId : EMPTY_OPTION
                 });
                 return setShowForm(true);
             }
@@ -143,13 +127,12 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 ...formState,
                 id: null,
                 amount: formState.splitAmount,
-                category: {id: formState.splitCategoryId},
-                liabilityId: formState.splitLiabilityId
+                categoryId: formState.splitCategoryId
             },
             {
                 ...formState,
                 id: null,
-                category: {id: formState.categoryId}
+                categoryId: formState.categoryId
             }
         ]
 
@@ -168,15 +151,6 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             categoriesList.push(<option key={c.id} value={c.id}>{c.name}</option>)
         });
         return categoriesList
-    }
-
-    function getLiabilitiesMap() {
-        let liabilitiesList = [<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>];
-        liabilities.forEach((l) => {
-            liabilitiesList.push(<option key={l.id}
-                                         value={l.id}>{l.name} ({l.bank != null ? l.bank.name : ''})</option>)
-        });
-        return liabilitiesList
     }
 
     async function handleResponse(response) {
@@ -236,17 +210,11 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                                 <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
                                               name="amount" value={formState.amount}/> : ''}
                         </Col>
-                        <Col sm={4}>
+                        <Col sm={8}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
                                          name="categoryId" value={formState.categoryId}
                                          autoFocus>
                                 {getCategoriesMap()}
-                            </Form.Select>
-                        </Col>
-                        <Col sm={4}>
-                            <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
-                                         name="liabilityId" value={formState.liabilityId}>
-                                {getLiabilitiesMap()}
                             </Form.Select>
                         </Col>
                     </Row>
@@ -256,16 +224,10 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                                           onChange={handleSplit}
                                           name="splitAmount" value={formState.splitAmount}/>
                         </Col>
-                        <Col sm={4}>
+                        <Col sm={8}>
                             <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
                                          name="splitCategoryId" value={formState.splitCategoryId}>
                                 {getCategoriesMap()}
-                            </Form.Select>
-                        </Col>
-                        <Col sm={4}>
-                            <Form.Select className="m-2" placeholder="Pasywa:" onChange={handleChange}
-                                         name="splitLiabilityId" value={formState.splitLiabilityId}>
-                                {getLiabilitiesMap()}
                             </Form.Select>
                         </Col>
                     </Row> : ''}
@@ -298,7 +260,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 <td>{transaction.title.substring(0, 50)}</td>
                 <td>{transaction.payee.substring(0, 50)}</td>
                 <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-                <td>{transaction.category != null ? transaction.category.name : ''}</td>
+                <td>{transaction.categoryName != null ? transaction.categoryName : ''}</td>
                 <td style={{textAlign: "center"}}>
                     <Button variant="outline-primary" size="sm"
                             onClick={() => editTransaction(transaction.id)}><Pencil/>

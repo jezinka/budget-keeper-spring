@@ -31,15 +31,17 @@ public class ExpenseService {
     private static final String CATEGORY = "category";
 
     private final ExpenseRepository expenseRepository;
+    private final ExpenseMapper expenseMapper;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, ExpenseMapper expenseMapper) {
         this.expenseRepository = expenseRepository;
+        this.expenseMapper = expenseMapper;
     }
 
-    public Boolean updateTransaction(Long id, ExpenseDTO updateExpense) {
+    public Boolean updateTransaction(Long id, ExpenseDTO updateExpenseDTO) {
         boolean expenseExists = expenseRepository.existsById(id);
         if (expenseExists) {
-            Expense expense = ExpenseMapper.mapFromDto(updateExpense);
+            Expense expense = expenseMapper.mapToEntity(updateExpenseDTO);
             expense.setId(id);
             expenseRepository.save(expense);
             return true;
@@ -49,7 +51,7 @@ public class ExpenseService {
 
     @Transactional
     public Boolean splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
-        List<Expense> updateExpenses = updateExpensesDTOs.stream().map(ExpenseMapper::mapFromDto).toList();
+        List<Expense> updateExpenses = updateExpensesDTOs.stream().map(expenseMapper::mapToEntity).toList();
         expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
         return true;

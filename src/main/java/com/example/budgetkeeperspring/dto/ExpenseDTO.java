@@ -1,10 +1,12 @@
 package com.example.budgetkeeperspring.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Builder
 @Data
 public class ExpenseDTO {
     private Long id;
@@ -13,7 +15,6 @@ public class ExpenseDTO {
     private String payee;
     private BigDecimal amount;
     private Long categoryId;
-    private Long liabilityId;
+    private String categoryName;
     private Boolean deleted;
-
 }

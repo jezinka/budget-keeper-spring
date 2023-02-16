@@ -6,6 +6,7 @@ import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.dto.YearlyFilterDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
+import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,10 +31,12 @@ public class ExpenseController {
 
     private final ExpenseRepository expenseRepository;
     private final ExpenseService expenseService;
+    private final ExpenseMapper expenseMapper;
 
-    public ExpenseController(ExpenseRepository expenseRepository, ExpenseService expenseService) {
+    public ExpenseController(ExpenseRepository expenseRepository, ExpenseService expenseService, ExpenseMapper expenseMapper) {
         this.expenseRepository = expenseRepository;
         this.expenseService = expenseService;
+        this.expenseMapper = expenseMapper;
     }
 
     @PostMapping("")
@@ -42,15 +45,15 @@ public class ExpenseController {
     }
 
     @GetMapping("/currentMonth")
-    List<Expense> getCurrentMonth() {
+    List<ExpenseDTO> getCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-        return expenseRepository.findAllForTimePeriod(begin, end);
+        return expenseRepository.findAllForTimePeriod(begin, end).stream().map(expenseMapper::mapToDTO).toList();
     }
 
     @GetMapping("/{id}")
-    Expense getById(@PathVariable Long id) {
-        return expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException(id));
+    ExpenseDTO getById(@PathVariable Long id) {
+        return expenseRepository.findById(id).map(expenseMapper::mapToDTO).orElseThrow(() -> new ExpenseNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
