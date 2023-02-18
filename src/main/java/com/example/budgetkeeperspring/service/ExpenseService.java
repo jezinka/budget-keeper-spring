@@ -6,6 +6,8 @@ import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,11 +21,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.*;
 
+@Slf4j
+@AllArgsConstructor
 @Service
 public class ExpenseService {
 
@@ -32,11 +34,6 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
-
-    public ExpenseService(ExpenseRepository expenseRepository, ExpenseMapper expenseMapper) {
-        this.expenseRepository = expenseRepository;
-        this.expenseMapper = expenseMapper;
-    }
 
     public Boolean updateTransaction(Long id, ExpenseDTO updateExpenseDTO) {
         boolean expenseExists = expenseRepository.existsById(id);
@@ -51,9 +48,14 @@ public class ExpenseService {
 
     @Transactional
     public Boolean splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
+        log.debug("Expense (" + id + ") will be splitted and deleted");
+
         List<Expense> updateExpenses = updateExpensesDTOs.stream().map(expenseMapper::mapToEntity).toList();
-        expenseRepository.saveAll(updateExpenses);
+        List<Expense> updated = expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
+
+        String newIds = updated.stream().map(e -> e.getId().toString()).collect(joining(","));
+        log.debug("Expense (" + id + ") deleted. Expenses " + newIds + " created");
         return true;
     }
 
@@ -63,7 +65,7 @@ public class ExpenseService {
 
         expenses.stream()
                 .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
-                .collect(Collectors.groupingBy(Expense::getTransactionDay,
+                .collect(groupingBy(Expense::getTransactionDay,
                         reducing(BigDecimal.ZERO, e -> e.getAmount().abs(), BigDecimal::add)))
                 .forEach((key, value) -> list.add(new DailyExpensesDTO(key, value)));
         return list;

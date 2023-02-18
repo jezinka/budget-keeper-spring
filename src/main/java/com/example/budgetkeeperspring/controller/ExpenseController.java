@@ -9,6 +9,7 @@ import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.service.ExpenseService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("expenses")
 public class ExpenseController {
@@ -32,12 +34,6 @@ public class ExpenseController {
     private final ExpenseRepository expenseRepository;
     private final ExpenseService expenseService;
     private final ExpenseMapper expenseMapper;
-
-    public ExpenseController(ExpenseRepository expenseRepository, ExpenseService expenseService, ExpenseMapper expenseMapper) {
-        this.expenseRepository = expenseRepository;
-        this.expenseService = expenseService;
-        this.expenseMapper = expenseMapper;
-    }
 
     @PostMapping("")
     List<Expense> getAllExpenses(@RequestBody HashMap<String, Object> filters) {

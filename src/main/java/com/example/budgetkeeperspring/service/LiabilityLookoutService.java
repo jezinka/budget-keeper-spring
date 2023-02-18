@@ -4,22 +4,19 @@ import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
 import com.example.budgetkeeperspring.entity.LiabilityLookout;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Service
 public class LiabilityLookoutService {
 
     private final LiabilityLookoutRepository liabilityLookoutRepository;
     private final LiabilityLookoutMapper liabilityLookoutMapper;
-
-    public LiabilityLookoutService(LiabilityLookoutRepository liabilityLookoutRepository, LiabilityLookoutMapper liabilityLookoutMapper) {
-        this.liabilityLookoutRepository = liabilityLookoutRepository;
-        this.liabilityLookoutMapper = liabilityLookoutMapper;
-    }
 
     public List<LiabilityLookoutDTO> getLatest() {
         return liabilityLookoutRepository.retrieveAll().stream()

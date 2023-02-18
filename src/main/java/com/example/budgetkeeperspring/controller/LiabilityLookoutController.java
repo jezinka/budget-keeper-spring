@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.entity.LiabilityLookout;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import com.example.budgetkeeperspring.service.LiabilityLookoutService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("liabilityLookouts")
 public class LiabilityLookoutController {
@@ -21,12 +23,6 @@ public class LiabilityLookoutController {
     private final LiabilityLookoutRepository liabilityLookoutRepository;
     private final LiabilityLookoutService liabilityLookoutService;
     private final LiabilityLookoutMapper liabilityLookoutMapper;
-
-    public LiabilityLookoutController(LiabilityLookoutRepository liabilityLookoutRepository, LiabilityLookoutService liabilityLookoutService, LiabilityLookoutMapper liabilityLookoutMapper) {
-        this.liabilityLookoutRepository = liabilityLookoutRepository;
-        this.liabilityLookoutService = liabilityLookoutService;
-        this.liabilityLookoutMapper = liabilityLookoutMapper;
-    }
 
     @PutMapping("")
     Boolean add(@RequestBody LiabilityLookoutDTO liabilityLookoutDTO) {

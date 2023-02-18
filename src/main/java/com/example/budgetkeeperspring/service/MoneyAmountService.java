@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,16 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@AllArgsConstructor
 @Service
 public class MoneyAmountService {
 
     private final MoneyAmountRepository moneyAmountRepository;
     private final ExpenseRepository expenseRepository;
-
-    public MoneyAmountService(MoneyAmountRepository moneyAmountRepository, ExpenseRepository expenseRepository) {
-        this.moneyAmountRepository = moneyAmountRepository;
-        this.expenseRepository = expenseRepository;
-    }
 
     public CurrentMonthMoneyAmountDTO getForPeriod(LocalDate startDate, LocalDate endDate) {
 
