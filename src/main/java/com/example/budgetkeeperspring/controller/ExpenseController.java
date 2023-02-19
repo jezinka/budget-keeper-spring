@@ -43,7 +43,7 @@ public class ExpenseController {
     List<ExpenseDTO> getCurrentMonth() {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-        return expenseRepository.findAllForTimePeriod(begin, end).stream().map(expenseMapper::mapToDTO).toList();
+        return expenseRepository.findAllByTransactionDateBetween(begin, end).stream().map(expenseMapper::mapToDTO).toList();
     }
 
     @GetMapping("/{id}")

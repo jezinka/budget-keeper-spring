@@ -143,7 +143,7 @@ class ExpenseServiceTest {
         List<DailyExpensesDTO> result = expenseService.getDailyExpenses(any(), any());
 
         assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(170)) && p.getDay() == 12));
-        assertTrue(result.stream().anyMatch(p -> p.getAmount().equals(BigDecimal.valueOf(20)) && p.getDay() == 13));
+        assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(170)) == 0 && p.getDay() == 12));
+        assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(20)) == 0 && p.getDay() == 13));
     }
 }
