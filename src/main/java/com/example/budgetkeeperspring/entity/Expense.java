@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.entity;
 
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -28,6 +30,7 @@ public class Expense {
     private BigDecimal amount;
 
     @ManyToOne()
+    @Fetch(FetchMode.JOIN)
     private Category category;
 
     private Boolean deleted = false;
