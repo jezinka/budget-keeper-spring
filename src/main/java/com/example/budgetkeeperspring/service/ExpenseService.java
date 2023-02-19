@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
@@ -160,7 +161,7 @@ public class ExpenseService {
                     for (Map.Entry<Integer, BigDecimal> e : entry.entrySet()) {
                         Integer month = e.getKey();
                         BigDecimal amount = e.getValue();
-                        chartEntry.put(shortMonths[month - 1], amount);
+                        chartEntry.put(shortMonths[month - 1], amount.setScale(2, RoundingMode.HALF_UP));
                     }
                     list.add(chartEntry);
                 });
