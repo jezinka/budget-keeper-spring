@@ -29,7 +29,7 @@ class LiabilityLookoutServiceTest {
     LiabilityLookoutRepository liabilityLookoutRepository;
 
     @Spy
-    private LiabilityLookoutMapper liabilityLookoutMapper = Mappers.getMapper(LiabilityLookoutMapper.class);
+    LiabilityLookoutMapper liabilityLookoutMapper = Mappers.getMapper(LiabilityLookoutMapper.class);
 
     @Autowired
     @InjectMocks

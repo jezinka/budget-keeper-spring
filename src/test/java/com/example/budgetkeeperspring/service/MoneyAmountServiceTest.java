@@ -29,19 +29,19 @@ import static org.mockito.Mockito.*;
 class MoneyAmountServiceTest {
 
     @Mock
-    private MoneyAmountRepository moneyAmountRepository;
+    MoneyAmountRepository moneyAmountRepository;
     @Mock
-    private ExpenseRepository expenseRepository;
+    ExpenseRepository expenseRepository;
 
     @Autowired
     @InjectMocks
-    private MoneyAmountService moneyAmountService;
+    MoneyAmountService moneyAmountService;
 
-    private LocalDate start;
-    private LocalDate end;
+    LocalDate start;
+    LocalDate end;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         start = LocalDate.of(2022, 1, 1);
         end = LocalDate.of(2022, 1, 31);
     }

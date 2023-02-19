@@ -26,13 +26,13 @@ class CategoryRepositoryTest {
     ExpenseRepository expenseRepository;
 
     @Test
-    public void findActiveCategoryShouldReturnEmptyListForNoExpenses() {
+    void findActiveCategoryShouldReturnEmptyListForNoExpenses() {
         assertEquals(0, repository.findActiveForYear(2023).size());
     }
 
     @Test
     @Transactional
-    public void findActiveCategoryShouldReturnOneCategory() {
+    void findActiveCategoryShouldReturnOneCategory() {
         Category a = repository.save(new Category("testA"));
         Category b = repository.save(new Category("testB"));
         Expense expenseA = new Expense();
@@ -55,7 +55,7 @@ class CategoryRepositoryTest {
 
     @Test
     @Transactional
-    public void findActiveCategoryShouldReturnDistinctCategories() {
+    void findActiveCategoryShouldReturnDistinctCategories() {
         Category a = repository.save(new Category("testA"));
         Category b = repository.save(new Category("testB"));
 
