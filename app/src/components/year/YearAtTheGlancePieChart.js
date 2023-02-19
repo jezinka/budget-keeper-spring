@@ -15,11 +15,7 @@ const YearAtTheGlancePieChart = () => {
     }, []);
 
     async function loadData() {
-        const response = await fetch('/expenses/getPivot', {
-            method: "POST",
-            body: JSON.stringify(formState),
-            headers: {'Content-Type': 'application/json'}
-        })
+        const response = await fetch('/expenses/getPivot/' + formState.year);
         if (response.ok) {
             let data = await response.json();
 

@@ -117,7 +117,7 @@ public class ExpenseService {
 
         collect.put(99, getCategorySummary(yearlyExpenses));
         collect.forEach((month, categories) ->
-                categories.put("SUMA", categories.values().stream().reduce(BigDecimal::add).get())
+                categories.put("SUMA", categories.values().stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
         );
         return collect;
     }

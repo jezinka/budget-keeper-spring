@@ -3,7 +3,6 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
-import com.example.budgetkeeperspring.dto.YearlyFilterDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
@@ -68,14 +67,14 @@ public class ExpenseController {
         return expenseService.splitExpense(id, expenseDTOS);
     }
 
-    @PostMapping("/getPivot")
-    List<Map<String, Object>> getForSelectedYearPivot(@RequestBody YearlyFilterDTO filter) {
-        return expenseService.getMonthsPivot(filter.getYear());
+    @GetMapping("/getPivot/{year}")
+    List<Map<String, Object>> getForSelectedYearPivot(@PathVariable("year") Integer year) {
+        return expenseService.getMonthsPivot(year);
     }
 
-    @PostMapping("/yearAtTheGlance")
-    Map<Integer, Map<String, BigDecimal>> getForSelectedYear(@RequestBody YearlyFilterDTO filter) {
-        return expenseService.getYearAtGlance(filter.getYear());
+    @GetMapping("/yearAtTheGlance/{year}")
+    Map<Integer, Map<String, BigDecimal>> getForSelectedYear(@PathVariable("year") Integer year) {
+        return expenseService.getYearAtGlance(year);
     }
 
     @GetMapping("/currentMonthByCategory")

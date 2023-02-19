@@ -17,9 +17,7 @@ export default function YearlyExpenses() {
     const handleShow = () => setShow(true);
 
     async function reloadTable() {
-        const response = await fetch('/expenses/yearAtTheGlance', {
-            method: "POST", body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'}
-        });
+        const response = await fetch('/expenses/yearAtTheGlance/' + formState.year);
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -30,9 +28,8 @@ export default function YearlyExpenses() {
     }
 
     async function fetchCategories() {
-        const response = await fetch('/categories/getActiveForSelectedYear', {
-            method: "POST", body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'}
-        });
+        const response = await fetch('/categories/getActiveForSelectedYear/' + formState.year);
+
         if (response.ok) {
             const data = await response.json();
             if (data) {

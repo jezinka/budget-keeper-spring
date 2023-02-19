@@ -1,12 +1,10 @@
 package com.example.budgetkeeperspring.controller;
 
-import com.example.budgetkeeperspring.dto.YearlyFilterDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,8 +22,8 @@ public class CategoryController {
         return categoryRepository.findAll();
     }
 
-    @PostMapping("/getActiveForSelectedYear")
-    List<Category> getActiveForSelectedYear(@RequestBody YearlyFilterDTO yearlyFilter) {
-        return categoryRepository.findActiveForYear(yearlyFilter.getYear());
+    @GetMapping("/getActiveForSelectedYear/{year}")
+    List<Category> getActiveForSelectedYear(@PathVariable("year") Integer year) {
+        return categoryRepository.findActiveForYear(year);
     }
 }

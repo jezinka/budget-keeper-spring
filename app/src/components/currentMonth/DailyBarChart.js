@@ -17,7 +17,7 @@ const DailyBarChart = () => {
 
     return (
         <BarChart width={500} height={500} data={data} layout="vertical" className={"mt-3"}>
-            <XAxis type="number" domain={[0, 1000]}/>
+            <XAxis type="number" domain={[0, 500]}/>
             <YAxis dataKey="day" type="number" domain={[1, 31]} interval={0} tickCount={32}/>
             <Bar dataKey="amount" fill="#6BBDFF">
                 <LabelList dataKey="amount" position="right"/>
