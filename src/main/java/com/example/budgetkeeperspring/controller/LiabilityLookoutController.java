@@ -1,7 +1,6 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
-import com.example.budgetkeeperspring.entity.LiabilityLookout;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import com.example.budgetkeeperspring.service.LiabilityLookoutService;
@@ -36,7 +35,10 @@ public class LiabilityLookoutController {
     }
 
     @GetMapping("/getLookouts/{id}")
-    List<LiabilityLookout> getLookoutsForLiability(@PathVariable Long id) {
-        return liabilityLookoutRepository.findAllByLiability_Id(id);
+    List<LiabilityLookoutDTO> getLookoutsForLiability(@PathVariable("id") Long id) {
+        return liabilityLookoutRepository.findAllByLiability_Id(id)
+                .stream()
+                .map(liabilityLookoutMapper::mapToDto)
+                .toList();
     }
 }

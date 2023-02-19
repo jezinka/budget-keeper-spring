@@ -12,4 +12,10 @@ public class LiabilityLookoutDTO {
     Long id;
     LocalDate date;
     BigDecimal outcome;
+
+    Long liabilityId;
+    String liabilityName;
+
+    Long bankId;
+    String bankName;
 }

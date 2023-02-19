@@ -9,7 +9,7 @@ export default function LiabilitiesGrid() {
     const [showForm, setShowForm] = useState(false);
     const [showGraph, setShowGraph] = useState(false);
     const [formState, setFormState] = useState({
-        "date": getDate(), "liability": EMPTY_OPTION, "outcome": 0
+        "date": getDate(), "liabilityId": EMPTY_OPTION, "outcome": 0
     })
     const [liabilities, setLiabilities] = useState([]);
 
@@ -32,7 +32,7 @@ export default function LiabilitiesGrid() {
             <AddOutcomeForm formState={formState} setFormState={setFormState}
                             showForm={showForm} setShowForm={setShowForm}
                             reloadHandler={reloadTable}/>
-            <GraphModal showGraph={showGraph} setShowGraph={setShowGraph} liabilityId={formState.liability}/>
+            <GraphModal showGraph={showGraph} setShowGraph={setShowGraph} liabilityId={formState.liabilityId}/>
             <Container>
                 <Row lg={4}>
                     {liabilities.map(liability =>

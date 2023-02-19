@@ -7,7 +7,7 @@ const GraphModal = ({liabilityId, showGraph, setShowGraph}) => {
     const [data, setData] = useState([])
 
     const loadData = async () => {
-        const lookouts = await fetch("liabilityLookouts/getLookouts/" + liabilityId, {method: 'POST'});
+        const lookouts = await fetch("liabilityLookouts/getLookouts/" + liabilityId);
         const graphData = await lookouts.json()
         graphData.forEach((d) => {
             d.date = DATE_FORMAT.format(new Date(d.date))

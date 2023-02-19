@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.entity;
 
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,5 +23,6 @@ public class LiabilityLookout {
     private BigDecimal outcome;
 
     @ManyToOne()
+    @Fetch(FetchMode.JOIN)
     Liability liability;
 }

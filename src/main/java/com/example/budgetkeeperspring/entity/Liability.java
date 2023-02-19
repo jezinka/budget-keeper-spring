@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +16,8 @@ import java.util.Set;
 
 @Data
 @Entity
+@EqualsAndHashCode(exclude = "liabilityLookouts")
+@ToString(exclude = "liabilityLookouts")
 public class Liability {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
