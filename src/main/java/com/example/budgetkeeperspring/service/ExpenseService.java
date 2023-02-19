@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -100,7 +101,7 @@ public class ExpenseService {
             allPredicates.add(p -> true);
         }
 
-        return expenseRepository.retrieveAll()
+        return expenseRepository.findAllByOrderByTransactionDateDesc()
                 .stream()
                 .filter(allPredicates.stream().reduce(x -> true, Predicate::and))
                 .toList();
@@ -108,7 +109,10 @@ public class ExpenseService {
 
 
     public Map<Integer, Map<String, BigDecimal>> getYearAtGlance(int year) {
-        List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
+        LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
+        LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
+
+        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 
         Map<Integer, Map<String, BigDecimal>> collect = yearlyExpenses.stream().collect(groupingBy(
                 Expense::getTransactionMonth,
@@ -140,7 +144,11 @@ public class ExpenseService {
     public List<Map<String, Object>> getMonthsPivot(int year) {
         List<Map<String, Object>> list = new ArrayList<>();
         String[] shortMonths = DFS.getShortMonths();
-        List<Expense> yearlyExpenses = expenseRepository.findAllByYear(year);
+
+        LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
+        LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
+
+        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 
         yearlyExpenses.stream().collect(groupingBy(
                         Expense::getCategoryName,

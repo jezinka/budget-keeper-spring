@@ -23,7 +23,7 @@ class ExpenseRepositoryTest {
     ExpenseRepository repository;
 
     @Test
-    public void retrieveAll_ShouldReturnOnlyUndeletedEntities() {
+    void retrieveAll_ShouldReturnOnlyUndeletedEntities() {
 
         Expense expenseA = new Expense();
         expenseA.setAmount(BigDecimal.valueOf(-1.99));
@@ -36,7 +36,7 @@ class ExpenseRepositoryTest {
         expenseA.setTransactionDate(LocalDate.of(2020, 12, 1));
         repository.save(expenseB);
 
-        List<Expense> all = repository.retrieveAll();
+        List<Expense> all = repository.findAllByOrderByTransactionDateDesc();
         assertEquals(1, all.size());
         assertTrue(all.stream().noneMatch(Expense::getDeleted));
     }

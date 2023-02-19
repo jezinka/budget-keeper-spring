@@ -28,11 +28,11 @@ import static org.mockito.Mockito.when;
 class ExpenseServiceTest {
 
     @Mock
-    private ExpenseRepository expenseRepository;
+    ExpenseRepository expenseRepository;
 
     @Autowired
     @InjectMocks
-    private ExpenseService expenseService;
+    ExpenseService expenseService;
 
     @Test
     void findAll_withoutFilters() {
@@ -46,7 +46,7 @@ class ExpenseServiceTest {
         b.setAmount(BigDecimal.valueOf(-120));
 
         when(expenseRepository
-                .retrieveAll())
+                .findAllByOrderByTransactionDateDesc())
                 .thenReturn(new ArrayList<Expense>(
                         Arrays.asList(a, b))
                 );
@@ -77,7 +77,7 @@ class ExpenseServiceTest {
         d.setAmount(BigDecimal.valueOf(-120));
 
         when(expenseRepository
-                .retrieveAll())
+                .findAllByOrderByTransactionDateDesc())
                 .thenReturn(new ArrayList<Expense>(
                         Arrays.asList(a, b, c, d))
                 );
@@ -107,7 +107,7 @@ class ExpenseServiceTest {
         b.setPayee("test_user");
 
         when(expenseRepository
-                .retrieveAll())
+                .findAllByOrderByTransactionDateDesc())
                 .thenReturn(new ArrayList<Expense>(
                         Arrays.asList(a, b))
                 );
