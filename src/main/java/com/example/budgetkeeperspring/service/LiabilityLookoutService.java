@@ -4,14 +4,14 @@ import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
 import com.example.budgetkeeperspring.entity.LiabilityLookout;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class LiabilityLookoutService {
 

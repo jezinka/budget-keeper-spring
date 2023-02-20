@@ -7,7 +7,7 @@ import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class ExpenseService {
 

@@ -8,7 +8,7 @@ import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.service.ExpenseService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("expenses")
 public class ExpenseController {

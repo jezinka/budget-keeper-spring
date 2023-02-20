@@ -2,7 +2,7 @@ package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.entity.Log;
 import com.example.budgetkeeperspring.repository.LogRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("logs")
 public class LogController {

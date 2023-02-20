@@ -4,7 +4,7 @@ import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import com.example.budgetkeeperspring.service.LiabilityLookoutService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("liabilityLookouts")
 public class LiabilityLookoutController {

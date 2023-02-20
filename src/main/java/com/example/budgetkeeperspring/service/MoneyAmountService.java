@@ -5,7 +5,7 @@ import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class MoneyAmountService {
 
