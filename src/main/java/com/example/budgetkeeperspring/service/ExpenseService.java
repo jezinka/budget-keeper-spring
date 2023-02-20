@@ -4,6 +4,7 @@ import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import lombok.AllArgsConstructor;
@@ -37,19 +38,19 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
 
-    public Boolean updateTransaction(Long id, ExpenseDTO updateExpenseDTO) {
+    public Expense updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
         boolean expenseExists = expenseRepository.existsById(id);
         if (expenseExists) {
             Expense expense = expenseMapper.mapToEntity(updateExpenseDTO);
             expense.setId(id);
-            expenseRepository.save(expense);
-            return true;
+            return expenseRepository.save(expense);
+
         }
-        return false;
+        throw new ExpenseNotFoundException(id);
     }
 
     @Transactional
-    public Boolean splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
+    public void splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
         log.debug("Expense (" + id + ") will be splitted and deleted");
 
         List<Expense> updateExpenses = updateExpensesDTOs.stream().map(expenseMapper::mapToEntity).toList();
@@ -58,7 +59,6 @@ public class ExpenseService {
 
         String newIds = updated.stream().map(e -> e.getId().toString()).collect(joining(","));
         log.debug("Expense (" + id + ") deleted. Expenses " + newIds + " created");
-        return true;
     }
 
     public List<DailyExpensesDTO> getDailyExpenses(LocalDate begin, LocalDate end) {

@@ -3,8 +3,10 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.CurrentMonthMoneyAmountDTO;
 import com.example.budgetkeeperspring.service.MoneyAmountService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,11 +29,10 @@ public class MoneyAmountController {
         return moneyAmountService.getForPeriod(startDate, endDate);
     }
 
-    @PutMapping("")
-    Boolean addMoneyAmountForCurrentMonth(@RequestBody Map<String, String> newAmount) {
-        if (newAmount.containsKey("amount")) {
-            return moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);
-        }
-        return false;
+    @PostMapping("")
+    ResponseEntity addMoneyAmountForCurrentMonth(@RequestBody Map<String, String> newAmount) {
+        moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);
+        return new ResponseEntity(HttpStatus.CREATED);
+
     }
 }

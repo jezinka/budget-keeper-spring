@@ -5,7 +5,7 @@ const AddOutcomeForm = ({formState, setFormState, setShowForm, showForm, reloadH
 
     async function submitForm() {
         const response = await fetch('/liabilityLookouts/', {
-            method: 'PUT',
+            method: 'POST',
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},
         });

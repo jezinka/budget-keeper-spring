@@ -11,7 +11,7 @@ export default function MoneyAmount() {
 
     async function submitForm() {
         const response = await fetch('/moneyAmount/', {
-            method: 'PUT',
+            method: 'POST',
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},
         });

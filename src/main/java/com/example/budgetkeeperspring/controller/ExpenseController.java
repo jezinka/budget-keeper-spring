@@ -9,6 +9,9 @@ import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,19 +55,23 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    Boolean deleteExpense(@PathVariable Long id) {
+    ResponseEntity deleteExpense(@PathVariable Long id) {
         expenseRepository.deleteById(id);
-        return true;
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}")
-    Boolean editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
-        return expenseService.updateTransaction(id, updateExpense);
+    ResponseEntity editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
+        Expense savedExpense = expenseService.updateExpense(id, updateExpense);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", "/expenses/" + savedExpense.getId());
+        return new ResponseEntity(headers, HttpStatus.OK);
     }
 
     @PostMapping("/split/{id}")
-    Boolean splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
-        return expenseService.splitExpense(id, expenseDTOS);
+    ResponseEntity splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
+        expenseService.splitExpense(id, expenseDTOS);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/getPivot/{year}")

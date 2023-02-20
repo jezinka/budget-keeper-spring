@@ -4,6 +4,8 @@ import com.example.budgetkeeperspring.entity.Log;
 import com.example.budgetkeeperspring.repository.LogRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +32,8 @@ public class LogController {
     }
 
     @DeleteMapping("/{id}")
-    void deleteLog(@PathVariable Long id) {
+    ResponseEntity deleteLog(@PathVariable Long id) {
         logRepository.deleteById(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

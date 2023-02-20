@@ -50,7 +50,7 @@ public class MoneyAmountService {
         return new CurrentMonthMoneyAmountDTO(moneyAmount.getAmount(), incomeSum, expensesSum);
     }
 
-    public Boolean addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
+    public MoneyAmount addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
         BigDecimal amount = new BigDecimal(newAmount.get("amount"));
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
 
@@ -60,7 +60,6 @@ public class MoneyAmountService {
         } else {
             moneyAmount = new MoneyAmount(begin, amount);
         }
-        moneyAmountRepository.save(moneyAmount);
-        return true;
+        return moneyAmountRepository.save(moneyAmount);
     }
 }
