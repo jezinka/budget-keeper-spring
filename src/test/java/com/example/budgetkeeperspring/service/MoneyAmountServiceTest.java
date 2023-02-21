@@ -19,7 +19,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +51,7 @@ class MoneyAmountServiceTest {
     @Test
     void getForPeriodTest_noMoneyAmount() {
 
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(null);
+        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.empty());
 
         CurrentMonthMoneyAmountDTO result = moneyAmountService.getForPeriod(start, end);
 
@@ -73,7 +75,7 @@ class MoneyAmountServiceTest {
         f.setAmount(BigDecimal.valueOf(122));
 
 
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(new MoneyAmount(start, BigDecimal.valueOf(600)));
+        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.of(new MoneyAmount(start, BigDecimal.valueOf(600))));
         when(expenseRepository
                 .findAllByTransactionDateBetween(any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(new ArrayList<Expense>(
@@ -91,7 +93,7 @@ class MoneyAmountServiceTest {
     @Test
     void getMoneyForCurrentMonth_whenExists() {
         MoneyAmount moneyAmount = new MoneyAmount(start, BigDecimal.valueOf(600));
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(moneyAmount);
+        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.of(moneyAmount));
 
         moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
 
@@ -103,8 +105,11 @@ class MoneyAmountServiceTest {
 
     @Test
     void getMoneyForCurrentMonth_whenNotExist() {
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(null);
+        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.empty());
         moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
-        verify(moneyAmountRepository, times(1)).save(any());
+        ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
+
+        verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue().getAmount()).isEqualByComparingTo(BigDecimal.valueOf(300));
     }
 }

@@ -14,6 +14,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -24,9 +25,13 @@ public class MoneyAmountService {
 
     public CurrentMonthMoneyAmountDTO getForPeriod(LocalDate startDate, LocalDate endDate) {
 
-        MoneyAmount moneyAmount = moneyAmountRepository.findFirstByDate(startDate);
-        if (moneyAmount == null) {
+        MoneyAmount moneyAmount;
+        Optional<MoneyAmount> repositoryFirstByDate = moneyAmountRepository.findFirstByDate(startDate);
+
+        if (repositoryFirstByDate.isEmpty()) {
             return new CurrentMonthMoneyAmountDTO();
+        } else {
+            moneyAmount = repositoryFirstByDate.get();
         }
 
         List<BigDecimal> incomes = new ArrayList<>();
@@ -54,12 +59,12 @@ public class MoneyAmountService {
         BigDecimal amount = new BigDecimal(newAmount.get("amount"));
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
 
-        MoneyAmount moneyAmount = moneyAmountRepository.findFirstByDate(begin);
-        if (moneyAmount != null) {
-            moneyAmount.setAmount(amount);
-        } else {
-            moneyAmount = new MoneyAmount(begin, amount);
-        }
+        MoneyAmount moneyAmount = moneyAmountRepository
+                .findFirstByDate(begin)
+                .orElseGet(() -> new MoneyAmount(begin));
+
+        moneyAmount.setAmount(amount);
+
         return moneyAmountRepository.save(moneyAmount);
     }
 }

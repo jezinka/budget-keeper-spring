@@ -4,6 +4,7 @@ import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -46,7 +47,7 @@ public class ExpenseController {
 
     @GetMapping(EXPENSES_PATH_ID)
     ExpenseDTO getById(@PathVariable Long id) {
-        return expenseService.findById(id);
+        return expenseService.findById(id).orElseThrow(NotFoundException::new);
     }
 
     @DeleteMapping(EXPENSES_PATH_ID)

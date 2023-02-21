@@ -1,7 +1,6 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -12,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.Random;
 
 import static com.example.budgetkeeperspring.controller.ExpenseController.EXPENSES_PATH_ID;
@@ -35,7 +35,7 @@ class ExpenseControllerTest {
 
     @Test
     void getById_NotFound() throws Exception {
-        given(expenseService.findById(any(Long.class))).willThrow(NotFoundException.class);
+        given(expenseService.findById(any(Long.class))).willReturn(Optional.empty());
 
         mockMvc.perform(get(EXPENSES_PATH_ID, new Random().nextLong())
                         .accept(MediaType.APPLICATION_JSON))
@@ -51,7 +51,7 @@ class ExpenseControllerTest {
                 .amount(BigDecimal.valueOf(123.92))
                 .build();
 
-        given(expenseService.findById(123L)).willReturn(expense);
+        given(expenseService.findById(123L)).willReturn(Optional.of(expense));
 
         mockMvc.perform(get(EXPENSES_PATH_ID, expense.getId())
                         .accept(MediaType.APPLICATION_JSON))

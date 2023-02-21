@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.*;
@@ -183,10 +184,9 @@ public class ExpenseService {
         return list;
     }
 
-    public ExpenseDTO findById(Long id) {
+    public Optional<ExpenseDTO> findById(Long id) {
         return expenseRepository.findById(id)
-                .map(expenseMapper::mapToDTO)
-                .orElseThrow(() -> new NotFoundException("Expense with id: " + id + " not found."));
+                .map(expenseMapper::mapToDTO);
     }
 
     public List<ExpenseDTO> findAllByTransactionDateBetween(LocalDate begin, LocalDate end) {

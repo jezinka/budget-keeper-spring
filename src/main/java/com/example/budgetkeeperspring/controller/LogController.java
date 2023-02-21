@@ -41,6 +41,6 @@ public class LogController {
 
     @GetMapping(LOG_PATH_ID)
     Log getLogById(@PathVariable("id") Long id) {
-        return logRepository.findById(id).orElseThrow(() -> new NotFoundException("Long with id: " + id + " not found"));
+        return logRepository.findById(id).orElseThrow(NotFoundException::new);
     }
 }

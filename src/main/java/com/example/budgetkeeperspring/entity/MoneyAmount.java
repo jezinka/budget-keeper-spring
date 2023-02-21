@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 
 @Entity
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class MoneyAmount {
 
@@ -17,8 +19,7 @@ public class MoneyAmount {
     private LocalDate date;
     private BigDecimal amount;
 
-    public MoneyAmount(LocalDate date, BigDecimal amount) {
+    public MoneyAmount(LocalDate date) {
         this.date = date;
-        this.amount = amount;
     }
 }
