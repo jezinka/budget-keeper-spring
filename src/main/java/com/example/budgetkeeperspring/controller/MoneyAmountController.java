@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -17,19 +16,20 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("moneyAmount")
 public class MoneyAmountController {
+
+    public static final String MONEY_AMOUNT_PATH = "/moneyAmount";
 
     private final MoneyAmountService moneyAmountService;
 
-    @GetMapping("")
+    @GetMapping(MONEY_AMOUNT_PATH)
     CurrentMonthMoneyAmountDTO getCurrentMonth() {
         LocalDate startDate = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate endDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return moneyAmountService.getForPeriod(startDate, endDate);
     }
 
-    @PostMapping("")
+    @PostMapping(MONEY_AMOUNT_PATH)
     ResponseEntity addMoneyAmountForCurrentMonth(@RequestBody Map<String, String> newAmount) {
         moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);
         return new ResponseEntity(HttpStatus.CREATED);

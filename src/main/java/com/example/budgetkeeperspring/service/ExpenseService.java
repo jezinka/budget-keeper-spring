@@ -4,7 +4,7 @@ import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
-import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +39,12 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
 
     public Expense updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
-        boolean expenseExists = expenseRepository.existsById(id);
-        if (expenseExists) {
+        if (expenseRepository.existsById(id)) {
             Expense expense = expenseMapper.mapToEntity(updateExpenseDTO);
             expense.setId(id);
             return expenseRepository.save(expense);
-
         }
-        throw new ExpenseNotFoundException(id);
+        throw new NotFoundException("Expense with id: " + id + " not found.");
     }
 
     @Transactional
@@ -183,5 +181,23 @@ public class ExpenseService {
                         list.add(new MonthCategoryAmountDTO(month, category, amount.abs())))
                 );
         return list;
+    }
+
+    public ExpenseDTO findById(Long id) {
+        return expenseRepository.findById(id)
+                .map(expenseMapper::mapToDTO)
+                .orElseThrow(() -> new NotFoundException("Expense with id: " + id + " not found."));
+    }
+
+    public List<ExpenseDTO> findAllByTransactionDateBetween(LocalDate begin, LocalDate end) {
+        return expenseRepository
+                .findAllByTransactionDateBetween(begin, end)
+                .stream()
+                .map(expenseMapper::mapToDTO)
+                .toList();
+    }
+
+    public void deleteById(Long id) {
+        expenseRepository.deleteById(id);
     }
 }

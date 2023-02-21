@@ -1,17 +1,17 @@
-package com.example.budgetkeeperspring.advice;
+package com.example.budgetkeeperspring.controller;
 
-import com.example.budgetkeeperspring.exception.ExpenseNotFoundException;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class ExpenseNotFoundAdvice {
+public class ExceptionController {
 
-    @ExceptionHandler(ExpenseNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String expenseNotFoundHandler(ExpenseNotFoundException ex) {
+    public String notFoundHandler(NotFoundException ex) {
         return ex.getMessage();
     }
 }
