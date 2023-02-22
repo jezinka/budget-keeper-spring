@@ -16,12 +16,9 @@ export default function MoneyAmount() {
             headers: {'Content-Type': 'application/json'},
         });
         if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                setShowForm(false);
-                setFormState({"amount": 0});
-                return await loadData();
-            }
+            setShowForm(false);
+            setFormState({"amount": 0});
+            return await loadData();
         }
         handleError();
     }

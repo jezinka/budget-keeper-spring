@@ -10,11 +10,8 @@ const AddOutcomeForm = ({formState, setFormState, setShowForm, showForm, reloadH
             headers: {'Content-Type': 'application/json'},
         });
         if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                setShowForm(false);
-                return await reloadHandler();
-            }
+            setShowForm(false);
+            return await reloadHandler();
         }
         handleError();
     }
