@@ -37,9 +37,9 @@ class MoneyAmountControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.start", is(2000)))
-                .andExpect(jsonPath("$.incomes", is(1000)))
-                .andExpect(jsonPath("$.expenses", is(-1500)))
-                .andExpect(jsonPath("$.accountBalance", is(1500)));
+                .andExpect(jsonPath("$.start", is(2000.00)))
+                .andExpect(jsonPath("$.incomes", is(1000.00)))
+                .andExpect(jsonPath("$.expenses", is(-1500.00)))
+                .andExpect(jsonPath("$.accountBalance", is(1500.00)));
     }
 }
