@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
-public interface MoneyAmountRepository extends JpaRepository<MoneyAmount, LocalDate> {
+public interface MoneyAmountRepository extends JpaRepository<MoneyAmount, Long> {
 
     Optional<MoneyAmount> findFirstByDateOrderByCreatedAtDesc(LocalDate date);
 

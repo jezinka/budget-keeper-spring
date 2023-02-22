@@ -1,16 +1,20 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CurrentMonthMoneyAmountDTO;
+import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
+import com.example.budgetkeeperspring.mapper.MoneyAmountMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,10 +23,8 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +37,8 @@ class MoneyAmountServiceTest {
     MoneyAmountRepository moneyAmountRepository;
     @Mock
     ExpenseRepository expenseRepository;
+    @Spy
+    MoneyAmountMapper moneyAmountMapper = Mappers.getMapper(MoneyAmountMapper.class);
 
     @Autowired
     @InjectMocks
@@ -93,23 +97,13 @@ class MoneyAmountServiceTest {
     }
 
     @Test
-    void addMoneyForCurrentMonth_whenExists() {
-        moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
+    void addMoneyForCurrentMonth() {
+        moneyAmountService.addMoneyAmountForCurrentMonth(MoneyAmountDTO.builder().amount(BigDecimal.valueOf(300)).build());
 
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
         assertEquals(300, argumentCaptor.getValue().getAmount().intValue());
         assertEquals(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()), argumentCaptor.getValue().getDate());
-    }
-
-    @Test
-    void getMoneyForCurrentMonth_whenNotExist() {
-
-        moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
-        ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
-
-        verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue().getAmount()).isEqualByComparingTo(BigDecimal.valueOf(300));
     }
 }

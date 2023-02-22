@@ -1,8 +1,10 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CurrentMonthMoneyAmountDTO;
+import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
+import com.example.budgetkeeperspring.mapper.MoneyAmountMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,6 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class MoneyAmountService {
 
     private final MoneyAmountRepository moneyAmountRepository;
     private final ExpenseRepository expenseRepository;
+    private final MoneyAmountMapper moneyAmountMapper;
 
     public CurrentMonthMoneyAmountDTO getForPeriod(LocalDate startDate, LocalDate endDate) {
 
@@ -55,13 +57,8 @@ public class MoneyAmountService {
         return new CurrentMonthMoneyAmountDTO(moneyAmount.getAmount(), incomeSum, expensesSum);
     }
 
-    public MoneyAmount addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
-        BigDecimal amount = new BigDecimal(newAmount.get("amount"));
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-
-        MoneyAmount moneyAmount = new MoneyAmount();
-        moneyAmount.setDate(begin);
-        moneyAmount.setAmount(amount);
-        return moneyAmountRepository.save(moneyAmount);
+    public MoneyAmountDTO addMoneyAmountForCurrentMonth(MoneyAmountDTO newAmount) {
+        newAmount.setDate(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
+        return moneyAmountMapper.mapToDto(moneyAmountRepository.save(moneyAmountMapper.mapToEntity(newAmount)));
     }
 }

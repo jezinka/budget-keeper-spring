@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,6 +25,13 @@ class CategoryRepositoryTest {
 
     @Autowired
     ExpenseRepository expenseRepository;
+
+    @Test
+    void save_test() {
+        Category category = repository.save(Category.builder().name("test_category").build());
+
+        assertThat(category.getId()).isNotNull();
+    }
 
     @Test
     void findActiveCategoryShouldReturnEmptyListForNoExpenses() {

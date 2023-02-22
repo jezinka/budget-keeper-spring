@@ -184,15 +184,15 @@ public class ExpenseService {
     }
 
     public Optional<ExpenseDTO> findById(Long id) {
-        return expenseRepository.findById(id)
-                .map(expenseMapper::mapToDTO);
+        return Optional.ofNullable(expenseMapper.mapToDto(expenseRepository.findById(id)
+                .orElse(null)));
     }
 
     public List<ExpenseDTO> findAllByTransactionDateBetween(LocalDate begin, LocalDate end) {
         return expenseRepository
                 .findAllByTransactionDateBetween(begin, end)
                 .stream()
-                .map(expenseMapper::mapToDTO)
+                .map(expenseMapper::mapToDto)
                 .toList();
     }
 

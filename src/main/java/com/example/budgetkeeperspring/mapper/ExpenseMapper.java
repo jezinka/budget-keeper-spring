@@ -16,6 +16,6 @@ public interface ExpenseMapper {
     @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
     @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "category.name", target = "categoryName")
-    ExpenseDTO mapToDTO(Expense expense);
+    ExpenseDTO mapToDto(Expense expense);
 
 }
