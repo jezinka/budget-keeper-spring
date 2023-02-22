@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -44,7 +44,7 @@ class ExpenseControllerTestIT {
                 .build());
 
         List<ExpenseDTO> dtos = expenseController.getCurrentMonth();
-        assertThat(dtos.size()).isEqualTo(1);
+        assertThat(dtos).hasSize(1);
     }
 
     @Rollback
@@ -54,7 +54,7 @@ class ExpenseControllerTestIT {
         expenseRepository.deleteAll();
 
         List<ExpenseDTO> dtos = expenseController.getCurrentMonth();
-        assertThat(dtos.size()).isEqualTo(0);
+        assertThat(dtos.size()).isZero();
     }
 
     @Test

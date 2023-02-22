@@ -11,7 +11,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
 class MoneyAmountControllerTestIT {
