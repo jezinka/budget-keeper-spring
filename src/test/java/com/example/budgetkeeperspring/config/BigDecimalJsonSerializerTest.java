@@ -22,7 +22,7 @@ class BigDecimalJsonSerializerTest {
 
     @ParameterizedTest
     @ValueSource(doubles = {-12.123, -10, 2, 10.99})
-    public void testSerialization(double number) throws JsonProcessingException {
+    void testSerialization(double number) throws JsonProcessingException {
         Map<String, BigDecimal> price = Map.of("price", BigDecimal.valueOf(number));
         String json = objectMapper.writeValueAsString(price);
 
