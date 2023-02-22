@@ -14,13 +14,10 @@ public class CurrentMonthMoneyAmountDTO {
     private BigDecimal expenses;
     private BigDecimal accountBalance;
 
-    public BigDecimal getAccountBalance() {
-        return start.add(incomes).add(expenses);
-    }
-
     public CurrentMonthMoneyAmountDTO(BigDecimal start, BigDecimal incomes, BigDecimal expenses) {
         this.start = start;
         this.incomes = incomes;
         this.expenses = expenses;
+        this.accountBalance = start.add(incomes).add(expenses);
     }
 }
