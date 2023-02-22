@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Data
 public class ExpenseDTO {
     private Long id;
+    private Integer version;
     private LocalDate transactionDate;
     private String title;
     private String payee;

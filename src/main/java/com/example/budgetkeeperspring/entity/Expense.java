@@ -1,6 +1,10 @@
 package com.example.budgetkeeperspring.entity;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
@@ -11,18 +15,26 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data
-@Entity
 @SQLDelete(sql = "UPDATE expense SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@Getter
+@Setter
+@Builder
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Version
+    private Integer version;
 
     private LocalDate transactionDate;
     private String title;

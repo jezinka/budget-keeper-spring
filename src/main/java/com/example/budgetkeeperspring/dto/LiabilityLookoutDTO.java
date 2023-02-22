@@ -9,13 +9,14 @@ import java.time.LocalDate;
 @Builder
 @Data
 public class LiabilityLookoutDTO {
-    Long id;
-    LocalDate date;
-    BigDecimal outcome;
+    private Long id;
+    private Integer version;
+    private LocalDate date;
+    private BigDecimal outcome;
 
-    Long liabilityId;
-    String liabilityName;
+    private Long liabilityId;
+    private String liabilityName;
 
-    Long bankId;
-    String bankName;
+    private Long bankId;
+    private String bankName;
 }

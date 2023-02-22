@@ -10,5 +10,7 @@ import java.util.Optional;
 @Repository
 public interface MoneyAmountRepository extends JpaRepository<MoneyAmount, LocalDate> {
 
+    Optional<MoneyAmount> findFirstByDateOrderByCreatedAtDesc(LocalDate date);
+
     Optional<MoneyAmount> findFirstByDate(LocalDate date);
 }

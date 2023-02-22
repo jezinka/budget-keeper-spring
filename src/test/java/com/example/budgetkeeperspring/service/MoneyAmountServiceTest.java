@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -50,11 +51,7 @@ class MoneyAmountServiceTest {
 
     @Test
     void getForPeriodTest_noMoneyAmount() {
-
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.empty());
-
         CurrentMonthMoneyAmountDTO result = moneyAmountService.getForPeriod(start, end);
-
         assertNull(result.getExpenses());
     }
 
@@ -75,7 +72,12 @@ class MoneyAmountServiceTest {
         f.setAmount(BigDecimal.valueOf(122));
 
 
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.of(new MoneyAmount(start, BigDecimal.valueOf(600))));
+        when(moneyAmountRepository.findFirstByDateOrderByCreatedAtDesc(any(LocalDate.class))).thenReturn(
+                Optional.of(MoneyAmount.builder()
+                        .date(start)
+                        .amount(BigDecimal.valueOf(600))
+                        .build()));
+
         when(expenseRepository
                 .findAllByTransactionDateBetween(any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(new ArrayList<Expense>(
@@ -91,21 +93,19 @@ class MoneyAmountServiceTest {
     }
 
     @Test
-    void getMoneyForCurrentMonth_whenExists() {
-        MoneyAmount moneyAmount = new MoneyAmount(start, BigDecimal.valueOf(600));
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.of(moneyAmount));
-
+    void addMoneyForCurrentMonth_whenExists() {
         moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
 
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(moneyAmount, argumentCaptor.getValue());
+        assertEquals(300, argumentCaptor.getValue().getAmount().intValue());
+        assertEquals(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()), argumentCaptor.getValue().getDate());
     }
 
     @Test
     void getMoneyForCurrentMonth_whenNotExist() {
-        when(moneyAmountRepository.findFirstByDate(any(LocalDate.class))).thenReturn(Optional.empty());
+
         moneyAmountService.addMoneyAmountForCurrentMonth(Map.of("amount", "300"));
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 

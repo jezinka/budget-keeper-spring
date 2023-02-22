@@ -1,27 +1,36 @@
 package com.example.budgetkeeperspring.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Version;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@Builder
 @Entity
-@EqualsAndHashCode(exclude = "liabilities")
-@ToString(exclude = "liabilities")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Bank {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    String name;
+
+    @Version
+    private Integer version;
+
+    private String name;
 
     @OneToMany(mappedBy = "bank")
     private Set<Liability> liabilities = new HashSet<>();

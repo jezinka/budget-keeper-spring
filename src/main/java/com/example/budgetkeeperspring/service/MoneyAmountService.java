@@ -26,7 +26,7 @@ public class MoneyAmountService {
     public CurrentMonthMoneyAmountDTO getForPeriod(LocalDate startDate, LocalDate endDate) {
 
         MoneyAmount moneyAmount;
-        Optional<MoneyAmount> repositoryFirstByDate = moneyAmountRepository.findFirstByDate(startDate);
+        Optional<MoneyAmount> repositoryFirstByDate = moneyAmountRepository.findFirstByDateOrderByCreatedAtDesc(startDate);
 
         if (repositoryFirstByDate.isEmpty()) {
             return new CurrentMonthMoneyAmountDTO();
@@ -55,16 +55,13 @@ public class MoneyAmountService {
         return new CurrentMonthMoneyAmountDTO(moneyAmount.getAmount(), incomeSum, expensesSum);
     }
 
-    public MoneyAmount addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
+    public void addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
         BigDecimal amount = new BigDecimal(newAmount.get("amount"));
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
 
-        MoneyAmount moneyAmount = moneyAmountRepository
-                .findFirstByDate(begin)
-                .orElseGet(() -> new MoneyAmount(begin));
-
+        MoneyAmount moneyAmount = new MoneyAmount();
+        moneyAmount.setDate(begin);
         moneyAmount.setAmount(amount);
-
-        return moneyAmountRepository.save(moneyAmount);
+        moneyAmountRepository.save(moneyAmount);
     }
 }

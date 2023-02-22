@@ -44,7 +44,7 @@ class ExpenseControllerTest {
 
     @Test
     void getById() throws Exception {
-        ExpenseDTO expense = new ExpenseDTO().builder()
+        ExpenseDTO expense = ExpenseDTO.builder()
                 .id(123L)
                 .title("test title")
                 .deleted(false)
