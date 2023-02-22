@@ -5,7 +5,6 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.repository.LogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,9 +33,9 @@ public class LogController {
     }
 
     @DeleteMapping(LOG_PATH_ID)
-    ResponseEntity deleteLog(@PathVariable Long id) {
+    ResponseEntity<Log> deleteLog(@PathVariable Long id) {
         logRepository.deleteById(id);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(LOG_PATH_ID)

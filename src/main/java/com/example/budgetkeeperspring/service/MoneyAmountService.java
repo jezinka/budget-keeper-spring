@@ -55,13 +55,13 @@ public class MoneyAmountService {
         return new CurrentMonthMoneyAmountDTO(moneyAmount.getAmount(), incomeSum, expensesSum);
     }
 
-    public void addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
+    public MoneyAmount addMoneyAmountForCurrentMonth(Map<String, String> newAmount) {
         BigDecimal amount = new BigDecimal(newAmount.get("amount"));
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
 
         MoneyAmount moneyAmount = new MoneyAmount();
         moneyAmount.setDate(begin);
         moneyAmount.setAmount(amount);
-        moneyAmountRepository.save(moneyAmount);
+        return moneyAmountRepository.save(moneyAmount);
     }
 }

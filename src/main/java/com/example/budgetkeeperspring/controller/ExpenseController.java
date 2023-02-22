@@ -8,7 +8,6 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,23 +50,23 @@ public class ExpenseController {
     }
 
     @DeleteMapping(EXPENSES_PATH_ID)
-    ResponseEntity deleteExpense(@PathVariable Long id) {
+    ResponseEntity<ExpenseDTO> deleteExpense(@PathVariable Long id) {
         expenseService.deleteById(id);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(EXPENSES_PATH_ID)
-    ResponseEntity editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
+    ResponseEntity<ExpenseDTO> editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
         Expense savedExpense = expenseService.updateExpense(id, updateExpense);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "/expenses/" + savedExpense.getId());
-        return new ResponseEntity(headers, HttpStatus.OK);
+        return ResponseEntity.ok().headers(headers).build();
     }
 
     @PostMapping(EXPENSES_PATH + "/split/{id}")
-    ResponseEntity splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
+    ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
         expenseService.splitExpense(id, expenseDTOS);
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(EXPENSES_PATH + "/getPivot/{year}")

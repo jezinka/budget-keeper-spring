@@ -1,11 +1,11 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.LiabilityLookoutDTO;
+import com.example.budgetkeeperspring.entity.LiabilityLookout;
 import com.example.budgetkeeperspring.mapper.LiabilityLookoutMapper;
 import com.example.budgetkeeperspring.repository.LiabilityLookoutRepository;
 import com.example.budgetkeeperspring.service.LiabilityLookoutService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -26,9 +27,9 @@ public class LiabilityLookoutController {
     private final LiabilityLookoutMapper liabilityLookoutMapper;
 
     @PostMapping("")
-    ResponseEntity add(@RequestBody LiabilityLookoutDTO liabilityLookoutDTO) {
-        liabilityLookoutRepository.save(liabilityLookoutMapper.mapToEntity(liabilityLookoutDTO));
-        return new ResponseEntity(HttpStatus.CREATED);
+    ResponseEntity<LiabilityLookoutDTO> add(@RequestBody LiabilityLookoutDTO liabilityLookoutDTO) {
+        LiabilityLookout savedLiabilityLookout = liabilityLookoutRepository.save(liabilityLookoutMapper.mapToEntity(liabilityLookoutDTO));
+        return ResponseEntity.created(URI.create("/liabilityLookouts/" + savedLiabilityLookout.getId())).build();
     }
 
     @GetMapping("")
