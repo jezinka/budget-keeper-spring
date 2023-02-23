@@ -3,8 +3,8 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
-import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.*;
@@ -38,13 +39,19 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
 
-    public Expense updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
-        if (expenseRepository.existsById(id)) {
-            Expense expense = expenseMapper.mapToEntity(updateExpenseDTO);
-            expense.setId(id);
-            return expenseRepository.save(expense);
-        }
-        throw new NotFoundException("Expense with id: " + id + " not found.");
+    public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
+        AtomicReference<Optional<ExpenseDTO>> atomicReference = new AtomicReference<>();
+
+        expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
+            foundExpense.setAmount(updateExpenseDTO.getAmount());
+            Category category = new Category();
+            category.setId(updateExpenseDTO.getId());
+            foundExpense.setCategory(category);
+            expenseRepository.save(foundExpense);
+            atomicReference.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
+        }, () -> atomicReference.set(Optional.empty()));
+
+        return atomicReference.get();
     }
 
     @Transactional

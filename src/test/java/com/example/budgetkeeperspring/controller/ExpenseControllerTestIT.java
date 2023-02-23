@@ -72,4 +72,11 @@ class ExpenseControllerTestIT {
 
         assertThat(dto).isNotNull();
     }
+
+    @Test
+    void edit_NotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            expenseController.editExpense(new Random().nextLong(), ExpenseDTO.builder().build());
+        });
+    }
 }

@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +25,8 @@ class MoneyAmountControllerTestIT {
     @Autowired
     MoneyAmountRepository moneyAmountRepository;
 
+    @Rollback
+    @Transactional
     @Test
     void moneyAmount_create() {
         moneyAmountRepository.findAll();

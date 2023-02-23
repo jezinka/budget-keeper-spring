@@ -7,7 +7,6 @@ import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,10 +56,10 @@ public class ExpenseController {
 
     @PutMapping(EXPENSES_PATH_ID)
     ResponseEntity<ExpenseDTO> editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
-        Expense savedExpense = expenseService.updateExpense(id, updateExpense);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "/expenses/" + savedExpense.getId());
-        return ResponseEntity.ok().headers(headers).build();
+        if (expenseService.updateExpense(id, updateExpense).isEmpty()) {
+            throw new NotFoundException();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(EXPENSES_PATH + "/split/{id}")
