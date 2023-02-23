@@ -80,6 +80,8 @@ class ExpenseControllerTest {
     void deleteById() throws Exception {
         Long expenseId = new Random().nextLong();
 
+        given(expenseService.deleteById(any())).willReturn(true);
+        
         mockMvc.perform(delete(EXPENSES_PATH_ID, expenseId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());

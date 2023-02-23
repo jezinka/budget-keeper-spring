@@ -85,6 +85,13 @@ class ExpenseControllerTestIT {
         });
     }
 
+    @Test
+    void delete_NotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            expenseController.deleteExpense(new Random().nextLong());
+        });
+    }
+
 
     @Rollback
     @Transactional
@@ -106,4 +113,13 @@ class ExpenseControllerTestIT {
         assertThat(updatedExpense.getAmount()).isEqualByComparingTo(BigDecimal.ONE);
     }
 
+    @Test
+    void deleteByIdFound() {
+        saveExpense();
+        Expense expense = expenseRepository.findAll().get(0);
+
+        ResponseEntity<ExpenseDTO> responseEntity = expenseController.deleteExpense(expense.getId());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        assertThat(expenseRepository.findById(expense.getId())).isEmpty();
+    }
 }

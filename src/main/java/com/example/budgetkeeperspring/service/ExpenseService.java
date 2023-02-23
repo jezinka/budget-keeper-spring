@@ -203,7 +203,11 @@ public class ExpenseService {
                 .toList();
     }
 
-    public void deleteById(Long id) {
-        expenseRepository.deleteById(id);
+    public Boolean deleteById(Long id) {
+        if (expenseRepository.existsById(id)) {
+            expenseRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

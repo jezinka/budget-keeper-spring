@@ -47,6 +47,6 @@ class ExpenseRepositoryTest {
 
         List<Expense> all = repository.findAllByOrderByTransactionDateDesc();
         assertEquals(1, all.size());
-        assertTrue(all.stream().noneMatch(Expense::getDeleted));
+        assertTrue(all.stream().noneMatch(Expense::isDeleted));
     }
 }

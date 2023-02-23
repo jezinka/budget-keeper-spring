@@ -50,7 +50,9 @@ public class ExpenseController {
 
     @DeleteMapping(EXPENSES_PATH_ID)
     ResponseEntity<ExpenseDTO> deleteExpense(@PathVariable Long id) {
-        expenseService.deleteById(id);
+        if (!expenseService.deleteById(id)) {
+            throw new NotFoundException();
+        }
         return ResponseEntity.noContent().build();
     }
 

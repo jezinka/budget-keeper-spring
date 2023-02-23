@@ -19,7 +19,7 @@ import org.hibernate.annotations.Where;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@SQLDelete(sql = "UPDATE expense SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE expense SET deleted = true WHERE id=? and version = ?")
 @Where(clause = "deleted=false")
 @Getter
 @Setter
@@ -45,7 +45,7 @@ public class Expense {
     @Fetch(FetchMode.JOIN)
     private Category category;
 
-    private Boolean deleted = false;
+    private boolean deleted = Boolean.FALSE;
 
     public String getCategoryName() {
         if (category != null) {

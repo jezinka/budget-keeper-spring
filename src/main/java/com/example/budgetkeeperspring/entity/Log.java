@@ -20,7 +20,7 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLDelete(sql = "UPDATE log SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE log SET deleted = true WHERE id=? and version = ?")
 public class Log {
 
     @Id
@@ -33,5 +33,5 @@ public class Log {
     private Date date;
     private String type;
     private String message;
-    private Boolean deleted = Boolean.FALSE;
+    private boolean deleted = Boolean.FALSE;
 }
