@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
 
+
 @Configuration
 public class SecurityConfiguration {
 
@@ -20,8 +21,8 @@ public class SecurityConfiguration {
         /* CUSTOM SECURITY */
         httpSecurity
                 .csrf().disable()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**")
+                .authorizeHttpRequests()
+                .requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
