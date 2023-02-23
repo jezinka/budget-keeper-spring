@@ -30,6 +30,9 @@ class ExpenseControllerTestIT {
     @Autowired
     ExpenseRepository expenseRepository;
 
+    @Autowired
+    ExpenseMapper expenseMapper;
+
     @Test
     void expense_notFound() {
         assertThrows(NotFoundException.class, () -> {
@@ -39,12 +42,7 @@ class ExpenseControllerTestIT {
 
     @Test
     void currentMonth_test() {
-        expenseRepository.save(Expense.builder()
-                .amount(BigDecimal.TEN)
-                .title("test_title")
-                .transactionDate(LocalDate.now())
-                .deleted(false)
-                .build());
+        saveExpense();
 
         List<ExpenseDTO> dtos = expenseController.getCurrentMonth();
         assertThat(dtos).hasSize(1);
@@ -62,12 +60,7 @@ class ExpenseControllerTestIT {
 
     @Test
     void testGetById() {
-        expenseRepository.save(Expense.builder()
-                .amount(BigDecimal.TEN)
-                .title("test_title")
-                .transactionDate(LocalDate.now())
-                .deleted(false)
-                .build());
+        saveExpense();
 
         Expense expense = expenseRepository.findAll().get(0);
 
@@ -76,10 +69,41 @@ class ExpenseControllerTestIT {
         assertThat(dto).isNotNull();
     }
 
+    private void saveExpense() {
+        expenseRepository.save(Expense.builder()
+                .amount(BigDecimal.TEN)
+                .title("test_title")
+                .transactionDate(LocalDate.now())
+                .deleted(false)
+                .build());
+    }
+
     @Test
     void edit_NotFound() {
         assertThrows(NotFoundException.class, () -> {
             expenseController.editExpense(new Random().nextLong(), ExpenseDTO.builder().build());
         });
     }
+
+
+    @Rollback
+    @Transactional
+    @Test
+    void updateExistingExpense() {
+        saveExpense();
+
+        Expense expense = expenseRepository.findAll().get(0);
+        ExpenseDTO expenseDTO = expenseMapper.mapToDto(expense);
+        expenseDTO.setId(null);
+        expenseDTO.setVersion(null);
+
+        expenseDTO.setAmount(BigDecimal.ONE);
+
+        ResponseEntity<ExpenseDTO> responseEntity = expenseController.editExpense(expense.getId(), expenseDTO);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+
+        Expense updatedExpense = expenseRepository.findById(expense.getId()).get();
+        assertThat(updatedExpense.getAmount()).isEqualByComparingTo(BigDecimal.ONE);
+    }
+
 }
