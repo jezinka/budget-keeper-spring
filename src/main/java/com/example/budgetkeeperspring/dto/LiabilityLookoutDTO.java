@@ -1,5 +1,8 @@
 package com.example.budgetkeeperspring.dto;
 
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +14,13 @@ import java.time.LocalDate;
 public class LiabilityLookoutDTO {
     private Long id;
     private Integer version;
+
+    @NotNull
+    @PastOrPresent
     private LocalDate date;
+
+    @NotNull
+    @Digits(integer = 5, fraction = 2)
     private BigDecimal outcome;
 
     private Long liabilityId;

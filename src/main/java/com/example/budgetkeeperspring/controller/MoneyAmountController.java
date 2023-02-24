@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +34,7 @@ public class MoneyAmountController {
     }
 
     @PostMapping(MONEY_AMOUNT_PATH)
-    ResponseEntity<MoneyAmountDTO> addMoneyAmountForCurrentMonth(@RequestBody MoneyAmountDTO newAmount) {
+    ResponseEntity<MoneyAmountDTO> addMoneyAmountForCurrentMonth(@Validated @RequestBody MoneyAmountDTO newAmount) {
         MoneyAmountDTO savedMoneyAmount = moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);
         System.out.println(savedMoneyAmount.getId().toString());
         HttpHeaders headers = new HttpHeaders();

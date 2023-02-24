@@ -29,7 +29,7 @@ class CategoryRepositoryTest {
     @Test
     void save_test() {
         Category category = repository.save(Category.builder().name("test_category").build());
-
+        repository.flush();
         assertThat(category.getId()).isNotNull();
     }
 

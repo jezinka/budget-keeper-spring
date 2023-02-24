@@ -5,13 +5,17 @@ import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,6 +36,16 @@ class ExpenseControllerTestIT {
 
     @Autowired
     ExpenseMapper expenseMapper;
+
+    @Autowired
+    WebApplicationContext wac;
+
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
 
     @Test
     void expense_notFound() {

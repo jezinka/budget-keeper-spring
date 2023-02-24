@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.repository;
 
 import com.example.budgetkeeperspring.entity.Expense;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -10,8 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @DataJpaTest
@@ -19,6 +19,19 @@ class ExpenseRepositoryTest {
 
     @Autowired
     ExpenseRepository repository;
+
+    @Test
+    void save_tooLongName_test() {
+
+        assertThrows(ConstraintViolationException.class, () -> {
+            Expense expense = repository.save(Expense.builder()
+                    .amount(BigDecimal.TEN)
+                    .title("test tdfjlasjdfkdsjkfjdsklfjkadsjfkdsjfkdsjfksdjkfdsklfkldsjfkdsjfkjakfjdksjfkdsjfklaskldjskfjdkslfjkldsjfkldsjfkdsjkfjdsklfjklajfdsjfasfitletdfjlasjdfkdsjkfjdsklfjkadsjfkdsjfkdsjfksdjkfdsklfkldsjfkdsjfkjakfjdksjfkdsjfklaskldjskfjdkslfjkldsjfkldsjfkdsjkfjdsklfjklajfdsjfasfitle")
+                    .transactionDate(LocalDate.now())
+                    .build());
+            repository.flush();
+        });
+    }
 
     @Test
     void save_test() {

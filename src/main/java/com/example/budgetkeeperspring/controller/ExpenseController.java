@@ -8,6 +8,7 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +58,7 @@ public class ExpenseController {
     }
 
     @PutMapping(EXPENSES_PATH_ID)
-    ResponseEntity<ExpenseDTO> editExpense(@PathVariable Long id, @RequestBody ExpenseDTO updateExpense) {
+    ResponseEntity<ExpenseDTO> editExpense(@PathVariable Long id, @Validated @RequestBody ExpenseDTO updateExpense) {
         if (expenseService.updateExpense(id, updateExpense).isEmpty()) {
             throw new NotFoundException();
         }
@@ -65,7 +66,7 @@ public class ExpenseController {
     }
 
     @PostMapping(EXPENSES_PATH + "/split/{id}")
-    ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @RequestBody List<ExpenseDTO> expenseDTOS) {
+    ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @Validated @RequestBody List<ExpenseDTO> expenseDTOS) {
         expenseService.splitExpense(id, expenseDTOS);
         return ResponseEntity.ok().build();
     }
