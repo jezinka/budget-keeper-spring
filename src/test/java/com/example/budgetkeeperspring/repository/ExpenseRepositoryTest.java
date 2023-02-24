@@ -47,16 +47,16 @@ class ExpenseRepositoryTest {
     @Test
     void retrieveAll_ShouldReturnOnlyUndeletedEntities() {
 
-        Expense expenseA = new Expense();
-        expenseA.setAmount(BigDecimal.valueOf(-1.99));
-        expenseA.setTransactionDate(LocalDate.of(2020, 12, 1));
-        expenseA.setDeleted(true);
-        repository.save(expenseA);
+        repository.save(Expense.builder()
+                .amount(BigDecimal.valueOf(-1.99))
+                .transactionDate(LocalDate.of(2020, 12, 1))
+                .deleted(true)
+                .build());
 
-        Expense expenseB = new Expense();
-        expenseA.setAmount(BigDecimal.valueOf(-1.99));
-        expenseA.setTransactionDate(LocalDate.of(2020, 12, 1));
-        repository.save(expenseB);
+        repository.save(Expense.builder()
+                .amount(BigDecimal.valueOf(-1.99))
+                .transactionDate(LocalDate.of(2020, 12, 1))
+                .build());
 
         List<Expense> all = repository.findAllByOrderByTransactionDateDesc();
         assertEquals(1, all.size());
