@@ -8,8 +8,6 @@ services:
       - 8080
     ports:
       - "8080:8080"
-    networks:
-      - budget-net
   react-ui:
     restart: always
     container_name: ui
@@ -21,8 +19,4 @@ services:
       - "3000:3000"
     depends_on:
       - api
-    networks:
-      - budget-net
-networks:
-  budget-net:
-    external: true
+

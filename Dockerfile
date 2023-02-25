@@ -5,5 +5,5 @@ RUN mvn verify --fail-never
 COPY src /app/src
 RUN mvn -f /app/pom.xml clean package
 
-FROM tomcat:9
+FROM tomcat:10
 COPY --from=build /app/target/budget.war /usr/local/tomcat/webapps/
