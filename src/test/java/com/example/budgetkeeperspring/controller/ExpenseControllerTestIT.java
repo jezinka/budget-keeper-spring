@@ -1,9 +1,11 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,9 @@ class ExpenseControllerTestIT {
 
     @Autowired
     ExpenseRepository expenseRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Autowired
     ExpenseMapper expenseMapper;
@@ -112,11 +117,13 @@ class ExpenseControllerTestIT {
     @Test
     void updateExistingExpense() {
         saveExpense();
+        Category savedCategory = categoryRepository.save(new Category("category_test"));
 
         Expense expense = expenseRepository.findAll().get(0);
         ExpenseDTO expenseDTO = expenseMapper.mapToDto(expense);
         expenseDTO.setId(null);
         expenseDTO.setVersion(null);
+        expenseDTO.setCategoryId(savedCategory.getId());
 
         expenseDTO.setAmount(BigDecimal.ONE);
 
@@ -125,6 +132,26 @@ class ExpenseControllerTestIT {
 
         Expense updatedExpense = expenseRepository.findById(expense.getId()).get();
         assertThat(updatedExpense.getAmount()).isEqualByComparingTo(BigDecimal.ONE);
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    void updateExistingExpense_WrongCategory() {
+        assertThrows(NotFoundException.class, () -> {
+            saveExpense();
+
+            Expense expense = expenseRepository.findAll().get(0);
+
+            ExpenseDTO expenseDTO = expenseMapper.mapToDto(expense);
+            expenseDTO.setId(null);
+            expenseDTO.setVersion(null);
+            expenseDTO.setCategoryId(new Random().nextLong());
+
+            expenseDTO.setAmount(BigDecimal.ONE);
+
+            expenseController.editExpense(expense.getId(), expenseDTO);
+        });
     }
 
     @Test

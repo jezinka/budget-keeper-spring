@@ -3,9 +3,10 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
-import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class ExpenseService {
     private static final String CATEGORY = "category";
 
     private final ExpenseRepository expenseRepository;
+    private final CategoryRepository categoryRepository;
     private final ExpenseMapper expenseMapper;
 
     public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
@@ -44,9 +46,12 @@ public class ExpenseService {
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
-            Category category = new Category();
-            category.setId(updateExpenseDTO.getId());
-            foundExpense.setCategory(category);
+            categoryRepository.findById(updateExpenseDTO.getCategoryId()).ifPresentOrElse(
+                    foundExpense::setCategory,
+                    () -> {
+                        throw new NotFoundException();
+                    }
+            );
             expenseRepository.save(foundExpense);
             atomicReference.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
         }, () -> atomicReference.set(Optional.empty()));
