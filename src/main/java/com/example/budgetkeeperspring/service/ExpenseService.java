@@ -185,6 +185,7 @@ public class ExpenseService {
 
         yearlyExpenses
                 .stream()
+                .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
                 .collect(groupingBy(Expense::getTransactionMonth,
                         groupingBy(Expense::getCategoryName,
                                 reducing(BigDecimal.ZERO,
