@@ -18,6 +18,7 @@ import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -193,7 +194,7 @@ public class ExpenseService {
                 .forEach((month, value) -> value.forEach((category, amount) ->
                         list.add(new MonthCategoryAmountDTO(month, category, amount.abs())))
                 );
-        return list;
+        return list.stream().sorted(Comparator.comparing(MonthCategoryAmountDTO::getAmount).reversed()).toList();
     }
 
     public Optional<ExpenseDTO> findById(Long id) {
