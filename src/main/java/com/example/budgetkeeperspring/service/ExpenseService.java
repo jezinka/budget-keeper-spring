@@ -207,20 +207,24 @@ public class ExpenseService {
         return expenseRepository
                 .findAllByTransactionDateBetween(begin, end)
                 .stream()
-                .sorted((o1, o2) -> {
-                    if (o1.getCategoryName().equals(StringUtils.EMPTY) && o2.getCategoryName().equals(StringUtils.EMPTY)) {
-                        return o1.getAmount().compareTo(o2.getAmount());
-                    }
-                    if (o1.getCategoryName().equals(StringUtils.EMPTY)) {
-                        return -1;
-                    }
-                    if (o2.getCategoryName().equals(StringUtils.EMPTY)) {
-                        return 1;
-                    }
-                    return o1.getAmount().compareTo(o2.getAmount());
-                })
+                .sorted(getExpenseComparator())
                 .map(expenseMapper::mapToDto)
                 .toList();
+    }
+
+    private Comparator<Expense> getExpenseComparator() {
+        return (o1, o2) -> {
+            if (o1.getCategoryName().equals(StringUtils.EMPTY) && o2.getCategoryName().equals(StringUtils.EMPTY)) {
+                return o1.getAmount().compareTo(o2.getAmount());
+            }
+            if (o1.getCategoryName().equals(StringUtils.EMPTY)) {
+                return -1;
+            }
+            if (o2.getCategoryName().equals(StringUtils.EMPTY)) {
+                return 1;
+            }
+            return o1.getAmount().compareTo(o2.getAmount());
+        };
     }
 
     public Boolean deleteById(Long id) {
