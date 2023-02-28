@@ -11,6 +11,7 @@ import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -206,6 +207,18 @@ public class ExpenseService {
         return expenseRepository
                 .findAllByTransactionDateBetween(begin, end)
                 .stream()
+                .sorted((o1, o2) -> {
+                    if (o1.getCategoryName().equals(StringUtils.EMPTY) && o2.getCategoryName().equals(StringUtils.EMPTY)) {
+                        return o1.getAmount().compareTo(o2.getAmount());
+                    }
+                    if (o1.getCategoryName().equals(StringUtils.EMPTY)) {
+                        return -1;
+                    }
+                    if (o2.getCategoryName().equals(StringUtils.EMPTY)) {
+                        return 1;
+                    }
+                    return o1.getAmount().compareTo(o2.getAmount());
+                })
                 .map(expenseMapper::mapToDto)
                 .toList();
     }

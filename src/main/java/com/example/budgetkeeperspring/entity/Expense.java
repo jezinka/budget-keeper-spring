@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
@@ -64,7 +65,7 @@ public class Expense {
         if (category != null) {
             return category.getName();
         }
-        return "";
+        return StringUtils.EMPTY;
     }
 
     public int getTransactionDay() {
