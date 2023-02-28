@@ -38,13 +38,16 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         setSplitFlow(false);
         setShowSpinner(false);
         if (response.ok) {
-            if (counterHandler !== undefined) {
-                counterHandler(data.length);
+            const data = await response.json();
+            if (data) {
+                if (counterHandler !== undefined) {
+                    counterHandler(data.length);
+                }
+                if (reloadCharts !== undefined) {
+                    reloadCharts()
+                }
+                return setTransactions(data);
             }
-            if (reloadCharts !== undefined) {
-                reloadCharts()
-            }
-            return setTransactions(data);
         }
         return handleError();
     }
