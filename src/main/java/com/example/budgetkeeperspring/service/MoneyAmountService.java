@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +57,6 @@ public class MoneyAmountService {
     }
 
     public MoneyAmountDTO addMoneyAmountForCurrentMonth(MoneyAmountDTO newAmount) {
-        newAmount.setDate(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
         return moneyAmountMapper.mapToDto(moneyAmountRepository.save(moneyAmountMapper.mapToEntity(newAmount)));
     }
 }

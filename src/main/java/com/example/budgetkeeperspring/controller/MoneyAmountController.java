@@ -36,7 +36,6 @@ public class MoneyAmountController {
     @PostMapping(MONEY_AMOUNT_PATH)
     ResponseEntity<MoneyAmountDTO> addMoneyAmountForCurrentMonth(@Validated @RequestBody MoneyAmountDTO newAmount) {
         MoneyAmountDTO savedMoneyAmount = moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);
-        System.out.println(savedMoneyAmount.getId().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", MONEY_AMOUNT_PATH + "/" + savedMoneyAmount.getId().toString());
         return new ResponseEntity(headers, HttpStatus.CREATED);

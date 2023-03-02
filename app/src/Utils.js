@@ -52,3 +52,14 @@ export const renderCustomizedLabel = ({cx, cy, midAngle, innerRadius, outerRadiu
 export function getSumFromMap(list, key) {
     return list.map((d) => d[key]).reduce((a, b) => a + b, 0);
 }
+
+export function getFirstDayOfCurrentMonth() {
+    const date = new Date();
+
+    const firstDay = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        1
+    );
+    return new Intl.DateTimeFormat('sv-SE').format(firstDay);
+}

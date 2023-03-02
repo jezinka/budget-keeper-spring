@@ -1,23 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
-import {formatNumber, handleError} from "../../Utils";
+import {formatNumber, getFirstDayOfCurrentMonth, handleError} from "../../Utils";
 import {Plus} from "react-bootstrap-icons";
 import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 
 export default function MoneyAmount() {
     const [moneyAmount, setMoneyAmount] = useState({});
     const [showForm, setShowForm] = useState(false);
-    const [formState, setFormState] = useState({"amount": 0})
+    const [formState, setFormState] = useState({"amount": 0, "date": getFirstDayOfCurrentMonth()})
 
     async function submitForm() {
-        const response = await fetch('/moneyAmount/', {
+        const response = await fetch('/moneyAmount', {
             method: 'POST',
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},
         });
         if (response.ok) {
             setShowForm(false);
-            setFormState({"amount": 0});
             return await loadData();
         }
         handleError();
@@ -47,6 +46,11 @@ export default function MoneyAmount() {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Kiedy:</Form.Label>
+                            <Form.Control type="date" onChange={handleChange} name="date"
+                                          value={formState.date}/>
+                        </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Ile:</Form.Label>
                             <Form.Control type="number" onChange={handleChange} name="amount"
@@ -89,10 +93,9 @@ export default function MoneyAmount() {
                 </Col>
                 <Col sm={1}>
                     <Button size={"sm"} onClick={() => {
-                        setShowForm(true)
-                    }}>
-                        <Plus/>
-                    </Button>
+                        setFormState({"amount": 0, "date": getFirstDayOfCurrentMonth()});
+                        setShowForm(true);
+                    }}> <Plus/> </Button>
                 </Col>
             </Row>
         </>);
