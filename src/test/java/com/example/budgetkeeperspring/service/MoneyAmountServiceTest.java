@@ -98,7 +98,10 @@ class MoneyAmountServiceTest {
 
     @Test
     void addMoneyForCurrentMonth() {
-        moneyAmountService.addMoneyAmountForCurrentMonth(MoneyAmountDTO.builder().amount(BigDecimal.valueOf(300)).build());
+        moneyAmountService.addMoneyAmountForCurrentMonth(MoneyAmountDTO.builder()
+                .amount(BigDecimal.valueOf(300))
+                .date(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()))
+                .build());
 
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 
