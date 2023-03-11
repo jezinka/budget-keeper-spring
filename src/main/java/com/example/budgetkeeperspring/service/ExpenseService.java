@@ -92,7 +92,7 @@ public class ExpenseService {
             allPredicates.add(p -> p.getCategory() == null);
         }
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
-            allPredicates.add(p -> p.getAmount().compareTo(new BigDecimal(0)) < 0);
+            allPredicates.add(p -> p.getAmount().compareTo(BigDecimal.ZERO) < 0);
         }
         if (filters.get("year") != null) {
             allPredicates.add(p -> p.getTransactionYear() == (int) filters.get("year"));
