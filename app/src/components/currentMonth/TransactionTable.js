@@ -1,12 +1,14 @@
 import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
 import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
-import {ArrowClockwise, ArrowsAngleExpand, Pencil, Trash} from "react-bootstrap-icons";
+import {ArrowClockwise, ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
 import {EMPTY_OPTION, formatNumber, handleError} from "../../Utils";
 
 export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
+    const [showCategoryForm, setShowCategoryForm] = useState(false);
+    const [categoryFormState, setCategoryFormState] = useState({"name": ""});
     const [showSpinner, setShowSpinner] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -25,6 +27,11 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     const handleChange = (event) => {
         setFormState({...formState, [event.target.name]: event.target.value});
     };
+
+    const handleCategoryChange = (event) => {
+        setCategoryFormState({...categoryFormState, [event.target.name]: event.target.value});
+    };
+
     const handleSplit = (event) => {
         let value = Number(event.target.value);
         let newValue = Number((formState.baseSplitAmount - value).toFixed(2))
@@ -113,12 +120,26 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         setSplitFlow(false);
     }
 
+    const handleCategoryClose = () => {
+        setShowCategoryForm(false);
+    }
+
     async function submitForm() {
         const response = await fetch('/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
         return await handleResponse(response)
+    }
+
+    async function submitCategoryForm() {
+        setShowCategoryForm(false);
+
+        await fetch('/categories', {
+            method: 'POST', body: JSON.stringify(categoryFormState), headers: {'Content-Type': 'application/json'},
+        });
+
+        return await fetchCategories();
     }
 
     async function submitSplitForm() {
@@ -170,107 +191,135 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     return (<>
-        {refreshButton()}
-        <Modal size="lg" show={showForm} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Edytuj transakcję:</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Row>
-                        <Col sm={3}>
-                            <Form.Control className="m-2"
-                                          placeholder="Kiedy:" type="date" disabled onChange={handleChange}
-                                          name="transactionDate"
-                                          value={formState.transactionDate}/>
-                        </Col>
-                        <Col sm={8}>
-                            <Form.Control className="m-2"
-                                          placeholder="Co:" type="text" disabled onChange={handleChange}
-                                          name="title"
-                                          value={formState.title}/>
-                        </Col>
-                        <Col sm={3}>
-                            <Form.Control className="m-2" placeholder="Ile:" type="number" disabled
-                                          name="baseSplitAmount" value={formState.baseSplitAmount}/>
-                        </Col>
-                        <Col sm={{span: 8}}>
-                            <Form.Control className="m-2"
-                                          placeholder="Kto:" type="text" disabled onChange={handleChange}
-                                          name="payee"
-                                          value={formState.payee}/>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={3}>
-                            {splitFlow ?
-                                <Form.Control className="m-2" placeholder="Ile:" type="number" onChange={handleChange}
-                                              name="amount" value={formState.amount}/> : ''}
-                        </Col>
-                        <Col sm={8}>
-                            <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
-                                         name="categoryId" value={formState.categoryId}
-                                         autoFocus>
-                                {getCategoriesMap()}
-                            </Form.Select>
-                        </Col>
-                    </Row>
-                    {splitFlow ? <Row>
-                        <Col sm={3}>
-                            <Form.Control className="m-2" placeholder="Ile:" type="number"
-                                          onChange={handleSplit}
-                                          name="splitAmount" value={formState.splitAmount}/>
-                        </Col>
-                        <Col sm={8}>
-                            <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
-                                         name="splitCategoryId" value={formState.splitCategoryId}>
-                                {getCategoriesMap()}
-                            </Form.Select>
-                        </Col>
-                    </Row> : ''}
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Zamknij
-                </Button>
-                {splitFlow ? '' :
-                    <Button variant="primary" onClick={submitForm}> Zapisz </Button>}
-                {splitFlow ? <Button variant="primary" onClick={submitSplitForm}> Rozdziel </Button> : ''}
-            </Modal.Footer>
-        </Modal>
+            {refreshButton()}
+            <Modal size="lg" show={showCategoryForm} onHide={handleCategoryClose} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Dodaj kategorie:</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Row>
+                            <Form.Control placeholder="Nazwa:" onChange={handleCategoryChange}
+                                          name="name"
+                                          value={categoryFormState.name}/>
+                        </Row>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCategoryClose}> Zamknij </Button>
+                    <Button variant="primary" onClick={submitCategoryForm}> Zapisz </Button>
+                </Modal.Footer>
+            </Modal>
 
-        <Table responsive='sm' striped bordered size="sm">
-            <thead>
-            <tr className='table-info'>
-                <th>KIEDY</th>
-                <th>CO</th>
-                <th>KTO</th>
-                <th>ILE</th>
-                <th>KATEGORIA</th>
-                <th style={{textAlign: "center"}}>*</th>
-            </tr>
-            </thead>
-            <tbody>
-            {transactions.map(transaction => <tr key={transaction.id}>
-                <td>{transaction.transactionDate}</td>
-                <td>{transaction.title.substring(0, 50)}</td>
-                <td>{transaction.payee.substring(0, 50)}</td>
-                <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-                <td>{transaction.categoryName != null ? transaction.categoryName : ''}</td>
-                <td style={{textAlign: "center"}}>
-                    <Button variant="outline-primary" size="sm"
-                            onClick={() => editTransaction(transaction.id)}><Pencil/>
-                    </Button>{' '}
-                    <Button variant="outline-primary" size="sm"
-                            onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/>
-                    </Button>{' '}
-                    <Button variant="outline-primary" size="sm"
-                            onClick={() => deleteTransaction(transaction.id)}><Trash/>
-                    </Button>
-                </td>
-            </tr>)}
-            </tbody>
-        </Table>
-    </>);
+            <Modal size="lg" show={showForm} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edytuj transakcję:</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Row>
+                            <Col sm={3}>
+                                <Form.Control className="m-2"
+                                              placeholder="Kiedy:" type="date" disabled onChange={handleChange}
+                                              name="transactionDate"
+                                              value={formState.transactionDate}/>
+                            </Col>
+                            <Col sm={8}>
+                                <Form.Control className="m-2"
+                                              placeholder="Co:" type="text" disabled onChange={handleChange}
+                                              name="title"
+                                              value={formState.title}/>
+                            </Col>
+                            <Col sm={3}>
+                                <Form.Control className="m-2" placeholder="Ile:" type="number" disabled
+                                              name="baseSplitAmount" value={formState.baseSplitAmount}/>
+                            </Col>
+                            <Col sm={{span: 8}}>
+                                <Form.Control className="m-2"
+                                              placeholder="Kto:" type="text" disabled onChange={handleChange}
+                                              name="payee"
+                                              value={formState.payee}/>
+                            </Col>
+                        </Row>
+                        <Row className="align-items-center">
+                            <Col sm={3}>
+                                {splitFlow ?
+                                    <Form.Control className="m-2" placeholder="Ile:" type="number"
+                                                  onChange={handleChange}
+                                                  name="amount" value={formState.amount}/> : ''}
+                            </Col>
+
+                            <Col sm={6}>
+                                <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
+                                             name="categoryId" value={formState.categoryId}
+                                             autoFocus>
+                                    {getCategoriesMap()}
+                                </Form.Select>
+                            </Col>
+
+                            <Col sm={1}>
+                                <Button size={"sm"} onClick={() => {
+                                    setCategoryFormState({"name": ""});
+                                    setShowCategoryForm(true);
+                                }}> <Plus/> </Button>
+                            </Col>
+
+                        </Row>
+                        {splitFlow ? <Row>
+                            <Col sm={3}>
+                                <Form.Control className="m-2" placeholder="Ile:" type="number"
+                                              onChange={handleSplit}
+                                              name="splitAmount" value={formState.splitAmount}/>
+                            </Col>
+                            <Col sm={8}>
+                                <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
+                                             name="splitCategoryId" value={formState.splitCategoryId}>
+                                    {getCategoriesMap()}
+                                </Form.Select>
+                            </Col>
+                        </Row> : ''}
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}> Zamknij </Button>
+                    {splitFlow ? '' :
+                        <Button variant="primary" onClick={submitForm}> Zapisz </Button>}
+                    {splitFlow ? <Button variant="primary" onClick={submitSplitForm}> Rozdziel </Button> : ''}
+                </Modal.Footer>
+            </Modal>
+
+            <Table responsive='sm' striped bordered size="sm">
+                <thead>
+                <tr className='table-info'>
+                    <th>KIEDY</th>
+                    <th>CO</th>
+                    <th>KTO</th>
+                    <th>ILE</th>
+                    <th>KATEGORIA</th>
+                    <th style={{textAlign: "center"}}>*</th>
+                </tr>
+                </thead>
+                <tbody>
+                {transactions.map(transaction => <tr key={transaction.id}>
+                    <td>{transaction.transactionDate}</td>
+                    <td>{transaction.title.substring(0, 50)}</td>
+                    <td>{transaction.payee.substring(0, 50)}</td>
+                    <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
+                    <td>{transaction.categoryName != null ? transaction.categoryName : ''}</td>
+                    <td style={{textAlign: "center"}}>
+                        <Button variant="outline-primary" size="sm"
+                                onClick={() => editTransaction(transaction.id)}><Pencil/>
+                        </Button>{' '}
+                        <Button variant="outline-primary" size="sm"
+                                onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/>
+                        </Button>{' '}
+                        <Button variant="outline-primary" size="sm"
+                                onClick={() => deleteTransaction(transaction.id)}><Trash/>
+                        </Button>
+                    </td>
+                </tr>)}
+                </tbody>
+            </Table>
+        </>
+    );
 }

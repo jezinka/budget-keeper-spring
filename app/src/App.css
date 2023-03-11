@@ -15,3 +15,7 @@ tr.inactive {
     background-color: #77e0be !important;
     font-weight: bold;
 }
+
+.szary {
+    background-color: darkgrey;
+}
