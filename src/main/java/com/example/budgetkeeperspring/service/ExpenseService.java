@@ -127,7 +127,7 @@ public class ExpenseService {
 
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end)
                 .stream()
-                .filter(p -> p.getCategory().isUseInYearlyCharts())
+                .filter(p -> p.getCategory() != null && p.getCategory().isUseInYearlyCharts())
                 .toList();
 
         Map<Integer, Map<String, BigDecimal>> collect = yearlyExpenses.stream().collect(groupingBy(
