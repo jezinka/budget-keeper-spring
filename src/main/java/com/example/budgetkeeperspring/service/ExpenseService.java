@@ -125,7 +125,10 @@ public class ExpenseService {
         LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
         LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
 
-        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end)
+                .stream()
+                .filter(p -> p.getCategory().isUseInYearlyCharts())
+                .toList();
 
         Map<Integer, Map<String, BigDecimal>> collect = yearlyExpenses.stream().collect(groupingBy(
                 Expense::getTransactionMonth,
