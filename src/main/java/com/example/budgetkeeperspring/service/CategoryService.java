@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CategoryDTO;
+import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class CategoryService {
     public List<CategoryDTO> findActiveForYear(int year) {
         return categoryRepository.findActiveForYear(year)
                 .stream()
+                .filter(Category::isUseInYearlyCharts)
                 .map(categoryMapper::mapToDto)
                 .toList();
     }
