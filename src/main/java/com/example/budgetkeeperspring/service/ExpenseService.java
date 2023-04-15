@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
@@ -66,6 +67,15 @@ public class ExpenseService {
         log.debug("Expense (" + id + ") will be splitted and deleted");
 
         List<Expense> updateExpenses = updateExpensesDTOs.stream().map(expenseMapper::mapToEntity).toList();
+        updateExpenses.forEach(expense -> {
+            Category category = expense.getCategory();
+            if (category != null) {
+                Category savedCategory = categoryRepository.findById(category.getId()).orElseThrow(() -> {
+                    throw new NotFoundException();
+                });
+                expense.setCategory(savedCategory);
+            }
+        });
         List<Expense> updated = expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
 
