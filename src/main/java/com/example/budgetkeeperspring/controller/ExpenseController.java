@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.controller;
 
+import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
@@ -93,5 +94,12 @@ public class ExpenseController {
         LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
         return expenseService.getDailyExpenses(begin, end);
+    }
+
+    @GetMapping(EXPENSES_PATH + "/budgetPlan")
+    List<BudgetPlanDTO> getBudgetPlan() {
+        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).minusYears(1);
+        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        return expenseService.getBudgetPlan(begin, end);
     }
 }

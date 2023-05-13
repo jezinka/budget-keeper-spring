@@ -6,6 +6,7 @@ import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
 import ExpensesPieChart from "./ExpensesPieChart";
 import DailyBarChart from "./DailyBarChart";
+import Budget from "./Budget";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([])
@@ -24,12 +25,15 @@ const CurrentMonth = () => {
         <Col sm={8}>
             <TransactionTable mode="currentMonth" reloadCharts={loadData}/>
         </Col>
-        <Col sm={3} className="mt-1">
+        <Col sm={4} className="mt-1">
             <Col sm={6}>
                 <MoneyAmount/>
             </Col>
-            <DailyBarChart/>
+            <Col sm={3}>
+                <Budget/>
+            </Col>
             <ExpensesBarChart data={data}/>
+            <DailyBarChart/>
             <ExpensesPieChart data={data}/>
         </Col>
     </>;

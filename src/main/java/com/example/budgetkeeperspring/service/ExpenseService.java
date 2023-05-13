@@ -1,14 +1,17 @@
 package com.example.budgetkeeperspring.service;
 
+import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.entity.Goal;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import com.example.budgetkeeperspring.repository.GoalRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,7 +33,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.max;
+import static java.util.Collections.min;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
@@ -42,6 +49,7 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final GoalRepository goalRepository;
     private final ExpenseMapper expenseMapper;
 
     public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
@@ -246,5 +254,39 @@ public class ExpenseService {
             return true;
         }
         return false;
+    }
+
+    public List<BudgetPlanDTO> getBudgetPlan(LocalDate begin, LocalDate end) {
+        List<Expense> expenses = expenseRepository.getBudgetPlan(begin, end);
+        List<Goal> goals = goalRepository.findAll();
+        LocalDate beginOfCurrentMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+
+        List<BudgetPlanDTO> budgetPlanDTOList = new ArrayList<>();
+
+        expenses
+                .stream()
+                .filter(e -> e.getTransactionDate().isBefore(beginOfCurrentMonth))
+                .collect(groupingBy(Expense::getCategory, groupingBy(Expense::getTransactionMonth, Collectors.summingDouble(e -> e.getAmount().doubleValue()))))
+                .forEach((category, monthSumMap) -> {
+                    double average = monthSumMap.values().stream().mapToDouble(Double::doubleValue).sum() / monthSumMap.size();
+                    double hipGoal = (max(monthSumMap.values()) + min(monthSumMap.values())) / 2;
+                    budgetPlanDTOList.add(new BudgetPlanDTO(category.getName(), BigDecimal.valueOf(average), BigDecimal.valueOf(hipGoal)));
+                });
+
+        budgetPlanDTOList.forEach(b -> {
+            Optional<Goal> goal = goals.stream().filter(g -> g.getCategory().getName().equals(b.getCategory())).findFirst();
+            goal.ifPresent(value -> b.setGoal(value.getAmount()));
+        });
+
+        expenses
+                .stream()
+                .filter(e -> !e.getTransactionDate().isBefore(beginOfCurrentMonth))
+                .collect(groupingBy(Expense::getCategory, Collectors.summingDouble(e -> e.getAmount().doubleValue())))
+                .forEach((key, value) -> {
+                    BudgetPlanDTO budgetPlanDTO = budgetPlanDTOList.stream().filter(b -> b.getCategory().equals(key.getName())).findFirst().get();
+                    budgetPlanDTO.setCurrentMonthSum(BigDecimal.valueOf(value));
+                });
+
+        return budgetPlanDTOList;
     }
 }
