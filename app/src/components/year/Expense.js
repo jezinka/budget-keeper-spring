@@ -19,7 +19,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
             <tbody>
             {data.map((row) => {
                 return <tr>
-                    <td>{row.transactionDate}</td>
+                    <td style={{minWidth: '80px'}}>{row.transactionDate}</td>
                     <td>{row.title}</td>
                     <td style={{textAlign: 'right'}}>{formatNumber(row.amount)}</td>
                 </tr>
