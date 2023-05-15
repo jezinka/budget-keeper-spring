@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
+
+import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,8 +30,8 @@ public class MoneyAmountController {
 
     @GetMapping(MONEY_AMOUNT_PATH)
     CurrentMonthMoneyAmountDTO getCurrentMonth() {
-        LocalDate startDate = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate endDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate startDate = getBeginOfCurrentMonth();
+        LocalDate endDate = getEndOfCurrentMonth();
         return moneyAmountService.getForPeriod(startDate, endDate);
     }
 

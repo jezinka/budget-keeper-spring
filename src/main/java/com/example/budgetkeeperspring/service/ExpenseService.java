@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
 import static java.util.Collections.max;
 import static java.util.Collections.min;
 import static java.util.stream.Collectors.*;
@@ -259,7 +259,7 @@ public class ExpenseService {
     public List<BudgetPlanDTO> getBudgetPlan(LocalDate begin, LocalDate end) {
         List<Expense> expenses = expenseRepository.getBudgetPlan(begin, end);
         List<Goal> goals = goalRepository.findAll();
-        LocalDate beginOfCurrentMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate beginOfCurrentMonth = getBeginOfCurrentMonth();
 
         List<BudgetPlanDTO> budgetPlanDTOList = new ArrayList<>();
 

@@ -9,36 +9,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.example.budgetkeeperspring.controller.LogController.LOG_PATH;
+
 @RequiredArgsConstructor
 @RestController
+@RequestMapping(LOG_PATH)
 public class LogController {
 
     public static final String LOG_PATH = "/logs";
-    public static final String LOG_PATH_ID = LOG_PATH + "/{id}";
 
     private final LogRepository logRepository;
 
-    @GetMapping(LOG_PATH)
+    @GetMapping()
     List<Log> getAll() {
         return logRepository.findAll(Sort.by(Sort.Direction.DESC, "date"));
     }
 
-    @GetMapping(LOG_PATH + "/active")
+    @GetMapping("/active")
     List<Log> getAllActive() {
         return logRepository.findByDeletedIsFalse(Sort.by(Sort.Direction.DESC, "date"));
     }
 
-    @DeleteMapping(LOG_PATH_ID)
+    @DeleteMapping("/{id}")
     ResponseEntity<Log> deleteLog(@PathVariable Long id) {
         logRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(LOG_PATH_ID)
+    @GetMapping("/{id}")
     Log getLogById(@PathVariable("id") Long id) {
         return logRepository.findById(id).orElseThrow(NotFoundException::new);
     }

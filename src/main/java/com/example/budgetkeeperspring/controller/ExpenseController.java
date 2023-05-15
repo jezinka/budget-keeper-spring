@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
 
 @RequiredArgsConstructor
 @RestController
@@ -40,8 +42,8 @@ public class ExpenseController {
 
     @GetMapping(EXPENSES_PATH + "/currentMonth")
     List<ExpenseDTO> getCurrentMonth() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate begin = getBeginOfCurrentMonth();
+        LocalDate end = getEndOfCurrentMonth();
         return expenseService.findAllByTransactionDateBetween(begin, end);
     }
 
@@ -84,22 +86,22 @@ public class ExpenseController {
 
     @GetMapping(EXPENSES_PATH + "/currentMonthByCategory")
     List<MonthCategoryAmountDTO> getGroupedForCurrentMonth() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate begin = getBeginOfCurrentMonth();
+        LocalDate end = getEndOfCurrentMonth();
         return expenseService.getGroupedByCategory(begin, end);
     }
 
     @GetMapping(EXPENSES_PATH + "/dailyExpenses")
     List<DailyExpensesDTO> getDailyForMonth() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate begin = getBeginOfCurrentMonth();
+        LocalDate end = getEndOfCurrentMonth();
         return expenseService.getDailyExpenses(begin, end);
     }
 
     @GetMapping(EXPENSES_PATH + "/budgetPlan")
     List<BudgetPlanDTO> getBudgetPlan() {
-        LocalDate begin = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).minusYears(1);
-        LocalDate end = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate begin = getBeginOfCurrentMonth().minusYears(1);
+        LocalDate end = getEndOfCurrentMonth();
         return expenseService.getBudgetPlan(begin, end);
     }
 }

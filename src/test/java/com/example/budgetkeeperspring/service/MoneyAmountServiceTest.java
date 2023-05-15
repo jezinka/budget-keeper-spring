@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -100,13 +99,13 @@ class MoneyAmountServiceTest {
     void addMoneyForCurrentMonth() {
         moneyAmountService.addMoneyAmountForCurrentMonth(MoneyAmountDTO.builder()
                 .amount(BigDecimal.valueOf(300))
-                .date(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()))
+                .date(DateUtilsService.getBeginOfCurrentMonth())
                 .build());
 
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
         assertEquals(300, argumentCaptor.getValue().getAmount().intValue());
-        assertEquals(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()), argumentCaptor.getValue().getDate());
+        assertEquals(DateUtilsService.getBeginOfCurrentMonth(), argumentCaptor.getValue().getDate());
     }
 }
