@@ -1,21 +1,20 @@
-import {Col} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import {Bar, BarChart, Tooltip, XAxis, YAxis} from "recharts";
 import {addSumPerMonth, getMonthName, handleError, MONTHS_ARRAY} from "../../Utils";
 import YearFilter from "./YearFilter";
-import SpinnerLoadButton from "./SpinnerLoadButton";
 
 const YearAtTheGlanceBarChart = () => {
     const [data, setData] = useState([])
-    const [formState, setFormState] = useState({year: new Date().getFullYear()});
+    const [formState, setFormState] = useState(new Date().getFullYear());
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [formState]);
 
     async function loadData() {
-        const response = await fetch('/expenses/getPivot/' + formState.year);
+        const response = await fetch('/expenses/getPivot/' + formState);
         if (response.ok) {
             let data = await response.json();
 
@@ -27,8 +26,9 @@ const YearAtTheGlanceBarChart = () => {
     }
 
     let body = <>
-        <YearFilter formState={formState} formHandler={setFormState}/>
-        <SpinnerLoadButton loadData={loadData}/>
+        <Row>
+            <YearFilter formState={formState} formHandler={setFormState}/>
+        </Row>
         <Col>
             <BarChart width={1700} height={800} data={data}>
                 <Tooltip/>

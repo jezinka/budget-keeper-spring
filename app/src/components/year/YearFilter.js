@@ -1,10 +1,10 @@
 import {Col, Form} from "react-bootstrap";
 import React from "react";
 
-const YearFilter = ({formState, formHandler}) => {
+const YearFilter = ({year, formHandler}) => {
 
     const handleChange = (event) => {
-        formHandler({...formState, [event.target.name]: event.target.value});
+        formHandler(event.target.value);
     };
 
     let firstYear = 2021;
@@ -14,7 +14,7 @@ const YearFilter = ({formState, formHandler}) => {
     return <Col sm={1}>
         <Form>
             <Form.Select className="m-2" size="sm" placeholder="Rok:" onChange={handleChange}
-                         name="year" value={formState.year}>
+                         name="year" value={year}>
                 {yearList.map((year) => <option key={year} value={year}>{year}</option>)}
             </Form.Select>
         </Form>

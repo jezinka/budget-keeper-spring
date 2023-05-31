@@ -2,22 +2,21 @@ import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
 import Expense from "./Expense";
 import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
-import {Col, Modal} from "react-bootstrap";
+import {Col, Modal, Row} from "react-bootstrap";
 import YearFilter from "./YearFilter";
-import SpinnerLoadButton from "./SpinnerLoadButton";
 
 export default function YearlyExpenses() {
 
     const [expenses, setExpenses] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [formState, setFormState] = useState({year: new Date().getFullYear()});
+    const [year, setYear] = useState(new Date().getFullYear());
     const [transactionsDetails, setTransactionsDetails] = useState([]);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     async function reloadTable() {
-        const response = await fetch('/expenses/yearAtTheGlance/' + formState.year);
+        const response = await fetch('/expenses/yearAtTheGlance/' + year);
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -28,7 +27,7 @@ export default function YearlyExpenses() {
     }
 
     async function fetchCategories() {
-        const response = await fetch('/categories/getActiveForSelectedYear/' + formState.year);
+        const response = await fetch('/categories/getActiveForSelectedYear/' + year);
 
         if (response.ok) {
             const data = await response.json();
@@ -39,14 +38,10 @@ export default function YearlyExpenses() {
         return handleError();
     }
 
-    function reloadPageComponents() {
+    useEffect(() => {
         fetchCategories();
         reloadTable();
-    }
-
-    useEffect(() => {
-        reloadPageComponents();
-    }, []);
+    }, [year])
 
     function ExpenseForMonthAndCategory(currMonth, currCategory) {
         if (currMonth in expenses && currCategory in expenses[currMonth]) {
@@ -56,7 +51,7 @@ export default function YearlyExpenses() {
                 amount: expenses[currMonth][currCategory]
             };
 
-            return <Expense expense={foundExpense} year={formState.year}
+            return <Expense expense={foundExpense} year={year} key={currMonth + currCategory}
                             modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
         }
         return <td style={{textAlign: 'right'}}>0,00</td>
@@ -67,8 +62,9 @@ export default function YearlyExpenses() {
             <Modal.Header closeButton> <Modal.Title>Transakcje</Modal.Title> </Modal.Header>
             <Modal.Body>{transactionsDetails}</Modal.Body>
         </Modal>
-        <YearFilter formState={formState} formHandler={setFormState}/>
-        <SpinnerLoadButton loadData={reloadPageComponents}/>
+        <Row>
+            <YearFilter year={year} formHandler={setYear}/>
+        </Row>
         <Col sm={11}>
             <Table id="yearly" responsive='sm' striped bordered size="sm">
                 <thead>
@@ -90,8 +86,8 @@ export default function YearlyExpenses() {
                 <tr>
                     <td>{SUM_CATEGORY}</td>
                     {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY))}
+                    <td></td>
                 </tr>
-
                 </tbody>
             </Table>
         </Col>
