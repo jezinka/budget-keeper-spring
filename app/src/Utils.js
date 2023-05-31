@@ -13,9 +13,7 @@ export function getDate() {
 }
 
 export function getMonthName(monthNumber, format) {
-    const date = new Date();
-    date.setMonth(monthNumber - 1);
-
+    const date = new Date(2023, monthNumber - 1, 1);
     return date.toLocaleString('pl-PL', {month: format});
 }
 
