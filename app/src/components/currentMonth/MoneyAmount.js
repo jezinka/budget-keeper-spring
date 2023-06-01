@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
 import {formatNumber, getFirstDayOfCurrentMonth, handleError} from "../../Utils";
 import {Plus} from "react-bootstrap-icons";
-import {Button, Col, Form, Modal, Row} from "react-bootstrap";
+import {Button, Col, Form, Modal} from "react-bootstrap";
 
 export default function MoneyAmount() {
     const [moneyAmount, setMoneyAmount] = useState({});
@@ -68,35 +68,33 @@ export default function MoneyAmount() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <Row>
-                <Col sm={10}>
-                    <Table responsive='sm' striped bordered size="sm">
-                        <tbody>
-                        <tr>
-                            <td>NA WEJŚCIU</td>
-                            <td>{formatNumber(moneyAmount.start)}</td>
-                        </tr>
-                        <tr>
-                            <td>WYDATKI</td>
-                            <td>{formatNumber(moneyAmount.expenses)}</td>
-                        </tr>
-                        <tr>
-                            <td>WPŁYWY</td>
-                            <td>{formatNumber(moneyAmount.incomes)}</td>
-                        </tr>
-                        <tr>
-                            <td>STAN KONTA</td>
-                            <td>{formatNumber(moneyAmount.accountBalance)}</td>
-                        </tr>
-                        </tbody>
-                    </Table>
-                </Col>
-                <Col sm={1}>
-                    <Button size={"sm"} onClick={() => {
-                        setFormState({"amount": 0, "date": getFirstDayOfCurrentMonth()});
-                        setShowForm(true);
-                    }}> <Plus/> </Button>
-                </Col>
-            </Row>
+            <Col sm={5}>
+                <Table responsive='sm' striped bordered size="sm">
+                    <tbody>
+                    <tr>
+                        <td>NA WEJŚCIU</td>
+                        <td>{formatNumber(moneyAmount.start)}
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <Plus style={{fontSize: 16}} onClick={() => {
+                                setFormState({"amount": 0, "date": getFirstDayOfCurrentMonth()});
+                                setShowForm(true);
+                            }}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>WYDATKI</td>
+                        <td>{formatNumber(moneyAmount.expenses)}</td>
+                    </tr>
+                    <tr>
+                        <td>WPŁYWY</td>
+                        <td>{formatNumber(moneyAmount.incomes)}</td>
+                    </tr>
+                    <tr>
+                        <td>STAN KONTA</td>
+                        <td>{formatNumber(moneyAmount.accountBalance)}</td>
+                    </tr>
+                    </tbody>
+                </Table>
+            </Col>
         </>);
 }

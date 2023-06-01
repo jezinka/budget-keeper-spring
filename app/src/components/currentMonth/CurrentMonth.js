@@ -1,4 +1,4 @@
-import {Col} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 import TransactionTable from "./TransactionTable";
 import MoneyAmount from "./MoneyAmount";
 import React, {useEffect, useState} from "react";
@@ -26,12 +26,10 @@ const CurrentMonth = () => {
             <TransactionTable mode="currentMonth" reloadCharts={loadData}/>
         </Col>
         <Col sm={4} className="mt-1">
-            <Col sm={6}>
+            <Row>
                 <MoneyAmount/>
-            </Col>
-            <Col sm={3}>
                 <Budget/>
-            </Col>
+            </Row>
             <ExpensesBarChart data={data}/>
             <DailyBarChart/>
             <ExpensesPieChart data={data}/>

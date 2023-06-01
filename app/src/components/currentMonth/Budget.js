@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
-import {Col, Row} from "react-bootstrap";
+import {Col} from "react-bootstrap";
 
 export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
@@ -17,25 +17,23 @@ export default function Budget() {
 
     return (
         <>
-            <Row>
-                <Col sm={10}>
-                    <Table responsive='sm' striped bordered size="sm">
-                        <tbody>
-                        <tr className='table-info'>
-                            <td>KATEGORIA</td>
-                            <td>SUMA</td>
-                            <td>ŚREDNIA</td>
-                            <td>ZAŁOŻENIE</td>
-                        </tr>
-                        {budgetPlan.map(row => <tr key={row.id}>
-                            <td>{row.category}</td>
-                            <td>{row.currentMonthSum}</td>
-                            <td>{row.previousYearMean}</td>
-                            <td>{row.goal}</td>
-                        </tr>)}
-                        </tbody>
-                    </Table>
-                </Col>
-            </Row>
+            <Col sm={4}>
+                <Table responsive='sm' striped bordered size="sm">
+                    <tbody>
+                    <tr className='table-info'>
+                        <td>KATEGORIA</td>
+                        <td>SUMA</td>
+                        <td>ŚREDNIA</td>
+                        <td>ZAŁOŻENIE</td>
+                    </tr>
+                    {budgetPlan.map(row => <tr key={row.id}>
+                        <td>{row.category}</td>
+                        <td>{row.currentMonthSum}</td>
+                        <td>{row.previousYearMean}</td>
+                        <td>{row.goal}</td>
+                    </tr>)}
+                    </tbody>
+                </Table>
+            </Col>
         </>);
 }
