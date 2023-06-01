@@ -54,7 +54,7 @@ export default function YearlyExpenses() {
             return <Expense expense={foundExpense} year={year} key={currMonth + currCategory}
                             modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
         }
-        return <td style={{textAlign: 'right'}}>0,00</td>
+        return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>
     }
 
     return (<>
