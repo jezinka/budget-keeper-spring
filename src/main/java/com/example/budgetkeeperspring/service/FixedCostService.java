@@ -23,9 +23,9 @@ public class FixedCostService {
     private final FixedCostPayedRepository fixedCostPayedRepository;
 
     public List<FixedCostDTO> getAllForCurrentMonth() {
-        List<FixedCostDTO> fixedCostDTOS = new ArrayList();
+        List<FixedCostDTO> fixedCostDTOS = new ArrayList<>();
         List<FixedCost> fixedCosts = fixedCostRepository.findAll();
-        List<FixedCostPayed> fixedCostPayed = fixedCostPayedRepository.findAllByFixedCostPayedBetween(getBeginOfCurrentMonth(), getEndOfCurrentMonth());
+        List<FixedCostPayed> fixedCostPayed = fixedCostPayedRepository.findAllByPayDateBetween(getBeginOfCurrentMonth(), getEndOfCurrentMonth());
         fixedCosts.forEach(fc -> {
             Optional<FixedCostPayed> fcp = fixedCostPayed.stream().filter(payed -> payed.getFixedCost() == fc).findFirst();
             FixedCostDTO fixedCostDTO = FixedCostDTO.builder()
