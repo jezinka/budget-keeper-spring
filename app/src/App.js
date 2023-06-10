@@ -7,7 +7,6 @@ import 'bootstrap/dist/js/bootstrap.min.js'
 import {BrowserRouter as Router, Route, Routes,} from "react-router-dom";
 import CurrentMonth from "./components/currentMonth/CurrentMonth";
 import YearAtTheGlance from "./components/year/YearAtTheGlance";
-import Liabilities from "./components/liabilities/Liabilities";
 import AllTransactions from "./components/allTransactions/AllTransactions";
 import YearAtTheGlanceBarChart from "./components/year/YearAtTheGlanceBarChart";
 import YearAtTheGlancePieChart from "./components/year/YearAtTheGlancePieChart";
@@ -23,7 +22,6 @@ const App = () => {
                     <Route path="/yearAtTheGlance" element={<YearAtTheGlance/>}/>
                     <Route path="/yearAtTheGlanceBarChart" element={<YearAtTheGlanceBarChart/>}/>
                     <Route path="/yearAtTheGlancePieChart" element={<YearAtTheGlancePieChart/>}/>
-                    <Route path="/liabilities" element={<Liabilities/>}/>
                     <Route path="/allTransactions" element={<AllTransactions/>}/>
                     <Route path="/fixedCosts" element={<FixedCosts/>}/>
                     <Route path="/logs" element={<LogsView/>}/>

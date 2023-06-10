@@ -14,7 +14,6 @@ const Navigation = () => {
                     <NavDropdown.Item href="/yearAtTheGlancePieChart">Pie Chart</NavDropdown.Item>
                 </NavDropdown>
                 <Nav.Link href="/fixedCosts">Koszty stałe</Nav.Link>
-                <Nav.Link href="/liabilities">Pasywa</Nav.Link>
                 <hr/>
                 <Nav.Link href="/allTransactions">Wszystkie transakcje</Nav.Link>
                 <Nav.Link href="/logs">Logi</Nav.Link>
