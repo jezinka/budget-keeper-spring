@@ -2,24 +2,22 @@ import React, {useEffect, useState} from 'react';
 import Alert from 'react-bootstrap/Alert';
 import {DATE_TIME_FORMAT} from "../../Utils";
 
-export default function ErrorLog() {
+export default function LastLog() {
     const [log, setLog] = useState({});
     const [variant, setVariant] = useState("danger");
 
     async function reloadLogs() {
-        const response = await fetch('/logs/active');
+        const response = await fetch('/logs/forDisplay');
         if (response.ok) {
             const data = await response.json();
             if (data) {
-                let displayLog = data.find(({type}) => type === "ERROR");
-                if (displayLog === undefined) {
-                    displayLog = data.find(({type}) => type === "INFO");
+                if (data.type === "INFO") {
                     setVariant("info")
                 }
-                setLog(displayLog);
+                setLog(data);
             }
         } else {
-            setLog({id: -1, type: 'ERROR', message: 'Something went wrong!'});
+            setLog({id: -1, type: 'ERROR', message: 'Something went wrong!', date: new Date()});
         }
     }
 

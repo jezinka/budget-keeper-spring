@@ -9,5 +9,8 @@ import java.util.List;
 
 @Repository
 public interface LogRepository extends JpaRepository<Log, Long> {
+
+    Log findFirstByDeletedIsFalseAndTypeOrderByDateDesc(String type);
+
     List<Log> findByDeletedIsFalse(Sort sort);
 }

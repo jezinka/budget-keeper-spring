@@ -1,5 +1,5 @@
 import {Col, Container, Row} from "react-bootstrap";
-import ErrorLog from "./ErrorLog";
+import Log from "./LastLog";
 import React from "react";
 import Navigation from "./Navigation";
 
@@ -14,7 +14,7 @@ const Main = ({body}) => {
                 <Col>
                     <Row>
                         <>
-                            <ErrorLog/>
+                            <Log/>
                             {body}
                         </>
                     </Row>

@@ -30,6 +30,15 @@ public class LogController {
         return logRepository.findAll(Sort.by(Sort.Direction.DESC, "date"));
     }
 
+    @GetMapping("/forDisplay")
+    Log getErrorOrLastActive() {
+        Log log = logRepository.findFirstByDeletedIsFalseAndTypeOrderByDateDesc("ERROR");
+        if (log == null) {
+            log = logRepository.findFirstByDeletedIsFalseAndTypeOrderByDateDesc("INFO");
+        }
+        return log;
+    }
+
     @GetMapping("/active")
     List<Log> getAllActive() {
         return logRepository.findByDeletedIsFalse(Sort.by(Sort.Direction.DESC, "date"));
