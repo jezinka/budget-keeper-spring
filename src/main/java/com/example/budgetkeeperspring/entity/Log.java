@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -30,7 +30,7 @@ public class Log {
     @Version
     private Integer version;
 
-    private Date date;
+    private LocalDate date;
     private String type;
     private String message;
     private boolean deleted = Boolean.FALSE;
