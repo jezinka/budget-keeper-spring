@@ -3,12 +3,12 @@ import React, {useEffect, useState} from "react";
 import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import {ArrowClockwise, ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
 import {EMPTY_OPTION, formatNumber, handleError} from "../../Utils";
+import AddCategoryModal from "./AddCategoryModal";
 
 export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [showCategoryForm, setShowCategoryForm] = useState(false);
-    const [categoryFormState, setCategoryFormState] = useState({"name": ""});
     const [showSpinner, setShowSpinner] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -26,10 +26,6 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     const handleChange = (event) => {
         setFormState({...formState, [event.target.name]: event.target.value});
-    };
-
-    const handleCategoryChange = (event) => {
-        setCategoryFormState({...categoryFormState, [event.target.name]: event.target.value});
     };
 
     const handleSplit = (event) => {
@@ -120,26 +116,12 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         setSplitFlow(false);
     }
 
-    const handleCategoryClose = () => {
-        setShowCategoryForm(false);
-    }
-
     async function submitForm() {
         const response = await fetch('/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
         return await handleResponse(response)
-    }
-
-    async function submitCategoryForm() {
-        setShowCategoryForm(false);
-
-        await fetch('/categories', {
-            method: 'POST', body: JSON.stringify(categoryFormState), headers: {'Content-Type': 'application/json'},
-        });
-
-        return await fetchCategories();
     }
 
     async function submitSplitForm() {
@@ -192,24 +174,10 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     return (<>
             {refreshButton()}
-            <Modal size="lg" show={showCategoryForm} onHide={handleCategoryClose} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Dodaj kategorie:</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Row>
-                            <Form.Control placeholder="Nazwa:" onChange={handleCategoryChange}
-                                          name="name"
-                                          value={categoryFormState.name}/>
-                        </Row>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCategoryClose}> Zamknij </Button>
-                    <Button variant="primary" onClick={submitCategoryForm}> Zapisz </Button>
-                </Modal.Footer>
-            </Modal>
+            <AddCategoryModal show={showCategoryForm} close={() => {
+                setShowCategoryForm(false);
+                fetchCategories();
+            }}/>
 
             <Modal size="lg" show={showForm} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -259,7 +227,6 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
                             <Col sm={1}>
                                 <Button size={"sm"} onClick={() => {
-                                    setCategoryFormState({"name": ""});
                                     setShowCategoryForm(true);
                                 }}> <Plus/> </Button>
                             </Col>
