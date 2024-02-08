@@ -39,7 +39,6 @@ class MoneyAmountServiceTest {
     @Spy
     MoneyAmountMapper moneyAmountMapper = Mappers.getMapper(MoneyAmountMapper.class);
 
-    @Autowired
     @InjectMocks
     MoneyAmountService moneyAmountService;
 
