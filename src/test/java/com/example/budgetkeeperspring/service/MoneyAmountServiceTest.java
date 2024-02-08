@@ -108,4 +108,33 @@ class MoneyAmountServiceTest {
         assertEquals(300, argumentCaptor.getValue().getAmount().intValue());
         assertEquals(DateUtilsService.getBeginOfCurrentMonth(), argumentCaptor.getValue().getDate());
     }
+
+    @Test
+    void addMoneyAmountForNextMonth() {
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+
+        Expense f = new Expense();
+        f.setAmount(BigDecimal.valueOf(122));
+
+
+        when(moneyAmountRepository.findFirstByDateOrderByCreatedAtDesc(any(LocalDate.class))).thenReturn(
+                Optional.of(MoneyAmount.builder()
+                        .date(start)
+                        .amount(BigDecimal.valueOf(100))
+                        .build()));
+
+        when(expenseRepository
+                .findAllByTransactionDateBetween(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new ArrayList<Expense>(Arrays.asList(b, f)));
+
+
+        moneyAmountService.addMoneyAmountForNextMonth();
+
+        ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
+
+        verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
+        assertEquals(102, argumentCaptor.getValue().getAmount().intValue());
+        assertEquals(2, argumentCaptor.getValue().getDate().getMonthValue());
+    }
 }

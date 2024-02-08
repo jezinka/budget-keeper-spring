@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
+
 @RequiredArgsConstructor
 @Service
 public class MoneyAmountService {
@@ -58,5 +61,13 @@ public class MoneyAmountService {
 
     public MoneyAmountDTO addMoneyAmountForCurrentMonth(MoneyAmountDTO newAmount) {
         return moneyAmountMapper.mapToDto(moneyAmountRepository.save(moneyAmountMapper.mapToEntity(newAmount)));
+    }
+
+    public void addMoneyAmountForNextMonth() {
+        MoneyAmountDTO newAmount = MoneyAmountDTO.builder()
+                .amount(getForPeriod(getBeginOfCurrentMonth(), getEndOfCurrentMonth()).getAccountBalance())
+                .date(LocalDate.now().plusDays(1))
+                .build();
+        moneyAmountRepository.save(moneyAmountMapper.mapToEntity(newAmount));
     }
 }
