@@ -48,6 +48,16 @@ const FixedCosts = () => {
                             id="payed"
                             name="payed"
                             checked={record.payDate != null}
+                            onClick={async () => {
+                                if (record.payDate != null) return;
+                                const response = await fetch('/fixedCost/' + record.id, {
+                                    method: 'PUT'
+                                });
+                                if (response.ok) {
+                                    loadData();
+                                    moneyAmountLoad();
+                                }
+                            }}
                         />
                     </td>
                     <td>{record.name}</td>

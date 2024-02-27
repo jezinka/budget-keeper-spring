@@ -8,6 +8,7 @@ import com.example.budgetkeeperspring.repository.FixedCostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,5 +38,17 @@ public class FixedCostService {
             fixedCostDTOS.add(fixedCostDTO);
         });
         return fixedCostDTOS;
+    }
+
+    public void updateFixedCost(Long id) {
+        Optional<FixedCost> fixedCost = fixedCostRepository.findById(id);
+        if (fixedCost.isPresent()) {
+            FixedCostPayed fixedCostPayed = FixedCostPayed.builder()
+                    .fixedCost(fixedCost.get())
+                    .amount(fixedCost.get().getAmount())
+                    .payDate(LocalDate.now())
+                    .build();
+            fixedCostPayedRepository.save(fixedCostPayed);
+        }
     }
 }

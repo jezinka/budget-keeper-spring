@@ -3,9 +3,8 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.FixedCostDTO;
 import com.example.budgetkeeperspring.service.FixedCostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,5 +23,11 @@ public class FixedCostController {
     @GetMapping()
     List<FixedCostDTO> getAllForCurrentMonth() {
         return fixedCostService.getAllForCurrentMonth();
+    }
+
+    @PutMapping({"/{id}"})
+    ResponseEntity updateFixedCost(@PathVariable("id") Long id) {
+        fixedCostService.updateFixedCost(id);
+        return ResponseEntity.noContent().build();
     }
 }
