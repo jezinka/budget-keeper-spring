@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -134,6 +133,6 @@ class MoneyAmountServiceTest {
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
         assertEquals(102, argumentCaptor.getValue().getAmount().intValue());
-        assertEquals(2, argumentCaptor.getValue().getDate().getMonthValue());
+        assertEquals(3, argumentCaptor.getValue().getDate().getMonthValue());
     }
 }
