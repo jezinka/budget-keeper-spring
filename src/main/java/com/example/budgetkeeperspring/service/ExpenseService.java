@@ -22,14 +22,7 @@ import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -51,6 +44,14 @@ public class ExpenseService {
     private final CategoryRepository categoryRepository;
     private final GoalRepository goalRepository;
     private final ExpenseMapper expenseMapper;
+
+    public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
+        Expense expense = expenseMapper.mapToEntity(expenseDTO);
+        if (category != null) {
+            expense.setCategory(category);
+        }
+        return expenseMapper.mapToDto(expenseRepository.save(expense));
+    }
 
     public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
         AtomicReference<Optional<ExpenseDTO>> atomicReference = new AtomicReference<>();
