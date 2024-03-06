@@ -1,13 +1,12 @@
 package com.example.budgetkeeperspring.service;
 
-import com.example.budgetkeeperspring.dto.ConditionDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.FixedCostDTO;
+import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.entity.FixedCost;
 import com.example.budgetkeeperspring.entity.FixedCostPayed;
 import com.example.budgetkeeperspring.repository.FixedCostPayedRepository;
 import com.example.budgetkeeperspring.repository.FixedCostRepository;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,11 +56,10 @@ public class FixedCostService {
     }
 
     public void updateFixedCost(ExpenseDTO expenseDTO) {
-        Gson g = new Gson();
-        AtomicReference<FixedCost> fixedCost = new AtomicReference<>(new FixedCost());
+        AtomicReference<FixedCost> fixedCost = new AtomicReference<>(null);
 
-        for (FixedCost fc : fixedCostRepository.findAllByConditionsIsNotNull()) {
-            ConditionDTO c = g.fromJson(fc.getConditions(), ConditionDTO.class);
+        for (FixedCost fc : fixedCostRepository.findAll()) {
+            Circ c = fc.getCirc();
             if (expenseDTO.getTitle().equals(c.getTitle()) &&
                     (c.getPayee() == null || expenseDTO.getPayee().equals(c.getPayee()))) {
                 fixedCost.set(fc);
@@ -73,7 +71,7 @@ public class FixedCostService {
             FixedCostPayed fixedCostPayed = FixedCostPayed.builder()
                     .fixedCost(fixedCost.get())
                     .amount(expenseDTO.getAmount())
-                    .payDate(expenseDTO.getTransactionDate())
+                    .payDate(LocalDate.parse(expenseDTO.getTransactionDate()))
                     .build();
             fixedCostPayedRepository.save(fixedCostPayed);
         }

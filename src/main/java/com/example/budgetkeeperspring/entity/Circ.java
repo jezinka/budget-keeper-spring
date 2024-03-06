@@ -1,9 +1,10 @@
 package com.example.budgetkeeperspring.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 
 @Getter
@@ -12,22 +13,12 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryCondition {
-
+public class Circ {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
-    @ManyToOne()
-    @Fetch(FetchMode.JOIN)
-    private Category category;
-
-    @ManyToOne()
-    @Fetch(FetchMode.JOIN)
-    private Circ circ;
-
-    @Version
-    private Integer version = 0;
-
+    private String title;
+    private String payee;
 }

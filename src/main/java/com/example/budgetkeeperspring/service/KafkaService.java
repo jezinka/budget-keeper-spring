@@ -31,7 +31,7 @@ public class KafkaService {
         }
     }
 
-    @KafkaListener(id = "springLogListener", topics = "log")
+//    @KafkaListener(id = "springLogListener", topics = "log")
     public void listenLogs(String in) {
         Gson g = new Gson();
         LogDTO log = g.fromJson(in, LogDTO.class);

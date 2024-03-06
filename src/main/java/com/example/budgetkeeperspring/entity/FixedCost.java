@@ -1,15 +1,9 @@
 package com.example.budgetkeeperspring.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
@@ -32,5 +26,8 @@ public class FixedCost {
 
     private String name;
     private BigDecimal amount;
-    private String conditions;
+
+    @ManyToOne()
+    @Fetch(FetchMode.JOIN)
+    private Circ circ;
 }
