@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
+import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +29,8 @@ class CategoryServiceTest {
     @Mock
     CategoryConditionRepository categoryConditionRepository;
 
-    @Autowired
     @InjectMocks
+    @Autowired
     CategoryService categoryService;
 
     @Spy
@@ -40,14 +41,14 @@ class CategoryServiceTest {
         when(categoryConditionRepository
                 .findAll())
                 .thenReturn(new ArrayList<>(
-                        Arrays.asList(CategoryCondition.builder().conditions("{\"title\":\"apteka\"}").category(Category.builder().name("zdrowie").build()).build(),
-                                CategoryCondition.builder().conditions("{\"payee\":\"szkolna kasa\"}").category(Category.builder().name("szkoła").build()).build()))
+                        Arrays.asList(CategoryCondition.builder().circ(Circ.builder().title("apteka").build()).category(Category.builder().name("zdrowie").build()).build(),
+                                CategoryCondition.builder().circ(Circ.builder().payee("szkolna kasa").build()).category(Category.builder().name("szkoła").build()).build()))
                 );
     }
 
     @Test
     void findCategoryByConditions_title() {
-        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Apteka Zielona").build());
+        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Apteka Zielona").payee("").build());
         assertEquals("zdrowie", category.getName());
     }
 
@@ -59,7 +60,7 @@ class CategoryServiceTest {
 
     @Test
     void findCategoryByConditions_empty() {
-        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Ubezpieczenie").build());
+        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Ubezpieczenie").payee("").build());
         assertNull(category);
     }
 }

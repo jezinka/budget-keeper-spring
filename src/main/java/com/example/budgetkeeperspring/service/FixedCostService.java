@@ -58,10 +58,12 @@ public class FixedCostService {
     public void updateFixedCost(ExpenseDTO expenseDTO) {
         AtomicReference<FixedCost> fixedCost = new AtomicReference<>(null);
 
+        String titleLower = expenseDTO.getTitle().toLowerCase();
+        String payeeLower = expenseDTO.getPayee().toLowerCase();
+
         for (FixedCost fc : fixedCostRepository.findAll()) {
             Circ c = fc.getCirc();
-            if (expenseDTO.getTitle().equals(c.getTitle()) &&
-                    (c.getPayee() == null || expenseDTO.getPayee().equals(c.getPayee()))) {
+            if (titleLower.contains(c.getTitle()) && (c.getPayee() == null || payeeLower.contains(c.getPayee()))) {
                 fixedCost.set(fc);
                 break;
             }
