@@ -6,6 +6,7 @@ import com.example.budgetkeeperspring.entity.CategoryCondition;
 import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,19 +50,21 @@ class CategoryServiceTest {
 
     @Test
     void findCategoryByConditions_title() {
-        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Apteka Zielona").payee("").build());
-        assertEquals("zdrowie", category.getName());
+        Optional<Category>  category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Apteka Zielona").payee("").build());
+        assertTrue(category.isPresent());
+        assertEquals("zdrowie", category.get().getName());
     }
 
     @Test
     void findCategoryByConditions_who() {
-        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().payee("Wpłata Szkolna Kasa").title("Wycieczka").build());
-        assertEquals("szkoła", category.getName());
+        Optional<Category>  category = categoryService.findCategoryByConditions(ExpenseDTO.builder().payee("Wpłata Szkolna Kasa").title("Wycieczka").build());
+        assertTrue(category.isPresent());
+        assertEquals("szkoła", category.get().getName());
     }
 
     @Test
     void findCategoryByConditions_empty() {
-        Category category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Ubezpieczenie").payee("").build());
-        assertNull(category);
+        Optional<Category> category = categoryService.findCategoryByConditions(ExpenseDTO.builder().title("Ubezpieczenie").payee("").build());
+        assertTrue(category.isEmpty());
     }
 }

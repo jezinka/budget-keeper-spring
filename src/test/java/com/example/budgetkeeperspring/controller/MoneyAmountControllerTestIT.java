@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +33,7 @@ class MoneyAmountControllerTestIT {
         moneyAmountRepository.findAll();
         MoneyAmountDTO moneyAmountDTO = MoneyAmountDTO.builder()
                 .amount(BigDecimal.valueOf(500))
+                .date(LocalDate.now().withDayOfMonth(1))
                 .build();
 
         ResponseEntity<MoneyAmountDTO> responseEntity = moneyAmountController.addMoneyAmountForCurrentMonth(moneyAmountDTO);

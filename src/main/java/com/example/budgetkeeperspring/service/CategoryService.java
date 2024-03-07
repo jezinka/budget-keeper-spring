@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 @Service
@@ -49,23 +48,17 @@ public class CategoryService {
                 .orElse(null)));
     }
 
-    public Category findCategoryByConditions(ExpenseDTO expenseDTO) {
-        List<CategoryCondition> categoryConditions = categoryConditionRepository.findAll();
-
+    public Optional<Category> findCategoryByConditions(ExpenseDTO expenseDTO) {
         String title = expenseDTO.getTitle().toLowerCase();
         String payee = expenseDTO.getPayee().toLowerCase();
 
-        AtomicReference<Category> category = new AtomicReference<>();
-
-        for (CategoryCondition cc : categoryConditions) {
-
-            Circ c = cc.getCirc();
-            if (c.getTitle() != null && title.contains(c.getTitle()) || c.getPayee() != null && payee.contains(c.getPayee())) {
-                category.set(cc.getCategory());
-                break;
-            }
-        }
-
-        return category.get();
+        return categoryConditionRepository.findAll()
+                .stream()
+                .filter(fc -> {
+                    Circ c = fc.getCirc();
+                    return (c.getTitle() != null && title.contains(c.getTitle())) || (c.getPayee() != null && payee.contains(c.getPayee()));
+                })
+                .map(CategoryCondition::getCategory)
+                .findFirst();
     }
 }

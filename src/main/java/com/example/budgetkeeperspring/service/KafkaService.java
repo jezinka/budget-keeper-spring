@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class KafkaService {
@@ -24,14 +26,14 @@ public class KafkaService {
     public void listenExpenses(String in) {
         Gson g = new Gson();
         ExpenseDTO message = g.fromJson(in, ExpenseDTO.class);
-        Category category = categoryService.findCategoryByConditions(message);
+        Optional<Category> category = categoryService.findCategoryByConditions(message);
         ExpenseDTO savedExpense = expenseService.createExpense(message, category);
         if (savedExpense != null) {
             fixedCostService.updateFixedCost(savedExpense);
         }
     }
 
-//    @KafkaListener(id = "springLogListener", topics = "log")
+    //    @KafkaListener(id = "springLogListener", topics = "log")
     public void listenLogs(String in) {
         Gson g = new Gson();
         LogDTO log = g.fromJson(in, LogDTO.class);

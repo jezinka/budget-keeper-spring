@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
 import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
@@ -56,20 +55,12 @@ public class FixedCostService {
     }
 
     public void updateFixedCost(ExpenseDTO expenseDTO) {
-        AtomicReference<FixedCost> fixedCost = new AtomicReference<>(null);
-
         String titleLower = expenseDTO.getTitle().toLowerCase();
         String payeeLower = expenseDTO.getPayee().toLowerCase();
 
-        for (FixedCost fc : fixedCostRepository.findAll()) {
-            Circ c = fc.getCirc();
-            if (titleLower.contains(c.getTitle()) && (c.getPayee() == null || payeeLower.contains(c.getPayee()))) {
-                fixedCost.set(fc);
-                break;
-            }
-        }
+        Optional<FixedCost> fixedCost = findFixedCost(titleLower, payeeLower);
 
-        if (fixedCost.get() != null) {
+        if (fixedCost.isPresent()) {
             FixedCostPayed fixedCostPayed = FixedCostPayed.builder()
                     .fixedCost(fixedCost.get())
                     .amount(expenseDTO.getAmount())
@@ -77,5 +68,15 @@ public class FixedCostService {
                     .build();
             fixedCostPayedRepository.save(fixedCostPayed);
         }
+    }
+
+    private Optional<FixedCost> findFixedCost(String titleLower, String payeeLower) {
+        return fixedCostRepository.findAll()
+                .stream()
+                .filter(fc -> {
+                    Circ c = fc.getCirc();
+                    return titleLower.contains(c.getTitle()) && (c.getPayee() == null || payeeLower.contains(c.getPayee()));
+                })
+                .findFirst();
     }
 }
