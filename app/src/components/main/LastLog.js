@@ -11,13 +11,13 @@ export default function LastLog() {
         if (response.ok) {
             const data = await response.json();
             if (data) {
-                if (data.type === "INFO") {
+                if (data.level === "INFO") {
                     setVariant("info")
                 }
                 setLog(data);
             }
         } else {
-            setLog({id: -1, type: 'ERROR', message: 'Something went wrong!', date: new Date()});
+            setLog({id: -1, level: 'ERROR', message: 'Something went wrong!', date: new Date()});
         }
     }
 
@@ -29,7 +29,7 @@ export default function LastLog() {
         let date = new Date(log.date);
         return (
             <Alert variant={variant} key={log.id}>
-                {DATE_TIME_FORMAT.format(date)}: {log.type} - {log.message}
+                {DATE_TIME_FORMAT.format(date)}: {log.level} - {log.message}
             </Alert>
         );
     }

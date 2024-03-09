@@ -35,7 +35,7 @@ const LogTable = () => {
         if (log.deleted) {
             className.push('inactive')
         }
-        if (log.type === 'ERROR') {
+        if (log.level === 'ERROR') {
             className.push('error')
         }
 
@@ -54,7 +54,7 @@ const LogTable = () => {
         <tbody>
         {logs.map(log => <tr key={log.id} className={getClassName(log)}>
             <td>{DATE_TIME_FORMAT.format(new Date(log.date))}</td>
-            <td>{log.type}</td>
+            <td>{log.level}</td>
             <td>{log.message}</td>
             <td style={{textAlign: "center"}}>
                 <Button variant="outline-primary" size="sm"
