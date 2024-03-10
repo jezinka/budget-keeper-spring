@@ -77,9 +77,7 @@ public class ExpenseService {
         updateExpenses.forEach(expense -> {
             Category category = expense.getCategory();
             if (category != null) {
-                Category savedCategory = categoryRepository.findById(category.getId()).orElseThrow(() -> {
-                    throw new NotFoundException();
-                });
+                Category savedCategory = categoryRepository.findById(category.getId()).orElseThrow(NotFoundException::new);
                 expense.setCategory(savedCategory);
             }
         });
@@ -275,7 +273,9 @@ public class ExpenseService {
                 });
 
         budgetPlanDTOList.forEach(b -> {
-            Optional<Goal> goal = goals.stream().filter(g -> g.getCategory().getName().equals(b.getCategory())).findFirst();
+            Optional<Goal> goal = goals.stream()
+                    .filter(g -> g.getCategory().getName().equals(b.getCategory()))
+                    .findFirst();
             goal.ifPresent(value -> b.setGoal(value.getAmount()));
         });
 
@@ -284,8 +284,11 @@ public class ExpenseService {
                 .filter(e -> !e.getTransactionDate().isBefore(beginOfCurrentMonth))
                 .collect(groupingBy(Expense::getCategory, Collectors.summingDouble(e -> e.getAmount().doubleValue())))
                 .forEach((key, value) -> {
-                    BudgetPlanDTO budgetPlanDTO = budgetPlanDTOList.stream().filter(b -> b.getCategory().equals(key.getName())).findFirst().get();
-                    budgetPlanDTO.setCurrentMonthSum(BigDecimal.valueOf(value));
+                    budgetPlanDTOList
+                            .stream()
+                            .filter(b -> b.getCategory().equals(key.getName()))
+                            .findFirst()
+                            .ifPresent(b -> b.setCurrentMonthSum(BigDecimal.valueOf(value)));
                 });
 
         return budgetPlanDTOList;
