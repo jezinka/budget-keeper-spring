@@ -1,5 +1,20 @@
 version: '3'
 services:
+  db:
+    restart: always
+    container_name: db
+    image: mariadb:latest
+    environment:
+      - MYSQL_DATABASE=budget_db
+      - MYSQL_USER=budget-keeper
+      - MYSQL_PASSWORD=123Budget#
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - "./sql/init:/docker-entrypoint-initdb.d/"
+    ports:
+      - "3306:3306"
+    networks:
+      - budget
   api:
     restart: always
     container_name: api
@@ -10,7 +25,8 @@ services:
       - "8080:8080"
     networks:
       - budget
-
+    depends_on:
+      - db
   react-ui:
     restart: always
     container_name: ui
