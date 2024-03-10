@@ -32,9 +32,9 @@ public class LogController {
 
     @GetMapping("/forDisplay")
     Log getErrorOrLastActive() {
-        Log log = logRepository.findFirstByDeletedIsFalseAndTypeOrderByDateDesc("ERROR");
+        Log log = logRepository.findFirstByDeletedIsFalseAndLevelOrderByDateDesc("ERROR");
         if (log == null) {
-            log = logRepository.findFirstByDeletedIsFalseAndTypeOrderByDateDesc("INFO");
+            log = logRepository.findFirstByDeletedIsFalseAndLevelOrderByDateDesc("INFO");
         }
         return log;
     }

@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.service;
 
+import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.FixedCostDTO;
+import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.entity.FixedCost;
 import com.example.budgetkeeperspring.entity.FixedCostPayed;
 import com.example.budgetkeeperspring.repository.FixedCostPayedRepository;
@@ -50,5 +52,31 @@ public class FixedCostService {
                     .build();
             fixedCostPayedRepository.save(fixedCostPayed);
         }
+    }
+
+    public void updateFixedCost(ExpenseDTO expenseDTO) {
+        String titleLower = expenseDTO.getTitle().toLowerCase();
+        String payeeLower = expenseDTO.getPayee().toLowerCase();
+
+        Optional<FixedCost> fixedCost = findFixedCost(titleLower, payeeLower);
+
+        if (fixedCost.isPresent()) {
+            FixedCostPayed fixedCostPayed = FixedCostPayed.builder()
+                    .fixedCost(fixedCost.get())
+                    .amount(expenseDTO.getAmount())
+                    .payDate(LocalDate.parse(expenseDTO.getTransactionDate()))
+                    .build();
+            fixedCostPayedRepository.save(fixedCostPayed);
+        }
+    }
+
+    private Optional<FixedCost> findFixedCost(String titleLower, String payeeLower) {
+        return fixedCostRepository.findAll()
+                .stream()
+                .filter(fc -> {
+                    Circ c = fc.getCirc();
+                    return titleLower.contains(c.getTitle()) && (c.getPayee() == null || payeeLower.contains(c.getPayee()));
+                })
+                .findFirst();
     }
 }

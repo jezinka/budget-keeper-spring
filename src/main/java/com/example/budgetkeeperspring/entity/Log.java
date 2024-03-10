@@ -33,7 +33,7 @@ public class Log {
     private Integer version;
 
     private LocalDate date;
-    private String type;
+    private String level;
     private String message;
     private boolean deleted = Boolean.FALSE;
 }

@@ -1,12 +1,11 @@
 package com.example.budgetkeeperspring.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
-
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -14,20 +13,12 @@ import java.math.BigDecimal;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class FixedCost {
-
+public class Circ {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
-    @Version
-    private Integer version;
-
-    private String name;
-    private BigDecimal amount;
-
-    @ManyToOne()
-    @Fetch(FetchMode.JOIN)
-    private Circ circ;
+    private String title;
+    private String payee;
 }

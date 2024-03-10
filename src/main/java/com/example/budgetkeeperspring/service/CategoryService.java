@@ -1,8 +1,12 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CategoryDTO;
+import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
+import com.example.budgetkeeperspring.entity.CategoryCondition;
+import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
+import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -16,6 +20,7 @@ import java.util.Optional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryConditionRepository categoryConditionRepository;
     private final CategoryMapper categoryMapper;
 
     public List<CategoryDTO> getAll() {
@@ -41,5 +46,19 @@ public class CategoryService {
     public Optional<CategoryDTO> findById(Long id) {
         return Optional.ofNullable(categoryMapper.mapToDto(categoryRepository.findById(id)
                 .orElse(null)));
+    }
+
+    public Optional<Category> findCategoryByConditions(ExpenseDTO expenseDTO) {
+        String title = expenseDTO.getTitle().toLowerCase();
+        String payee = expenseDTO.getPayee().toLowerCase();
+
+        return categoryConditionRepository.findAll()
+                .stream()
+                .filter(fc -> {
+                    Circ c = fc.getCirc();
+                    return (c.getTitle() != null && title.contains(c.getTitle())) || (c.getPayee() != null && payee.contains(c.getPayee()));
+                })
+                .map(CategoryCondition::getCategory)
+                .findFirst();
     }
 }
