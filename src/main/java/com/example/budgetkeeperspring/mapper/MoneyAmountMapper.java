@@ -4,7 +4,7 @@ import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface MoneyAmountMapper {
 
     MoneyAmount mapToEntity(MoneyAmountDTO moneyAmountDTO);
