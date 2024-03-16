@@ -1,19 +1,11 @@
 package com.example.budgetkeeperspring.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,7 +24,7 @@ public class Log {
     @Version
     private Integer version;
 
-    private LocalDate date;
+    private LocalDateTime date;
     private String level;
     private String message;
     private boolean deleted = Boolean.FALSE;

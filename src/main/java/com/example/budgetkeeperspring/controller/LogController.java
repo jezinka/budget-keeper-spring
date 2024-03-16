@@ -1,57 +1,48 @@
 package com.example.budgetkeeperspring.controller;
 
-import com.example.budgetkeeperspring.entity.Log;
-import com.example.budgetkeeperspring.exception.NotFoundException;
-import com.example.budgetkeeperspring.repository.LogRepository;
+import com.example.budgetkeeperspring.dto.LogDTO;
+import com.example.budgetkeeperspring.service.LogService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static com.example.budgetkeeperspring.controller.LogController.LOG_PATH;
 
+@Data
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(LOG_PATH)
 public class LogController {
 
     public static final String LOG_PATH = "/logs";
-
-    private final LogRepository logRepository;
+    private final LogService logService;
 
     @GetMapping()
-    List<Log> getAll() {
-        return logRepository.findAll(Sort.by(Sort.Direction.DESC, "date"));
+    List<LogDTO> getAll() {
+        return logService.getAll();
     }
 
     @GetMapping("/forDisplay")
-    Log getErrorOrLastActive() {
-        Log log = logRepository.findFirstByDeletedIsFalseAndLevelOrderByDateDesc("ERROR");
-        if (log == null) {
-            log = logRepository.findFirstByDeletedIsFalseAndLevelOrderByDateDesc("INFO");
-        }
-        return log;
+    LogDTO getErrorOrLastActive() {
+        return logService.getErrorOrLastActive();
     }
 
     @GetMapping("/active")
-    List<Log> getAllActive() {
-        return logRepository.findByDeletedIsFalse(Sort.by(Sort.Direction.DESC, "date"));
+    List<LogDTO> getAllActive() {
+        return logService.getAllActive();
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Log> deleteLog(@PathVariable Long id) {
-        logRepository.deleteById(id);
+    ResponseEntity<Void> deleteLog(@PathVariable Long id) {
+       logService.deleteLog(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    Log getLogById(@PathVariable("id") Long id) {
-        return logRepository.findById(id).orElseThrow(NotFoundException::new);
+    LogDTO getLogById(@PathVariable("id") Long id) {
+        return logService.getLogById(id);
     }
 }

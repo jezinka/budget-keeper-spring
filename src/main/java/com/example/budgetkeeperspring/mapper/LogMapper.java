@@ -10,6 +10,6 @@ public interface LogMapper {
 
     @Mapping(target = "date", dateFormat = "yyyy-MM-dd HH:mm:ss")
     Log mapToEntity(LogDTO logDTO);
-
+    @Mapping(target = "date", dateFormat = "yyyy-MM-dd HH:mm:ss")
     LogDTO mapToDto(Log log);
 }
