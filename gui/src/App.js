@@ -19,12 +19,12 @@ const App = () => {
             <Router>
                 <Routes>
                     <Route exact path="/" element={<CurrentMonth/>}/>
-                    <Route path="/yearAtTheGlance" element={<YearAtTheGlance/>}/>
-                    <Route path="/yearAtTheGlanceBarChart" element={<YearAtTheGlanceBarChart/>}/>
-                    <Route path="/yearAtTheGlancePieChart" element={<YearAtTheGlancePieChart/>}/>
-                    <Route path="/allTransactions" element={<AllTransactions/>}/>
-                    <Route path="/fixedCosts" element={<FixedCosts/>}/>
-                    <Route path="/logs" element={<LogsView/>}/>
+                    <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>
+                    <Route path="/gui/yearAtTheGlanceBarChart" element={<YearAtTheGlanceBarChart/>}/>
+                    <Route path="/gui/yearAtTheGlancePieChart" element={<YearAtTheGlancePieChart/>}/>
+                    <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
+                    <Route path="/gui/fixedCosts" element={<FixedCosts/>}/>
+                    <Route path="/gui/logs" element={<LogsView/>}/>
                 </Routes>
             </Router>
         </>
