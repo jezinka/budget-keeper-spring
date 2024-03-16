@@ -25,7 +25,7 @@ export default function LastLog() {
         reloadLogs();
     }, []);
 
-    if (log?.id) {
+    if (log !== null && log.message !== undefined) {
         let date = new Date(log.date);
         return (
             <Alert variant={variant} key={log.id}>
