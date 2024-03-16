@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class LogDTO {
 
+    private Long id;
     private String date;
     private String level;
     private String message;
+    private Boolean deleted;
 }
