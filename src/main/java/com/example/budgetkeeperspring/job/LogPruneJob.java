@@ -22,6 +22,6 @@ public class LogPruneJob {
     @Scheduled(cron = "0 0 8 * * SUN")
     public void execute() {
         log.debug("Prune old logs");
-        logRepository.deleteAllByDateBefore(LocalDate.now().minusDays(7));
+        logRepository.deleteAllByDateBefore(LocalDate.now().atStartOfDay().minusDays(7));
     }
 }

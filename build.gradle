@@ -30,7 +30,7 @@ dependencies {
 
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    implementation('org.springframework.boot:spring-boot-starter-web:3.0.2') { exclude module: 'spring-boot-starter-jackson' }
+    implementation('org.springframework.boot:spring-boot-starter-web:3.0.2')
     implementation 'org.springframework.boot:spring-boot-devtools:3.0.2'
     implementation 'org.springframework.boot:spring-boot-starter-security:3.0.2'
     implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.2'
@@ -48,7 +48,8 @@ dependencies {
     runtimeOnly 'mysql:mysql-connector-java:8.0.32'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.h2database:h2:2.1.214'
 }
@@ -81,4 +82,8 @@ compileJava {
 
 clean {
     delete 'src/main/generated'
+}
+
+test {
+    useJUnitPlatform()
 }

@@ -2,9 +2,10 @@ package com.example.budgetkeeperspring.dto;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -12,13 +13,14 @@ import java.time.LocalDate;
 
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MoneyAmountDTO {
 
     private Long id;
     private Integer version;
 
     @NotNull
-    @PastOrPresent
     private LocalDate date;
 
     @NotNull

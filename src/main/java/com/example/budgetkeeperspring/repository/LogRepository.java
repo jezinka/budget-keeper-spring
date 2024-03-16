@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -20,5 +20,5 @@ public interface LogRepository extends JpaRepository<Log, Long> {
 
     @Modifying
     @Query("delete from Log l where l.date < :before")
-    void deleteAllByDateBefore(@Param("before") LocalDate date);
+    void deleteAllByDateBefore(@Param("before") LocalDateTime date);
 }
