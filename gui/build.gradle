@@ -1,0 +1,20 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath "com.github.node-gradle:gradle-node-plugin:7.0.2"
+    }
+}
+
+apply plugin: 'com.github.node-gradle.node'
+
+node {
+    download = true
+    version = "18.16.1"
+}
+
+tasks.register('npmBuild', NpmTask) {
+    args = [ 'run', 'build' ]
+}

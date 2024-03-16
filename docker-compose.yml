@@ -31,7 +31,7 @@ services:
     restart: always
     container_name: ui
     build:
-      context: ./app
+      context: gui
     expose:
       - 3000
     ports:

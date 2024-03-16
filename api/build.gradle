@@ -78,6 +78,7 @@ tasks.withType(Test).configureEach {
 
 compileJava {
     options.annotationProcessorGeneratedSourcesDirectory = file('src/main/generated')
+    dependsOn(':gui:npmBuild')
 }
 
 clean {
@@ -86,4 +87,13 @@ clean {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('copyWebApp', Copy) {
+    from "$rootDir/gui/dist"
+    into "$buildDir/resources/main/static/."
+}
+
+tasks.named('processResources') {
+    dependsOn('copyWebApp')
 }

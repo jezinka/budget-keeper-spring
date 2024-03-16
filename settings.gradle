@@ -5,3 +5,5 @@
  */
 
 rootProject.name = 'budget-keeper-spring'
+include 'gui'
+include 'api'

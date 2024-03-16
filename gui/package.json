@@ -12,13 +12,21 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.1",
     "react-scripts": "5.0.1",
-    "recharts": "^2.1.15"
+    "recharts": "^2.1.15",
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "webpack-dev-server",
+    "build": "webpack"
   },
   "proxy": "http://api:8080/budget",
   "eslintConfig": {
