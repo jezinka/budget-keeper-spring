@@ -12,7 +12,7 @@ const LogTable = () => {
     }, []);
 
     async function loadData() {
-        const response = await fetch('/logs');
+        const response = await fetch('/budget/logs');
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -23,7 +23,7 @@ const LogTable = () => {
     }
 
     async function deleteLog(id) {
-        const response = await fetch('/logs/' + id, {method: "DELETE"});
+        const response = await fetch('/budget/logs/' + id, {method: "DELETE"});
         if (response.ok) {
             return loadData();
         }

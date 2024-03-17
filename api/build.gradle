@@ -7,6 +7,7 @@
 plugins {
     id 'java-library'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'war'
 }
 
 dependencyManagement {
@@ -91,9 +92,14 @@ test {
 
 tasks.register('copyWebApp', Copy) {
     from "$rootDir/gui/dist"
-    into "$buildDir/resources/main/static/."
+    into "src/main/resources/."
 }
 
 tasks.named('processResources') {
     dependsOn('copyWebApp')
 }
+
+war {
+    archiveFileName = 'budget.war'
+}
+

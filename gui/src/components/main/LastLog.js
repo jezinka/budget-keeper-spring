@@ -7,7 +7,7 @@ export default function LastLog() {
     const [variant, setVariant] = useState("danger");
 
     async function reloadLogs() {
-        const response = await fetch('/logs/forDisplay');
+        const response = await fetch('/budget/logs/forDisplay');
         if (response.ok) {
             const data = await response.json();
             if (data) {

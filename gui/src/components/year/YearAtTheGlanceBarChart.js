@@ -14,7 +14,7 @@ const YearAtTheGlanceBarChart = () => {
     }, [formState]);
 
     async function loadData() {
-        const response = await fetch('/expenses/getPivot/' + formState);
+        const response = await fetch('/budget/expenses/getPivot/' + formState);
         if (response.ok) {
             let data = await response.json();
 

@@ -10,7 +10,7 @@ export default function MoneyAmount() {
     const [formState, setFormState] = useState({"amount": 0, "date": getFirstDayOfCurrentMonth()})
 
     async function submitForm() {
-        const response = await fetch('/moneyAmount', {
+        const response = await fetch('/budget/moneyAmount', {
             method: 'POST',
             body: JSON.stringify(formState),
             headers: {'Content-Type': 'application/json'},
@@ -29,7 +29,7 @@ export default function MoneyAmount() {
     };
 
     async function loadData() {
-        const response = await fetch('/moneyAmount')
+        const response = await fetch('/budget/moneyAmount')
         const data = await response.json();
         setMoneyAmount(data);
     }

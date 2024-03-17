@@ -57,16 +57,16 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     async function getResponse() {
         if (mode === "currentMonth") {
-            return await fetch("/expenses/currentMonth");
+            return await fetch("/budget/expenses/currentMonth");
         } else {
-            return await fetch('/expenses', {
+            return await fetch('/budget/expenses', {
                 method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
             });
         }
     }
 
     async function fetchCategories() {
-        const response = await fetch('/categories');
+        const response = await fetch('/budget/categories');
         if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -117,7 +117,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function submitForm() {
-        const response = await fetch('/expenses/' + formState.id, {
+        const response = await fetch('/budget/expenses/' + formState.id, {
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
@@ -139,7 +139,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             }
         ]
 
-        const response = await fetch('/expenses/split/' + formState.id, {
+        const response = await fetch('/budget/expenses/split/' + formState.id, {
             method: 'POST',
             body: JSON.stringify(splittedTransactions),
             headers: {'Content-Type': 'application/json'},

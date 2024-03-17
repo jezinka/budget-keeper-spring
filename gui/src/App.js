@@ -16,7 +16,7 @@ import FixedCosts from "./components/fixedCosts/FixedCosts";
 const App = () => {
     return (
         <>
-            <Router>
+            <Router basename="/budget">
                 <Routes>
                     <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>

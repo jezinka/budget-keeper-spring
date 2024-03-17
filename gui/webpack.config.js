@@ -11,8 +11,8 @@ module.exports = {
   mode: "development",
   entry: "/src/index.js", // main js
   output: {
-    path: path.resolve(__dirname, "dist"), // output folder
-    publicPath: "/",
+    path: path.resolve(__dirname, "dist/static/js"), // change 'dist' to 'dist/static'
+    publicPath: "/budget/js",
   },
   module: {
     rules: [
@@ -22,7 +22,10 @@ module.exports = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
+            presets: [
+              "@babel/preset-env",
+              ["@babel/preset-react", {"runtime": "automatic"}]
+            ]
           },
         },
       },
@@ -37,7 +40,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./public/index.html", // base html
+      template: "./public/index.html",
+      filename: path.resolve(__dirname, 'dist/static/index.html'), // output file in 'dist/static'
     }),
     new CopyWebpackPlugin({
       patterns: [

@@ -5,7 +5,7 @@ const AddCategoryForm = (props) => {
     const [name, setName] = useState("");
 
     const handleSubmit = async () => {
-        await fetch('/categories', {
+        await fetch('/budget/categories', {
             method: 'POST', body: JSON.stringify({"name": name}), headers: {'Content-Type': 'application/json'},
         });
         props.close();

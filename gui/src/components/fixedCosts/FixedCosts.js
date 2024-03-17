@@ -14,13 +14,13 @@ const FixedCosts = () => {
     }, []);
 
     async function loadData() {
-        const response = await fetch('/fixedCost')
+        const response = await fetch('/budget/fixedCost')
         const data = await response.json();
         setData(data);
     }
 
     async function moneyAmountLoad() {
-        const response = await fetch('/moneyAmount')
+        const response = await fetch('/budget/moneyAmount')
         const data = await response.json();
         setMoneyAmount(data);
     }
@@ -50,7 +50,7 @@ const FixedCosts = () => {
                             checked={record.payDate != null}
                             onClick={async () => {
                                 if (record.payDate != null) return;
-                                const response = await fetch('/fixedCost/' + record.id, {
+                                const response = await fetch('/budget/fixedCost/' + record.id, {
                                     method: 'PUT'
                                 });
                                 if (response.ok) {

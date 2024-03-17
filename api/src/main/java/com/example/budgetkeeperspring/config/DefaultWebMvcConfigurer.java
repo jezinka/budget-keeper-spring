@@ -27,7 +27,7 @@ class DefaultWebMvcConfigurer implements WebMvcConfigurer  {
                                                    List<? extends Resource> locations, ResourceResolverChain chain) {
             Resource resource = super.resolveResourceInternal(request, requestPath, locations, chain);
             if (resource == null) {
-                resource = super.resolveResourceInternal(request, "/index.html", locations, chain);
+                resource = super.resolveResourceInternal(request, "index.html", locations, chain);
             }
             return resource;
         }
