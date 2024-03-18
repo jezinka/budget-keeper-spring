@@ -82,12 +82,12 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }, []);
 
     async function deleteTransaction(id) {
-        const response = await fetch("/expenses/" + id, {method: 'DELETE'})
+        const response = await fetch('/budget/expenses/' + id, {method: 'DELETE'})
         return await handleResponse(response);
     }
 
     async function editTransaction(id) {
-        const transaction = await fetch("/expenses/" + id, {method: 'GET'})
+        const transaction = await fetch('/budget/expenses/' + id, {method: 'GET'})
         if (transaction.ok) {
             const data = await transaction.json();
             if (data) {
