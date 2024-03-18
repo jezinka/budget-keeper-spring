@@ -18,9 +18,10 @@ dependencyManagement {
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
+    gradlePluginPortal()
+    maven { url 'https://repo.spring.io/release' }
+    maven { url 'https://repo.maven.apache.org/maven2/' }
+    maven { url "https://plugins.gradle.org/m2/" }
 }
 
 dependencies {
