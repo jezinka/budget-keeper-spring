@@ -24,7 +24,7 @@ public class KafkaService {
     private final LogMapper logMapper;
     private final FixedCostService fixedCostService;
 
-    @KafkaListener(id = "springExpenseListener", topics = "expense")
+    @KafkaListener(id = "springExpenseListener", topics = "expense", autoStartup = "${listen.auto.start:false}")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -37,7 +37,7 @@ public class KafkaService {
         log.info("Saved expense: " + savedExpense);
     }
 
-    @KafkaListener(id = "springLogListener", topics = "log")
+    @KafkaListener(id = "springLogListener", topics = "log", autoStartup = "${listen.auto.start:false}")
     public void listenLogs(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
