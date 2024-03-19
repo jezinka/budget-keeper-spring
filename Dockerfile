@@ -10,5 +10,5 @@ RUN gradle api:processResources
 RUN gradle -p /app/api war
 
 # Run stage
-FROM tomcat:10
+FROM tomcat:10.1.19-jre17
 COPY --from=build /app/api/build/libs/*.war /usr/local/tomcat/webapps/

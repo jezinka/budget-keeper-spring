@@ -1,5 +1,11 @@
-sql/
+.github
 target/
-gui/node_modules
+api/build
+gui/node_modules/
+gui/dist/
+gui/.gradle
+node_modules/
+docker_images
 .mvn
 .idea
+.gradle
