@@ -13,7 +13,7 @@ export function getDate() {
 }
 
 export function getMonthName(monthNumber, format) {
-    const date = new Date(2023, monthNumber - 1, 1);
+    const date = new Date(new Date().getFullYear(), monthNumber - 1, 1);
     return date.toLocaleString('pl-PL', {month: format});
 }
 
@@ -60,4 +60,10 @@ export function getFirstDayOfCurrentMonth() {
         1
     );
     return new Intl.DateTimeFormat('sv-SE').format(firstDay);
+}
+
+export function getDaysOfWeek() {
+    const {format} = new Intl.DateTimeFormat("pl-PL", {weekday: "short"});
+    return [...Array(7).keys()]
+        .map((day) => format(new Date(Date.UTC(new Date().getFullYear(), 0, day + 1))));
 }
