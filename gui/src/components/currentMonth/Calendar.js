@@ -1,6 +1,8 @@
 import {Col, Container, Row} from "react-bootstrap";
 import {useEffect, useState} from "react";
 import {getDaysOfWeek} from "../../Utils";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 export const Calendar = () => {
     const [data, setData] = useState([]);
@@ -30,8 +32,12 @@ export const Calendar = () => {
 
         while (i <= lastDay) {
             let className = "text-sm-center";
-            if (data.filter(d => d.day === i).length > 0)
+            let day = data.find(d => d.day === i);
+            let tooltipText = null;
+            if (day !== undefined) {
                 className += " bg-info";
+                tooltipText = day.amount;
+            }
 
             if (i === date.getDate()) {
                 className += " fw-bolder bg-success";
@@ -41,7 +47,13 @@ export const Calendar = () => {
                 className += " bg-dark-subtle text-muted";
             }
 
-            row.push(<Col className={className}>{i}</Col>);
+            row.push(<OverlayTrigger
+                placement={'bottom'}
+                overlay={<Tooltip id={`tooltip-cell-${i}`}>
+                    {tooltipText}
+                </Tooltip>}>
+                <Col className={className}>{i}</Col>
+            </OverlayTrigger>);
 
             if (row.length === 7) {
                 rows.push(<Row>{row}</Row>);
@@ -58,12 +70,10 @@ export const Calendar = () => {
         return rows;
     }
 
-    return (
-        <Container>
+    return (<Container>
             <Col sm={7}>
-                <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center" key={d}>{d}</Col>)}</Row>
+                <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
                 {daysRows()}
             </Col>
-        </Container>
-    )
+        </Container>)
 }
