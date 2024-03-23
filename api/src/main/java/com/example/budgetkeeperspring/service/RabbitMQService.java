@@ -8,7 +8,7 @@ import com.example.budgetkeeperspring.repository.LogRepository;
 import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class KafkaService {
+public class RabbitMQService {
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
@@ -24,7 +24,7 @@ public class KafkaService {
     private final LogMapper logMapper;
     private final FixedCostService fixedCostService;
 
-    @KafkaListener(id = "springExpenseListener", topics = "expense", autoStartup = "${listen.auto.start:false}")
+    @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -37,7 +37,7 @@ public class KafkaService {
         log.info("Saved expense: " + savedExpense);
     }
 
-    @KafkaListener(id = "springLogListener", topics = "log", autoStartup = "${listen.auto.start:false}")
+    @RabbitListener(queues = "log")
     public void listenLogs(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
