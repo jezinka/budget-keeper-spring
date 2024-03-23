@@ -28,6 +28,7 @@ public class CategoryCondition {
     private Circ circ;
 
     @Version
+    @Builder.Default
     private Integer version = 0;
 
 }

@@ -35,13 +35,13 @@ public class CategoryController {
     }
 
     @PostMapping("")
-    ResponseEntity add(@Validated @RequestBody CategoryDTO categoryDTO) {
+    ResponseEntity<Void> add(@Validated @RequestBody CategoryDTO categoryDTO) {
 
         CategoryDTO savedCategory = categoryService.saveCategory(categoryDTO);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "categories/" + savedCategory.getId().toString());
-        return new ResponseEntity(headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

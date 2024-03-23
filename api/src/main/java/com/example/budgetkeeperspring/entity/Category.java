@@ -36,7 +36,10 @@ public class Category {
     @Column(unique = true)
     private String name;
 
+    @Builder.Default
     private boolean useInYearlyCharts = Boolean.TRUE;
+
+    @Builder.Default
     private boolean toCheck = Boolean.FALSE;
 
     public Category(String name) {

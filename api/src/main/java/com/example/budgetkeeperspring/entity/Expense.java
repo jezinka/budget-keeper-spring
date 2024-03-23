@@ -61,6 +61,7 @@ public class Expense {
     @Fetch(FetchMode.JOIN)
     private Category category;
 
+    @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
     public String getCategoryName() {

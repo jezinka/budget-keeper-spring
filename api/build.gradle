@@ -79,7 +79,8 @@ tasks.withType(Test).configureEach {
 }
 
 compileJava {
-    options.annotationProcessorGeneratedSourcesDirectory = file('src/main/generated')
+    options.compilerArgs << '-parameters'
+    options.generatedSourceOutputDirectory.set(file('src/main/generated'))
     dependsOn(':gui:npmBuild')
 }
 
