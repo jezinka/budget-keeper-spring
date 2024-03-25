@@ -4,9 +4,12 @@ import Main from "../main/Main";
 import {LabelList, Pie, PieChart} from "recharts";
 import {addSumPerMonth, getSumFromMap, handleError, renderCustomizedLabel} from "../../Utils";
 import YearFilter from "./YearFilter";
+import CategoryCheckboxRow from "./CategoryCheckboxRow";
 
 const YearAtTheGlancePieChart = () => {
     const [data, setData] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [formState, setFormState] = useState(new Date().getFullYear());
 
     useEffect(() => {
@@ -30,7 +33,12 @@ const YearAtTheGlancePieChart = () => {
             });
 
             filteredData.push({category: 'inne', sum: sum - getSumFromMap(filteredData, 'sum')});
-            return setData(filteredData.sort((a, b) => a.sum - b.sum));
+            const sorted = filteredData.sort((a, b) => a.sum - b.sum);
+            const categoriesNames = sorted.map((d) => d.category);
+
+            setCategories(categoriesNames.reverse());
+            setSelectedCategories(categoriesNames);
+            return setData(sorted);
         }
         handleError();
     }
@@ -39,10 +47,15 @@ const YearAtTheGlancePieChart = () => {
         <Row>
             <YearFilter formState={formState} formHandler={setFormState}/>
         </Row>
+        <CategoryCheckboxRow
+            categories={categories}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+        />
         <Col>
             <PieChart width={1700} height={800}>
                 <Pie
-                    data={data}
+                    data={data.filter((d) => selectedCategories.includes(d.category))}
                     cx="50%"
                     cy="50%"
                     outerRadius={300}

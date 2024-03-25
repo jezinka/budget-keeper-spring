@@ -4,11 +4,13 @@ import Expense from "./Expense";
 import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
 import {Col, Modal, Row} from "react-bootstrap";
 import YearFilter from "./YearFilter";
+import CategoryCheckboxRow from "./CategoryCheckboxRow";
 
 export default function YearlyExpenses() {
 
     const [expenses, setExpenses] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
     const [transactionsDetails, setTransactionsDetails] = useState([]);
     const [show, setShow] = useState(false);
@@ -32,6 +34,7 @@ export default function YearlyExpenses() {
         if (response.ok) {
             const data = await response.json();
             if (data) {
+                setSelectedCategories(data.map(c => c.name));
                 return setCategories(data);
             }
         }
@@ -65,6 +68,11 @@ export default function YearlyExpenses() {
         <Row>
             <YearFilter year={year} formHandler={setYear}/>
         </Row>
+        <CategoryCheckboxRow
+            categories={categories.map(c => c.name)}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+        />
         <Col sm={11}>
             <Table id="yearly" responsive='sm' striped bordered size="sm">
                 <thead>
@@ -77,12 +85,14 @@ export default function YearlyExpenses() {
                 </thead>
                 <tbody>
 
-                {categories.map(currentCategory => <tr key={currentCategory.id}>
-                    <td>{currentCategory.name}</td>
-                    {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, currentCategory.name))}
-                    {ExpenseForMonthAndCategory(SUM_MONTH, currentCategory.name)}
-                </tr>)}
-
+                {categories
+                    .filter(c => selectedCategories.find(sc => c.name === sc))
+                    .map(currentCategory =>
+                        <tr key={currentCategory.id}>
+                            <td>{currentCategory.name}</td>
+                            {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, currentCategory.name))}
+                            {ExpenseForMonthAndCategory(SUM_MONTH, currentCategory.name)}
+                        </tr>)}
                 <tr>
                     <td>{SUM_CATEGORY}</td>
                     {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY))}

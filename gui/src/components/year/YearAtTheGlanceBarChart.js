@@ -4,10 +4,14 @@ import Main from "../main/Main";
 import {Bar, BarChart, Tooltip, XAxis, YAxis} from "recharts";
 import {addSumPerMonth, getMonthName, handleError, MONTHS_ARRAY} from "../../Utils";
 import YearFilter from "./YearFilter";
+import CategoryCheckboxRow from "./CategoryCheckboxRow";
 
 const YearAtTheGlanceBarChart = () => {
     const [data, setData] = useState([])
     const [formState, setFormState] = useState(new Date().getFullYear());
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+
 
     useEffect(() => {
         loadData();
@@ -20,7 +24,12 @@ const YearAtTheGlanceBarChart = () => {
 
             addSumPerMonth(data);
             data = data.filter((d) => d.sum < 0);
-            return setData(data.sort((a, b) => a.sum - b.sum));
+            const sorted = data.sort((a, b) => a.sum - b.sum);
+            const categoriesNames = sorted.map((d) => d.category);
+
+            setCategories(categoriesNames);
+            setSelectedCategories(categoriesNames);
+            return setData(sorted);
         }
         handleError();
     }
@@ -29,8 +38,15 @@ const YearAtTheGlanceBarChart = () => {
         <Row>
             <YearFilter formState={formState} formHandler={setFormState}/>
         </Row>
+        <CategoryCheckboxRow
+            categories={categories}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+        />
         <Col>
-            <BarChart width={1700} height={800} data={data}>
+            <BarChart width={1700}
+                      height={800}
+                      data={data.filter((d) => selectedCategories.includes(d.category))}>
                 <Tooltip/>
                 <YAxis width={40}/>
                 <XAxis height={110}
