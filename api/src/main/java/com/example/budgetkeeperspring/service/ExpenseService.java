@@ -145,16 +145,10 @@ public class ExpenseService {
                 .filter(p -> p.getCategory() != null && p.getCategory().isUseInYearlyCharts())
                 .toList();
 
-        Map<Integer, Map<String, BigDecimal>> collect = yearlyExpenses.stream().collect(groupingBy(
+        return yearlyExpenses.stream().collect(groupingBy(
                 Expense::getTransactionMonth,
                 groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
                         Expense::getAmount, BigDecimal::add))));
-
-        collect.put(99, getCategorySummary(yearlyExpenses));
-        collect.forEach((month, categories) ->
-                categories.put("SUMA", categories.values().stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
-        );
-        return collect;
     }
 
     private Map<String, BigDecimal> getCategorySummary(List<Expense> yearlyExpenses) {

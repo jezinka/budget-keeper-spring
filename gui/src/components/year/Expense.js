@@ -29,6 +29,10 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
         </Table>)
     };
 
+    if (modalHandler === undefined || modalContentHandler === undefined) {
+        return (<td style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
+    }
+
     return (
         <td style={{textAlign: 'right'}} onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
     );

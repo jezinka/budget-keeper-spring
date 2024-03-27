@@ -47,6 +47,9 @@ export default function YearlyExpenses() {
     }, [year])
 
     function ExpenseForMonthAndCategory(currMonth, currCategory) {
+        if (expenses.length === 0) {
+            return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>;
+        }
         if (currMonth in expenses && currCategory in expenses[currMonth]) {
             const foundExpense = {
                 month: currMonth,
@@ -56,8 +59,39 @@ export default function YearlyExpenses() {
 
             return <Expense expense={foundExpense} year={year} key={currMonth + currCategory}
                             modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
+        } else if (currMonth === SUM_MONTH && currCategory === SUM_CATEGORY) {
+            let expenseAmount = 0;
+            for (let month of Object.keys(expenses)) {
+                for (let category of Object.keys(expenses[month])) {
+                    if (selectedCategories.find(sc => category === sc)) {
+                        expenseAmount += expenses[month][category];
+                    }
+                }
+            }
+            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
+        } else if (currMonth === SUM_MONTH) {
+            let expenseAmount = 0;
+            for (let month of Object.keys(expenses)) {
+                if (Object.keys(expenses[month]).find(c => c === currCategory) !== undefined) {
+                    if (selectedCategories.find(sc => currCategory === sc)) {
+                        expenseAmount += expenses[month][currCategory];
+                    }
+                }
+            }
+            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
+        } else if (currCategory === SUM_CATEGORY) {
+            let expenseAmount = 0;
+            if (Object.keys(expenses).find(c => c == currMonth) !== undefined) {
+                for (let category of Object.keys(expenses[currMonth])) {
+                    if (selectedCategories.find(sc => category === sc)) {
+                        expenseAmount += expenses[currMonth][category];
+                    }
+                }
+            }
+            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
+        } else {
+            return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>
         }
-        return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>
     }
 
     return (<>
@@ -96,7 +130,7 @@ export default function YearlyExpenses() {
                 <tr>
                     <td>{SUM_CATEGORY}</td>
                     {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, SUM_CATEGORY))}
-                    <td></td>
+                    {ExpenseForMonthAndCategory(SUM_MONTH, SUM_CATEGORY)}
                 </tr>
                 </tbody>
             </Table>
