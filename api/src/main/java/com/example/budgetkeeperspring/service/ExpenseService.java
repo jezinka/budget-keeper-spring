@@ -151,21 +151,6 @@ public class ExpenseService {
                         Expense::getAmount, BigDecimal::add))));
     }
 
-    private Map<String, BigDecimal> getCategorySummary(List<Expense> yearlyExpenses) {
-        List<String> categories = yearlyExpenses.stream().map(Expense::getCategoryName).distinct().toList();
-
-        Map<String, BigDecimal> categorySum = new HashMap<>();
-        for (String c : categories) {
-            categorySum.put(c,
-                    yearlyExpenses
-                            .stream()
-                            .filter(e -> e.getCategoryName().equals(c))
-                            .map(Expense::getAmount)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add));
-        }
-        return categorySum;
-    }
-
     public List<Map<String, Object>> getMonthsPivot(int year) {
         List<Map<String, Object>> list = new ArrayList<>();
         String[] shortMonths = DFS.getShortMonths();
