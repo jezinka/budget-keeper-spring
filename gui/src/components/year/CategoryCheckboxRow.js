@@ -1,9 +1,20 @@
 import React from 'react';
-import { Row, Col } from 'react-bootstrap';
+import {Col, Row} from 'react-bootstrap';
 
-const CategoryCheckboxRow = ({ categories, selectedCategories, setSelectedCategories }) => {
+const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategories}) => {
     return (
         <Row>
+            <Col sm={2}>
+                <input type="checkbox"
+                       checked={selectedCategories.length === categories.length}
+                       onChange={(event) => {
+                           if (event.target.checked) {
+                               setSelectedCategories(categories)
+                           } else {
+                               setSelectedCategories([])
+                           }
+                       }}/><span className="fw-bold">&nbsp;Zaznacz/odznacz wszystkie</span>
+            </Col>
             {categories.map((category) => {
                 return (
                     <Col sm={2} key={category}>
@@ -17,8 +28,7 @@ const CategoryCheckboxRow = ({ categories, selectedCategories, setSelectedCatego
                                     setSelectedCategories(selectedCategories.filter(c => c !== category));
                                 }
                             }}
-                        />
-                        {category}
+                        />&nbsp;{category}
                     </Col>
                 );
             })}
