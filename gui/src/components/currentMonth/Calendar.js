@@ -35,7 +35,9 @@ export const Calendar = () => {
             let day = data.find(d => d.day === i);
             let tooltipText = null;
             if (day !== undefined) {
-                className += " bg-info";
+                if (i !== date.getDate()) {
+                    className += " bg-info";
+                }
                 tooltipText = day.amount;
             }
 
@@ -71,9 +73,9 @@ export const Calendar = () => {
     }
 
     return (<Container>
-            <Col sm={7}>
-                <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
-                {daysRows()}
-            </Col>
-        </Container>)
+        <Col sm={7}>
+            <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
+            {daysRows()}
+        </Col>
+    </Container>)
 }
