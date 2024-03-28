@@ -72,15 +72,15 @@ const FixedCosts = () => {
                 <tbody>
                 <tr>
                     <td className='table-info'>ZAPŁACONE</td>
-                    <td>{data.filter(d => d.payDate != null).map(x => x.amount).reduce((sum, num) => sum + num, 0)}</td>
+                    <td>{formatNumber(data.filter(d => d.payDate != null).map(x => x.amount).reduce((sum, num) => sum + num, 0))}</td>
                 </tr>
                 <tr>
                     <td className='table-info'>DO ZAPŁATY</td>
-                    <td>{getPayedSum()}</td>
+                    <td>{formatNumber(getPayedSum())}</td>
                 </tr>
                 <tr>
                     <td className='table-info'>SUMA</td>
-                    <td>{data.map(x => x.amount).reduce((sum, num) => sum + num, 0)}</td>
+                    <td>{formatNumber(data.map(x => x.amount).reduce((sum, num) => sum + num, 0))}</td>
                 </tr>
                 </tbody>
             </Table>
