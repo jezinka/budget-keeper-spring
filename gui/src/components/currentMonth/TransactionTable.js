@@ -4,6 +4,8 @@ import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import {ArrowClockwise, ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
 import {EMPTY_OPTION, formatNumber, handleError} from "../../Utils";
 import AddCategoryModal from "./AddCategoryModal";
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
@@ -172,6 +174,24 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         }
     }
 
+    function getNote(transaction) {
+        if (transaction.note == null) {
+            return <td></td>;
+        }
+        if (transaction.note.length < 50) {
+            return <td>{transaction.note}</td>
+        }
+
+        return <td>
+            {transaction.note.substring(0, 50)} <OverlayTrigger placement={'bottom'}
+                                                                overlay={<Tooltip
+                                                                    id={`tooltip-cell-${transaction.id}`}>
+                                                                    {transaction.note}
+                                                                </Tooltip>}><Button sm={1} className="btn-sm btn-light ms-4">...</Button></OverlayTrigger>
+        </td>;
+    }
+
+
     return (<>
             {refreshButton()}
             <AddCategoryModal show={showCategoryForm} close={() => {
@@ -263,6 +283,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                     <th>KTO</th>
                     <th>ILE</th>
                     <th>KATEGORIA</th>
+                    <th>NOTATKA</th>
                     <th style={{textAlign: "center"}}>*</th>
                 </tr>
                 </thead>
@@ -273,6 +294,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                     <td>{transaction.payee.substring(0, 50)}</td>
                     <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
                     <td>{transaction.categoryName != null ? transaction.categoryName : ''}</td>
+                    {getNote(transaction)}
                     <td style={{textAlign: "center"}}>
                         <Button variant="outline-primary" size="sm"
                                 onClick={() => editTransaction(transaction.id)}><Pencil/>

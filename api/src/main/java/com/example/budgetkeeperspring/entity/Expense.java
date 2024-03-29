@@ -64,6 +64,8 @@ public class Expense {
     @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
+    private String note;
+
     public String getCategoryName() {
         if (category != null) {
             return category.getName();
