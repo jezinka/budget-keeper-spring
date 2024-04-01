@@ -8,6 +8,7 @@ plugins {
     id 'java-library'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'war'
+    id "org.sonarqube" version "4.0.0.2929"
 }
 
 dependencyManagement {
@@ -104,4 +105,3 @@ tasks.named('processResources') {
 war {
     archiveFileName = 'budget.war'
 }
-

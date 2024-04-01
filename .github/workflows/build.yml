@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: SonarCloud
 on:
   push:
     branches:
@@ -7,8 +7,14 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  sonarqube:
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:latest
+        ports:
+          - 9000:9000
     steps:
       - uses: actions/checkout@v2
         with:
@@ -30,10 +36,19 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Generate package-lock.json
+        run: npm install --prefix ./gui
+      - name: Install npm dependencies
+        run: npm ci --prefix ./gui
       - name: Set execute permissions for gradlew
         run: chmod +x ./gradlew
-      - name: Run SonarQube Analysis
+      - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonarqube -Dsonar.projectKey=jezinka_budget-keeping-spring
+          SONAR_HOST_URL: http://localhost:9000
+        run: ./gradlew sonar -Dsonar.projectKey=jezinka_budget-keeping-spring --stacktrace
