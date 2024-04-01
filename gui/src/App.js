@@ -12,6 +12,7 @@ import YearAtTheGlanceBarChart from "./components/year/YearAtTheGlanceBarChart";
 import YearAtTheGlancePieChart from "./components/year/YearAtTheGlancePieChart";
 import LogsView from "./components/logs/LogsView";
 import FixedCosts from "./components/fixedCosts/FixedCosts";
+import LatestSavings from "./components/savings/LatestSavings";
 
 const App = () => {
     return (
@@ -25,6 +26,7 @@ const App = () => {
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
                     <Route path="/gui/fixedCosts" element={<FixedCosts/>}/>
                     <Route path="/gui/logs" element={<LogsView/>}/>
+                    <Route path="/gui/savings" element={<LatestSavings/>}/>
                 </Routes>
             </Router>
         </>
