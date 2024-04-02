@@ -67,3 +67,7 @@ export function getDaysOfWeek() {
     return [...Array(7).keys()]
         .map((day) => format(new Date(Date.UTC(new Date().getFullYear(), 0, day + 1))));
 }
+
+export const monthColors = [
+    '#A6CEE3', '#1F78B4', '#b413b9', '#33A02C', '#FB9A99', '#E31A1C',
+    '#FDBF6F', '#FF7F00', '#CAB2D6', '#6A3D9A', '#16AC1C', '#B15928']

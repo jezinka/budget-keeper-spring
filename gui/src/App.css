@@ -19,3 +19,7 @@ tr.inactive {
 .szary {
     background-color: darkgrey;
 }
+
+#latestSavings.table tr td {
+    background-color: inherit;
+}

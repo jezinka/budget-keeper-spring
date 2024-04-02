@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from "react";
-import {DATE_FORMAT, formatNumber, handleError, renderCustomizedLabel} from "../../Utils";
+import {DATE_FORMAT, formatNumber, handleError, monthColors, renderCustomizedLabel} from "../../Utils";
 import Table from "react-bootstrap/Table";
-import {Container, Row} from "react-bootstrap";
+import {Col, Container, Row} from "react-bootstrap";
 import Main from "../main/Main";
-import {CartesianGrid, LabelList, Legend, Line, LineChart, Pie, PieChart, Tooltip, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Cell, LabelList, Legend, Line, LineChart, Pie, PieChart, Tooltip, XAxis, YAxis} from "recharts";
 
 const LatestSavings = () => {
     const [savings, setSavings] = useState([]);
     const [groupedSavings, setGroupedSavings] = useState([]);
+    const [savingColorMap, setSavingColorMap] = useState({})
 
     useEffect(() => {
         loadLatest();
@@ -19,6 +20,9 @@ const LatestSavings = () => {
         if (response.ok) {
             const data = await response.json();
             if (data) {
+                let savingsIdColor = {}
+                data.forEach(d => savingsIdColor[d.savingsId] = monthColors[data.indexOf(d)]);
+                setSavingColorMap(savingsIdColor);
                 return setSavings(data)
             }
         }
@@ -39,10 +43,9 @@ const LatestSavings = () => {
     return (<Main body={
         <Container>
             <Row sm={5}>
-                <Table responsive='sm' striped bordered size="sm">
+                <Table id='latestSavings' responsive='sm' bordered size="sm">
                     <thead>
                     <tr className='table-info'>
-                        {/*<th><input type="checkbox"/></th>*/}
                         <th>GRUPA</th>
                         <th>NAZWA</th>
                         <th>ILE</th>
@@ -50,8 +53,10 @@ const LatestSavings = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {savings.map(saving => <tr key={saving.id}>
-                        {/*<td><input type="checkbox"/></td>*/}
+                    {savings.map(saving => <tr key={saving.id}
+                                               style={{
+                                                   backgroundColor: savingColorMap[saving.savingsId] +'40',
+                                               }}>
                         <td>{saving.fundGroup}</td>
                         <td>{saving.name}</td>
                         <td>{formatNumber(saving.amount)}</td>
@@ -59,18 +64,44 @@ const LatestSavings = () => {
                     </tr>)}
                     </tbody>
                 </Table>
-                <PieChart width={500} height={400}>
-                    <Pie
-                        data={savings.sort((a, b) => a.amount - b.amount)}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        dataKey="amount"
-                        fill="#6BBDFF"
-                        label={renderCustomizedLabel}>
-                        <LabelList dataKey="groupName" position="outside" stroke={"black"} offset={20}/>
-                    </Pie>
-                </PieChart>
+                <Col sm={4}>
+                    <h5>Inwestycje</h5>
+                    <PieChart width={600} height={300}>
+                        <Pie
+                            data={savings.filter(s => s.purpose === 'I').sort((a, b) => a.amount - b.amount)}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            dataKey="amount"
+                            label={renderCustomizedLabel}>
+                            {
+                                savings.filter(s => s.purpose === 'I').sort((a, b) => a.amount - b.amount).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={savingColorMap[entry.savingsId]}/>
+                                ))
+                            }
+                            <LabelList dataKey="groupName" position="outside" stroke={"black"} offset={20}/>
+                        </Pie>
+                    </PieChart>
+                </Col>
+                <Col sm={4}>
+                    <h5>Emerytura</h5>
+                    <PieChart width={600} height={300}>
+                        <Pie
+                            data={savings.filter(s => s.purpose === 'E').sort((a, b) => a.amount - b.amount)}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            dataKey="amount"
+                            label={renderCustomizedLabel}>
+                            <LabelList dataKey="groupName" position="outside" stroke={"black"} offset={20}/>
+                            {
+                                savings.filter(s => s.purpose === 'E').sort((a, b) => a.amount - b.amount).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={savingColorMap[entry.savingsId]}/>
+                                ))
+                            }
+                        </Pie>
+                    </PieChart>
+                </Col>
             </Row>
             {groupedSavings != null ? <LineChart width={1500} height={400}>
                 <CartesianGrid strokeDasharray="3 3"/>
@@ -81,13 +112,16 @@ const LatestSavings = () => {
                            return DATE_FORMAT.format(new Date(tickItem))
                        }}/>
                 <YAxis dataKey="amount" scale='log' domain={['auto', 'auto']}/>
-                <Tooltip/>
-                <Legend/>
+                <Tooltip labelFormatter={(label) => {
+                    return DATE_FORMAT.format(new Date(label))
+                }}/>
+                <Legend layout="vertical" align="right" verticalAlign="middle"/>
                 {groupedSavings.map((s) => (
                     <Line dataKey="amount"
                           data={s.data}
                           name={s.name}
-                          key={s.name}/>
+                          key={s.name}
+                          stroke={savingColorMap[s.savingsId]}/>
                 ))}
             </LineChart> : <LineChart width={500} height={300}> </LineChart>}
         </Container>

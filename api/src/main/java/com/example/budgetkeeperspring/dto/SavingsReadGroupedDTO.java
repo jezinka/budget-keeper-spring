@@ -9,10 +9,12 @@ import java.util.List;
 
 @Data
 public class SavingsReadGroupedDTO {
+    private Long savingsId;
     private String name;
     private List<SavingsChartDataDTO> data = new ArrayList<>();
 
     public SavingsReadGroupedDTO(SavingsReadDTO savingsReadDTO) {
+        this.savingsId = savingsReadDTO.getSavingsId();
         this.name = savingsReadDTO.getGroupName();
         this.data.add(new SavingsChartDataDTO(savingsReadDTO));
     }
