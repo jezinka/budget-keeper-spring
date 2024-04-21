@@ -22,4 +22,6 @@ public class CategoryDTO {
 
     @Builder.Default
     private boolean useInYearlyCharts = Boolean.TRUE;
+
+    private Integer level;
 }

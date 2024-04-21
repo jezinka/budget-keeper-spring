@@ -42,6 +42,8 @@ public class Category {
     @Builder.Default
     private boolean toCheck = Boolean.FALSE;
 
+    private Integer level;
+
     public Category(String name) {
         this.name = name;
     }
