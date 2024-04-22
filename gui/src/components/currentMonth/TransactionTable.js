@@ -68,7 +68,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     async function fetchCategories() {
-        const response = await fetch('/budget/categories');
+        const response = await fetch('/budget/categories/all');
         if (response.ok) {
             const data = await response.json();
             if (data) {
