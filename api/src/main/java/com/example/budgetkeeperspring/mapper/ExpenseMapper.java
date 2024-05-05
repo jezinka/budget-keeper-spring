@@ -11,7 +11,7 @@ public interface ExpenseMapper {
     @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
     @Mapping(source = "categoryId", target = "category.id")
     @Mapping(source = "categoryName", target = "category.name")
-    @Mapping(target = "transactionDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "transactionDate", dateFormat = "yyyy-MM-dd")
     Expense mapToEntity(ExpenseDTO expenseDTO);
 
     @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
