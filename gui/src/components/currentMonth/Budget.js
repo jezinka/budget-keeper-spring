@@ -30,7 +30,7 @@ export default function Budget() {
                     {budgetPlan.filter(g => g.goal !== 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
                         <td>{row.goal}</td>
-                        <td>{row.currentMonthSum}</td>
+                        <td>{row.expense}</td>
                         <td>{row.difference}</td>
                     </tr>)}
                     </tbody>
@@ -46,7 +46,7 @@ export default function Budget() {
                     </tr>
                     {budgetPlan.filter(g => g.goal === 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
-                        <td>{row.currentMonthSum}</td>
+                        <td>{row.expense}</td>
                     </tr>)}
                     </tbody>
                 </Table>
