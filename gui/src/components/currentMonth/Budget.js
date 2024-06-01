@@ -6,7 +6,7 @@ export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
 
     async function loadData() {
-        const response = await fetch('/budget/expenses/budgetPlan')
+        const response = await fetch('/budget/budgetPlan')
         const data = await response.json();
         setBudgetPlan(data);
     }
@@ -17,20 +17,36 @@ export default function Budget() {
 
     return (
         <>
-            <Col sm={4}>
+            <Col sm={5}>
+                <h5>PLAN</h5>
+                <Table responsive='sm' striped bordered size="sm">
+                    <tbody>
+                    <tr className='table-info'>
+                        <td>KATEGORIA</td>
+                        <td>ZAŁOŻENIE</td>
+                        <td>SUMA</td>
+                        <td>RÓŻNICA</td>
+                    </tr>
+                    {budgetPlan.filter(g => g.goal !== 0).map(row => <tr key={row.id}>
+                        <td>{row.category}</td>
+                        <td>{row.goal}</td>
+                        <td>{row.currentMonthSum}</td>
+                        <td>{row.difference}</td>
+                    </tr>)}
+                    </tbody>
+                </Table>
+            </Col>
+            <Col sm={5}>
+                <h5>NO BUY</h5>
                 <Table responsive='sm' striped bordered size="sm">
                     <tbody>
                     <tr className='table-info'>
                         <td>KATEGORIA</td>
                         <td>SUMA</td>
-                        <td>ŚREDNIA</td>
-                        <td>ZAŁOŻENIE</td>
                     </tr>
-                    {budgetPlan.map(row => <tr key={row.id}>
+                    {budgetPlan.filter(g => g.goal === 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
                         <td>{row.currentMonthSum}</td>
-                        <td>{row.previousYearMean}</td>
-                        <td>{row.goal}</td>
                     </tr>)}
                     </tbody>
                 </Table>

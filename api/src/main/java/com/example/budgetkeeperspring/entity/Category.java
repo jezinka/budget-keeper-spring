@@ -39,9 +39,6 @@ public class Category {
     @Builder.Default
     private boolean useInYearlyCharts = Boolean.TRUE;
 
-    @Builder.Default
-    private boolean toCheck = Boolean.FALSE;
-
     private Integer level;
 
     public Category(String name) {

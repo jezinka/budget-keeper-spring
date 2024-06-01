@@ -5,7 +5,6 @@ import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
 import ExpensesPieChart from "./ExpensesPieChart";
-import Budget from "./Budget";
 import {Calendar} from "./Calendar";
 
 const CurrentMonth = () => {
@@ -28,7 +27,6 @@ const CurrentMonth = () => {
         <Col sm={4} className="mt-1">
             <Row>
                 <MoneyAmount/>
-                <Budget/>
             </Row>
             <ExpensesBarChart data={data}/>
             <Calendar/>

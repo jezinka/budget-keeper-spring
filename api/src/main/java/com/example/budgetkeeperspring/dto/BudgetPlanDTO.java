@@ -12,14 +12,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BudgetPlanDTO {
+    private Long id;
     private String category;
-    private BigDecimal currentMonthSum;
-    private BigDecimal previousYearMean;
+    private BigDecimal expense;
     private BigDecimal goal;
+    private BigDecimal difference;
 
-    public BudgetPlanDTO(String category, BigDecimal previousYearMean, BigDecimal hipGoal) {
-        this.category = category;
-        this.previousYearMean = previousYearMean;
-        this.goal = hipGoal;
+    public BigDecimal getDifference() {
+        return goal.subtract(expense);
     }
 }
