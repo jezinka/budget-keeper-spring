@@ -15,6 +15,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -34,4 +35,6 @@ public class Goal {
     private Category category;
 
     private BigDecimal amount;
+
+    private LocalDate date;
 }

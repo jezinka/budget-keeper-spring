@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
 import {Col} from "react-bootstrap";
+import BudgetSummary from "./BudgetSummary";
 
 export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
@@ -15,6 +16,14 @@ export default function Budget() {
         loadData();
     }, []);
 
+    function getGoalTotal() {
+        return budgetPlan.filter(g => g.goal !== 0).map(row => row.goal).reduce((sum, num) => sum + num, 0);
+    }
+
+    function getTotalExpenses() {
+        return budgetPlan.filter(g => g.goal !== 0).map(row => row.difference).reduce((sum, num) => sum + num, 0);
+    }
+
     return (
         <>
             <Col sm={5}>
@@ -24,20 +33,20 @@ export default function Budget() {
                     <tr className='table-info'>
                         <td>KATEGORIA</td>
                         <td>ZAŁOŻENIE</td>
-                        <td>SUMA</td>
+                        <td>WYDANE</td>
                         <td>RÓŻNICA</td>
                     </tr>
                     {budgetPlan.filter(g => g.goal !== 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
                         <td>{row.goal}</td>
                         <td>{row.expense}</td>
-                        <td className={row.percentage > 100 ? (row.percentage > 105 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{row.difference}</td>
+                        <td className={row.percentage > 0 ? (row.percentage > 100 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{row.difference}</td>
                     </tr>)}
                     <tr>
                         <td>RAZEM</td>
-                        <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.goal).reduce((sum, num) => sum + num, 0)}</td>
+                        <td>{getGoalTotal()}</td>
                         <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
-                        <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.difference).reduce((sum, num) => sum + num, 0)}</td>
+                        <td>{getTotalExpenses()}</td>
                     </tr>
                     </tbody>
                 </Table>
@@ -48,7 +57,7 @@ export default function Budget() {
                     <tbody>
                     <tr className='table-info'>
                         <td>KATEGORIA</td>
-                        <td>SUMA</td>
+                        <td>WYDANE</td>
                     </tr>
                     {budgetPlan.filter(g => g.goal === 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
@@ -57,9 +66,13 @@ export default function Budget() {
                     <tr>
                         <td>RAZEM</td>
                         <td>{budgetPlan.filter(g => g.goal === 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
-                        </tr>
+                    </tr>
                     </tbody>
                 </Table>
+            </Col>
+            <Col>
+                <h5>PODSUMOWANIE</h5>
+                <BudgetSummary/>
             </Col>
         </>);
 }

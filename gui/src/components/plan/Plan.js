@@ -4,27 +4,18 @@ import Main from "../main/Main";
 import {formatNumber} from "../../Utils";
 import Table from "react-bootstrap/Table";
 import Budget from "./Budget";
-import BudgetSummary from "./BudgetSummary";
 
 const Plan = () => {
     const [data, setData] = useState([]);
-    const [moneyAmount, setMoneyAmount] = useState({});
 
     useEffect(() => {
         loadData();
-        moneyAmountLoad();
     }, []);
 
     async function loadData() {
         const response = await fetch('/budget/fixedCost')
         const data = await response.json();
         setData(data);
-    }
-
-    async function moneyAmountLoad() {
-        const response = await fetch('/budget/moneyAmount')
-        const data = await response.json();
-        setMoneyAmount(data);
     }
 
     function getPayedSum() {
@@ -58,7 +49,6 @@ const Plan = () => {
                                     });
                                     if (response.ok) {
                                         loadData();
-                                        moneyAmountLoad();
                                     }
                                 }}
                             />
@@ -86,22 +76,6 @@ const Plan = () => {
                         <td>{formatNumber(data.map(x => x.amount).reduce((sum, num) => sum + num, 0))}</td>
                     </tr>
                     </tbody>
-                </Table>
-                <BudgetSummary/>
-            </Col>
-            <Col sm={2}>
-                <Table responsive='sm' striped bordered size="sm">
-                    <tbody>
-                    <tr>
-                        <td>NA KONCIE</td>
-                        <td>ZOSTANIE</td>
-                    </tr>
-                    <tr>
-                        <td>{moneyAmount.accountBalance}</td>
-                        <td>{formatNumber(moneyAmount.accountBalance + getPayedSum())}</td>
-                    </tr>
-                    </tbody>
-
                 </Table>
             </Col>
         </Row>
