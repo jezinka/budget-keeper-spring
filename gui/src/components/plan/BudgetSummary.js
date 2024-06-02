@@ -32,11 +32,11 @@ export default function BudgetSummary() {
                     <tbody>
                     <tr>
                         <td className='table-info'>NA WEJŚCIU</td>
-                        <td>{moneyAmount.accountBalance}</td>
+                        <td>{moneyAmount.start}</td>
                     </tr>
                     <tr>
                         <td className='table-info'>PO ZAPLANOWANYCH</td>
-                        <td>{formatNumber(moneyAmount.accountBalance + budgetPlanSummary.sumGoal)}</td>
+                        <td>{formatNumber(moneyAmount.start + budgetPlanSummary.sumGoal)}</td>
                     </tr>
 
                     </tbody>
@@ -67,7 +67,7 @@ export default function BudgetSummary() {
                     <tbody>
                     <tr>
                         <td className='table-info'>WOLNE ŚRODKI</td>
-                        <td>{formatNumber(moneyAmount.accountBalance +
+                        <td>{formatNumber(moneyAmount.start +
                             budgetPlanSummary.sumGoal +
                             budgetPlanSummary.otherExpenses +
                             budgetPlanSummary.noBuy +
