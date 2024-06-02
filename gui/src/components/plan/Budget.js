@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
 import {Col} from "react-bootstrap";
 import BudgetSummary from "./BudgetSummary";
+import {formatNumber} from "../../Utils";
 
 export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
@@ -46,7 +47,7 @@ export default function Budget() {
                         <td>RAZEM</td>
                         <td>{getGoalTotal()}</td>
                         <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
-                        <td>{getTotalExpenses()}</td>
+                        <td>{formatNumber(getTotalExpenses())}</td>
                     </tr>
                     </tbody>
                 </Table>
@@ -65,7 +66,7 @@ export default function Budget() {
                     </tr>)}
                     <tr>
                         <td>RAZEM</td>
-                        <td>{budgetPlan.filter(g => g.goal === 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
+                        <td>{formatNumber(budgetPlan.filter(g => g.goal === 0).map(row => row.expense).reduce((sum, num) => sum + num, 0))}</td>
                     </tr>
                     </tbody>
                 </Table>
