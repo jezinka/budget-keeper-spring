@@ -30,6 +30,10 @@ table tr td.failed_goal {
     background-color: #ff7f7f;
 }
 
+table tr td.over_goal {
+    background-color: #efa8a8;
+}
+
 .success_goal {
     background-color: #77e0be;
 }

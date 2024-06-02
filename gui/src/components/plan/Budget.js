@@ -31,7 +31,7 @@ export default function Budget() {
                         <td>{row.category}</td>
                         <td>{row.goal}</td>
                         <td>{row.expense}</td>
-                        <td className={row.percentage > 105 ? 'failed_goal' : 'success_goal'}>{row.difference}</td>
+                        <td className={row.percentage > 100 ? (row.percentage > 105 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{row.difference}</td>
                     </tr>)}
                     <tr>
                         <td>RAZEM</td>
