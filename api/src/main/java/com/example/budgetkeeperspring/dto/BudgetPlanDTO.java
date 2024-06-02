@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Data
 @Builder
@@ -17,8 +18,20 @@ public class BudgetPlanDTO {
     private BigDecimal expense;
     private BigDecimal goal;
     private BigDecimal difference;
+    private BigDecimal percentage;
 
     public BigDecimal getDifference() {
-        return goal.subtract(expense);
+        return expense.subtract(goal);
+    }
+
+    public BigDecimal getPercentage() {
+        if(goal.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        if (getDifference().compareTo(BigDecimal.ZERO) < 0) {
+            return getDifference().divide(goal, RoundingMode.CEILING).multiply(BigDecimal.valueOf(100));
+        }
+        return BigDecimal.ZERO;
     }
 }

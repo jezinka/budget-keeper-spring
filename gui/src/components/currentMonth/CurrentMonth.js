@@ -6,6 +6,7 @@ import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
 import ExpensesPieChart from "./ExpensesPieChart";
 import {Calendar} from "./Calendar";
+import BudgetSummary from "../plan/BudgetSummary";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([])
@@ -27,6 +28,7 @@ const CurrentMonth = () => {
         <Col sm={4} className="mt-1">
             <Row>
                 <MoneyAmount/>
+                <BudgetSummary/>
             </Row>
             <ExpensesBarChart data={data}/>
             <Calendar/>

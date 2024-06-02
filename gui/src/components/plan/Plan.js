@@ -3,9 +3,10 @@ import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import {formatNumber} from "../../Utils";
 import Table from "react-bootstrap/Table";
-import Budget from "../currentMonth/Budget";
+import Budget from "./Budget";
+import BudgetSummary from "./BudgetSummary";
 
-const FixedCosts = () => {
+const Plan = () => {
     const [data, setData] = useState([]);
     const [moneyAmount, setMoneyAmount] = useState({});
 
@@ -47,10 +48,10 @@ const FixedCosts = () => {
                         <td style={{width: "30px", textAlign: "center"}}>
                             <input
                                 type="checkbox"
-                                id="payed"
-                                name="payed"
+                                id={"payed_" + record.id}
+                                name={"payed_" + record.id}
                                 checked={record.payDate != null}
-                                onClick={async () => {
+                                onChange={async () => {
                                     if (record.payDate != null) return;
                                     const response = await fetch('/budget/fixedCost/' + record.id, {
                                         method: 'PUT'
@@ -86,7 +87,7 @@ const FixedCosts = () => {
                     </tr>
                     </tbody>
                 </Table>
-
+                <BudgetSummary/>
             </Col>
             <Col sm={2}>
                 <Table responsive='sm' striped bordered size="sm">
@@ -109,4 +110,4 @@ const FixedCosts = () => {
     return <Main body={body}/>;
 }
 
-export default FixedCosts;
+export default Plan;

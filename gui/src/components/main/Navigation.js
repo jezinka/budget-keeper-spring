@@ -13,7 +13,7 @@ const Navigation = () => {
                     <NavDropdown.Item href="/budget/gui/yearAtTheGlanceBarChart">Bar Chart</NavDropdown.Item>
                     <NavDropdown.Item href="/budget/gui/yearAtTheGlancePieChart">Pie Chart</NavDropdown.Item>
                 </NavDropdown>
-                <Nav.Link href="/budget/gui/fixedCosts">Koszty stałe</Nav.Link>
+                <Nav.Link href="/budget/gui/plan">Plan</Nav.Link>
                 <Nav.Link href="/budget/gui/savings">Oszczędności</Nav.Link>
                 <hr/>
                 <Nav.Link href="/budget/gui/allTransactions">Wszystkie transakcje</Nav.Link>

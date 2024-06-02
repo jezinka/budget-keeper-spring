@@ -19,7 +19,7 @@ export default function Budget() {
         <>
             <Col sm={5}>
                 <h5>PLAN</h5>
-                <Table responsive='sm' striped bordered size="sm">
+                <Table id='budgetPlanTable' responsive='sm' striped bordered size="sm">
                     <tbody>
                     <tr className='table-info'>
                         <td>KATEGORIA</td>
@@ -31,14 +31,20 @@ export default function Budget() {
                         <td>{row.category}</td>
                         <td>{row.goal}</td>
                         <td>{row.expense}</td>
-                        <td>{row.difference}</td>
+                        <td className={row.percentage > 105 ? 'failed_goal' : 'success_goal'}>{row.difference}</td>
                     </tr>)}
+                    <tr>
+                        <td>RAZEM</td>
+                        <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.goal).reduce((sum, num) => sum + num, 0)}</td>
+                        <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
+                        <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.difference).reduce((sum, num) => sum + num, 0)}</td>
+                    </tr>
                     </tbody>
                 </Table>
             </Col>
             <Col sm={5}>
                 <h5>NO BUY</h5>
-                <Table responsive='sm' striped bordered size="sm">
+                <Table id='noBuyTable' responsive='sm' striped bordered size="sm">
                     <tbody>
                     <tr className='table-info'>
                         <td>KATEGORIA</td>
@@ -46,8 +52,12 @@ export default function Budget() {
                     </tr>
                     {budgetPlan.filter(g => g.goal === 0).map(row => <tr key={row.id}>
                         <td>{row.category}</td>
-                        <td>{row.expense}</td>
+                        <td className={row.expense === 0 ? 'success_goal' : 'failed_goal'}>{row.expense}</td>
                     </tr>)}
+                    <tr>
+                        <td>RAZEM</td>
+                        <td>{budgetPlan.filter(g => g.goal === 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
+                        </tr>
                     </tbody>
                 </Table>
             </Col>

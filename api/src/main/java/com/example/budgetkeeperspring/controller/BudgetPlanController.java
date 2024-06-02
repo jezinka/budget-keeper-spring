@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
+import com.example.budgetkeeperspring.dto.BudgetPlanSummaryDTO;
 import com.example.budgetkeeperspring.service.BudgetPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,5 +30,12 @@ public class BudgetPlanController {
         LocalDate startDate = getBeginOfCurrentMonth();
         LocalDate endDate = getEndOfCurrentMonth();
         return budgetPlanService.getBudgetPlan(startDate, endDate);
+    }
+
+    @GetMapping("/summary")
+    public BudgetPlanSummaryDTO getBudgetPlanSummary() {
+        LocalDate startDate = getBeginOfCurrentMonth();
+        LocalDate endDate = getEndOfCurrentMonth();
+        return budgetPlanService.getBudgetPlanSummary(startDate, endDate);
     }
 }

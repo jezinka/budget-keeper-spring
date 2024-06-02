@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,4 +18,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e from Expense e left join fetch e.category c order by e.transactionDate desc")
     List<Expense> findAllByOrderByTransactionDateDesc();
+
+    @Query("select sum(e.amount) from Expense e where e.transactionDate between :begin and :end")
+    BigDecimal sumAllByTransactionDateBetween(@Param("begin") LocalDate begin, @Param("end") LocalDate end);
 }

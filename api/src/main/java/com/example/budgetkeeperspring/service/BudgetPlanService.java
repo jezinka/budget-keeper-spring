@@ -1,6 +1,8 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
+import com.example.budgetkeeperspring.dto.BudgetPlanSummaryDTO;
+import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,11 @@ import java.util.List;
 public class BudgetPlanService {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final ExpenseRepository expenseRepository;
 
-    public BudgetPlanService(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public BudgetPlanService(NamedParameterJdbcTemplate namedParameterJdbcTemplate, ExpenseRepository expenseRepository) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.expenseRepository = expenseRepository;
     }
 
     public List<BudgetPlanDTO> getBudgetPlan(LocalDate startDate, LocalDate endDate) {
@@ -40,5 +44,37 @@ public class BudgetPlanService {
             budgetPlan.setGoal(rs.getBigDecimal("goal") == null ? BigDecimal.ZERO : rs.getBigDecimal("goal"));
             return budgetPlan;
         });
+    }
+
+    public BudgetPlanSummaryDTO getBudgetPlanSummary(LocalDate startDate, LocalDate endDate) {
+        BudgetPlanSummaryDTO summary = new BudgetPlanSummaryDTO();
+        List<BudgetPlanDTO> budgetPlanDTOS = getBudgetPlan(startDate, endDate);
+
+        BigDecimal sumPlanned = budgetPlanDTOS.stream().filter(budgetPlanDTO -> budgetPlanDTO.getGoal().compareTo(BigDecimal.ZERO) < 0).map(BudgetPlanDTO::getExpense).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal sumNoBuy = budgetPlanDTOS.stream().filter(budgetPlanDTO -> budgetPlanDTO.getGoal().compareTo(BigDecimal.ZERO) == 0).map(BudgetPlanDTO::getExpense).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        summary.setSumPlanned(sumPlanned);
+        summary.setNoBuy(sumNoBuy);
+        summary.setOtherExpenses(getOtherExpensesSum(startDate, endDate));
+        summary.setTotal(expenseRepository.sumAllByTransactionDateBetween(startDate, endDate));
+
+        return summary;
+    }
+
+    private BigDecimal getOtherExpensesSum(LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                select sum(e.amount) as expense \
+                       from expense e \
+                       join category c on e.category_id = c.id \
+                       where e.category_id not in (select category_id from goal where date >= cast(:startDate as DATE)  and date <= cast(:endDate as DATE) ) \
+                         and e.transaction_date >= cast(:startDate as DATE) \
+                         and e.transaction_date <= cast(:endDate as DATE) \
+                           and c.level in (0, 1, 3)""";
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("startDate", startDate.toString());
+        parameters.addValue("endDate", endDate.toString());
+
+        return namedParameterJdbcTemplate.queryForObject(sql, parameters, BigDecimal.class);
     }
 }
