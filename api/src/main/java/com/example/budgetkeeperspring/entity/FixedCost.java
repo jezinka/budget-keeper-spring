@@ -2,12 +2,11 @@ package com.example.budgetkeeperspring.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @Builder
@@ -30,4 +29,7 @@ public class FixedCost {
     @ManyToOne()
     @Fetch(FetchMode.JOIN)
     private Circ circ;
+
+    @Builder.Default
+    private boolean deleted = Boolean.FALSE;
 }
