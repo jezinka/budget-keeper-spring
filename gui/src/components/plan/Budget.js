@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
 import {Col, Modal} from "react-bootstrap";
-import BudgetSummary from "./BudgetSummary";
 import {formatNumber} from "../../Utils";
 import Expense from "../year/Expense";
 
@@ -91,10 +90,6 @@ export default function Budget() {
                 </tr>
                 </tbody>
             </Table>
-        </Col>
-        <Col>
-            <h5>PODSUMOWANIE</h5>
-            <BudgetSummary/>
         </Col>
     </>);
 }

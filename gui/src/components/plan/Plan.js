@@ -4,6 +4,7 @@ import Main from "../main/Main";
 import {formatNumber} from "../../Utils";
 import Table from "react-bootstrap/Table";
 import Budget from "./Budget";
+import BudgetSummary from "./BudgetSummary";
 
 const Plan = () => {
     const [data, setData] = useState([]);
@@ -60,7 +61,7 @@ const Plan = () => {
                     </tbody>
                 </Table>
             </Col>
-            <Col sm={2}>
+            <Col sm={3}>
                 <Table responsive='sm' striped bordered size="sm">
                     <tbody>
                     <tr>
@@ -77,6 +78,8 @@ const Plan = () => {
                     </tr>
                     </tbody>
                 </Table>
+                <h5>PODSUMOWANIE</h5>
+                <BudgetSummary/>
             </Col>
         </Row>
         <Row><Budget/></Row>

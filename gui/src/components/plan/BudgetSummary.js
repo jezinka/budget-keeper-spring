@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
-import {Col} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 import {formatNumber} from "../../Utils";
 
 export default function BudgetSummary() {
@@ -26,55 +26,72 @@ export default function BudgetSummary() {
 
     return (
         <>
-            <Col>
-
-                <Table responsive='sm' striped bordered size="sm">
-                    <tbody>
-                    <tr>
-                        <td className='table-info'>NA WEJŚCIU</td>
-                        <td>{moneyAmount.start}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>PO ZAPLANOWANYCH</td>
-                        <td>{formatNumber(moneyAmount.start + budgetPlanSummary.sumGoal)}</td>
-                    </tr>
-
-                    </tbody>
-                </Table>
-
-                <Table id='budgetPlanTableSummary' responsive='sm' striped bordered size="sm">
-                    <tbody>
-                    <tr>
-                        <td className='table-info'>PLANOWANE</td>
-                        <td>{budgetPlanSummary.sumPlanned}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>NO BUY</td>
-                        <td>{budgetPlanSummary.noBuy}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>NIEPLANOWANE</td>
-                        <td>{budgetPlanSummary.otherExpenses}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>WSZYSTKIE</td>
-                        <td>{budgetPlanSummary.total}</td>
-                    </tr>
-                    </tbody>
-                </Table>
-
-                <Table responsive='sm' striped bordered size="sm">
-                    <tbody>
-                    <tr>
-                        <td className='table-info'>WOLNE ŚRODKI</td>
-                        <td>{formatNumber(moneyAmount.start +
-                            budgetPlanSummary.sumGoal +
-                            budgetPlanSummary.otherExpenses +
-                            budgetPlanSummary.noBuy +
-                            budgetPlanSummary.overGoalDifference)}</td>
-                    </tr>
-                    </tbody>
-                </Table>
-            </Col>
-        </>);
+            <Row>
+                <Col sm={6}>
+                    <Table responsive='sm' striped bordered size="sm">
+                        <tbody>
+                        <tr>
+                            <td className='table-info'>NA WEJŚCIU</td>
+                            <td>{moneyAmount.start}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>WPŁYWY</td>
+                            <td>{moneyAmount.incomes}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>ZAPLANOWANE</td>
+                            <td>{formatNumber(budgetPlanSummary.sumGoal)}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>STAN KONTA</td>
+                            <td>{formatNumber(moneyAmount.accountBalance)}</td>
+                        </tr>
+                        </tbody>
+                    </Table>
+                </Col>
+                <Col sm={5}>
+                    <Table id='budgetPlanTableSummary' responsive='sm' striped bordered size="sm">
+                        <tbody>
+                        <tr>
+                            <td className='table-info'>PLANOWANE</td>
+                            <td>{budgetPlanSummary.sumPlanned}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>NO BUY</td>
+                            <td>{budgetPlanSummary.noBuy}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>NIEPLANOWANE</td>
+                            <td>{budgetPlanSummary.otherExpenses}</td>
+                        </tr>
+                        <tr>
+                            <td className='table-info'>WSZYSTKIE</td>
+                            <td>{budgetPlanSummary.total}</td>
+                        </tr>
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
+            <Row>
+                <Col sm={2}/>
+                <Col>
+                    <Table responsive='sm' striped bordered size="sm">
+                        <tbody>
+                        <tr>
+                            <td className='table-info'>WOLNE ŚRODKI</td>
+                            <td>{formatNumber(moneyAmount.start +
+                                moneyAmount.incomes +
+                                budgetPlanSummary.sumGoal +
+                                budgetPlanSummary.otherExpenses +
+                                budgetPlanSummary.noBuy +
+                                budgetPlanSummary.overGoalDifference
+                            )}</td>
+                        </tr>
+                        </tbody>
+                    </Table>
+                </Col>
+                <Col sm={2}/>
+            </Row>
+        </>)
+        ;
 }
