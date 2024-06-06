@@ -6,23 +6,45 @@ import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.mapper.LogMapper;
 import com.example.budgetkeeperspring.repository.LogRepository;
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RabbitMQService {
+
+    @Value("${spring.rabbitmq.host}")
+    private String address;
+
+    @Value("${spring.rabbitmq.username}")
+    private String username;
+
+    @Value("${spring.rabbitmq.password}")
+    private String password;
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
     private final LogRepository logRepository;
     private final LogMapper logMapper;
     private final FixedCostService fixedCostService;
+
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setAddresses(address);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
+        return connectionFactory;
+    }
 
     @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
