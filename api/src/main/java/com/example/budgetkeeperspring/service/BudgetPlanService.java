@@ -62,6 +62,7 @@ public class BudgetPlanService {
         summary.setOtherExpenses(getOtherExpensesSum(startDate, endDate));
         summary.setTotal(expenseRepository.sumAllByTransactionDateBetween(startDate, endDate));
         summary.setOverGoalDifference(getOverGoalExpensesSum(startDate, endDate));
+        summary.setInvestments(getInvestmentsSum(startDate, endDate));
 
         return summary;
     }
@@ -75,6 +76,23 @@ public class BudgetPlanService {
                          and e.transaction_date >= cast(:startDate as DATE) \
                          and e.transaction_date <= cast(:endDate as DATE) \
                            and c.level in (0, 1, 3)""";
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("startDate", startDate.toString());
+        parameters.addValue("endDate", endDate.toString());
+
+        return namedParameterJdbcTemplate.queryForObject(sql, parameters, BigDecimal.class);
+    }
+
+    private BigDecimal getInvestmentsSum(LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                select sum(e.amount) as expense \
+                       from expense e \
+                       join category c on e.category_id = c.id \
+                       where e.category_id not in (select category_id from goal where date >= cast(:startDate as DATE)  and date <= cast(:endDate as DATE) ) \
+                         and e.transaction_date >= cast(:startDate as DATE) \
+                         and e.transaction_date <= cast(:endDate as DATE) \
+                           and c.level = 2""";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("startDate", startDate.toString());

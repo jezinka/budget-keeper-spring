@@ -15,4 +15,5 @@ public class BudgetPlanSummaryDTO {
     private BigDecimal total;
     private BigDecimal sumGoal; // zaplanowane
     private BigDecimal overGoalDifference;
+    private BigDecimal investments;
 }

@@ -23,11 +23,16 @@ export default function Budget() {
     }, []);
 
     function getGoalTotal() {
-        return budgetPlan.filter(g => g.goal !== 0).map(row => row.goal).reduce((sum, num) => sum + num, 0);
+        return formatNumber(budgetPlan.filter(g => g.goal !== 0).map(row => row.goal).reduce((sum, num) => sum + num, 0));
     }
 
+    function getExpenses() {
+        return formatNumber(budgetPlan.filter(g => g.goal !== 0).map(row => row.expense).reduce((sum, num) => sum + num, 0));
+    }
+
+
     function getTotalExpenses() {
-        return budgetPlan.filter(g => g.goal !== 0).map(row => row.difference).reduce((sum, num) => sum + num, 0);
+        return formatNumber(budgetPlan.filter(g => g.goal !== 0).map(row => row.difference).reduce((sum, num) => sum + num, 0));
     }
 
     let currentMonth = new Date().getMonth() + 1;
@@ -66,8 +71,8 @@ export default function Budget() {
                 <tr>
                     <td>RAZEM</td>
                     <td>{getGoalTotal()}</td>
-                    <td>{budgetPlan.filter(g => g.goal !== 0).map(row => row.expense).reduce((sum, num) => sum + num, 0)}</td>
-                    <td>{formatNumber(getTotalExpenses())}</td>
+                    <td>{getExpenses()}</td>
+                    <td>{getTotalExpenses()}</td>
                 </tr>
                 </tbody>
             </Table>

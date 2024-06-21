@@ -81,6 +81,7 @@ export default function BudgetSummary() {
                             <td className='table-info'>WOLNE ŚRODKI</td>
                             <td>{formatNumber(moneyAmount.start +
                                 moneyAmount.incomes +
+                                budgetPlanSummary.investments +
                                 budgetPlanSummary.sumGoal +
                                 budgetPlanSummary.otherExpenses +
                                 budgetPlanSummary.noBuy +
