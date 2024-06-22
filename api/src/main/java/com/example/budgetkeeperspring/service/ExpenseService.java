@@ -48,12 +48,16 @@ public class ExpenseService {
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
-            categoryRepository.findById(updateExpenseDTO.getCategoryId()).ifPresentOrElse(
-                    foundExpense::setCategory,
-                    () -> {
-                        throw new NotFoundException();
-                    }
-            );
+            if (updateExpenseDTO.getCategoryId() == -1) {
+                foundExpense.setCategory(null);
+            } else {
+                categoryRepository.findById(updateExpenseDTO.getCategoryId()).ifPresentOrElse(
+                        foundExpense::setCategory,
+                        () -> {
+                            throw new NotFoundException();
+                        }
+                );
+            }
             expenseRepository.save(foundExpense);
             atomicReference.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
         }, () -> atomicReference.set(Optional.empty()));
