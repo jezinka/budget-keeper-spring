@@ -22,10 +22,6 @@ tr.inactive {
     background-color: darkgrey;
 }
 
-#latestSavings.table tr td {
-    background-color: inherit;
-}
-
 table tr td.failed_goal {
     background-color: #ff7f7f;
 }
