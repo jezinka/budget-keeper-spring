@@ -21,4 +21,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select sum(e.amount) from Expense e where e.transactionDate between :begin and :end")
     BigDecimal sumAllByTransactionDateBetween(@Param("begin") LocalDate begin, @Param("end") LocalDate end);
+
+    @Query("select e from Expense e left join fetch e.category c where e.transactionDate between :begin and :end and c.level <> 2")
+    List<Expense> findAllByTransactionDateBetweenWithoutExpenses(LocalDate begin, LocalDate end);
 }

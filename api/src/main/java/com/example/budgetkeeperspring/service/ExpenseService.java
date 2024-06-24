@@ -176,9 +176,14 @@ public class ExpenseService {
         return list;
     }
 
-    public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end) {
+    public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end, boolean withInvestments) {
         List<MonthCategoryAmountDTO> list = new ArrayList<>();
-        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+        List<Expense> yearlyExpenses;
+        if(withInvestments){
+            yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+        } else {
+            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutExpenses(begin, end);
+        }
 
         yearlyExpenses
                 .stream()

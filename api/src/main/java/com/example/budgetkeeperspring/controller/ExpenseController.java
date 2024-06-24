@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
@@ -84,10 +85,10 @@ public class ExpenseController {
     }
 
     @GetMapping(EXPENSES_PATH + "/currentMonthByCategory")
-    List<MonthCategoryAmountDTO> getGroupedForCurrentMonth() {
+    List<MonthCategoryAmountDTO> getGroupedForCurrentMonth(@RequestParam(value = "withInvestments", required = false) boolean withInvestments) {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
-        return expenseService.getGroupedByCategory(begin, end);
+        return expenseService.getGroupedByCategory(begin, end, withInvestments);
     }
 
     @GetMapping(EXPENSES_PATH + "/dailyExpenses")

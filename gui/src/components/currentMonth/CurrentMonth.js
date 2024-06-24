@@ -8,14 +8,15 @@ import {Calendar} from "./Calendar";
 import BudgetSummary from "../plan/BudgetSummary";
 
 const CurrentMonth = () => {
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
+    const [withInvestments, setWithInvestments] = useState(true);
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [withInvestments]);
 
     async function loadData() {
-        const response = await fetch('/budget/expenses/currentMonthByCategory')
+        const response = await fetch('/budget/expenses/currentMonthByCategory?withInvestments=' + withInvestments);
         const data = await response.json();
         setData(data);
     }
@@ -26,6 +27,12 @@ const CurrentMonth = () => {
         </Col>
         <Col sm={4} className="mt-1">
             <BudgetSummary/>
+            <input id="withInvestments"
+                   type="checkbox"
+                   checked={withInvestments}
+                   onChange={(e) => {setWithInvestments(e.target.checked);}}
+            />
+            <span className="fw-bold">Inwestycje</span>
             <ExpensesBarChart data={data}/>
             <Calendar/>
             <ExpensesPieChart data={data}/>
