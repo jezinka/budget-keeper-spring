@@ -9,7 +9,7 @@ import BudgetSummary from "../plan/BudgetSummary";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([]);
-    const [withInvestments, setWithInvestments] = useState(true);
+    const [withInvestments, setWithInvestments] = useState(false);
 
     useEffect(() => {
         loadData();
