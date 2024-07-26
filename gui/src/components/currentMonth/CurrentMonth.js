@@ -1,4 +1,4 @@
-import {Col} from "react-bootstrap";
+import {Badge, Col} from "react-bootstrap";
 import TransactionTable from "./TransactionTable";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
@@ -27,14 +27,19 @@ const CurrentMonth = () => {
         </Col>
         <Col sm={4} className="mt-1">
             <BudgetSummary/>
-            <input id="withInvestments"
-                   type="checkbox"
-                   checked={withInvestments}
-                   onChange={(e) => {setWithInvestments(e.target.checked);}}
-            />
-            <span className="fw-bold">Inwestycje</span>
-            <ExpensesBarChart data={data}/>
             <Calendar/>
+            <h5>
+                <Badge bg="light" text="dark" className={"mt-3"}>
+                    <input id="withInvestments"
+                           type="checkbox"
+                           checked={withInvestments}
+                           onChange={(e) => {
+                               setWithInvestments(e.target.checked);
+                           }}
+                    /> Inwestycje
+                </Badge>
+            </h5>
+            <ExpensesBarChart data={data}/>
             <ExpensesPieChart data={data}/>
         </Col>
     </>;

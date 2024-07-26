@@ -19,13 +19,9 @@ const Plan = () => {
         setData(data);
     }
 
-    function getPayedSum() {
-        return data.filter(d => d.payDate == null).map(x => x.amount).reduce((sum, num) => sum + num, 0);
-    }
-
     let body = <>
         <Row>
-            <Col sm={8}>
+            <Col sm={5}>
                 <Table responsive='sm' striped bordered size="sm">
                     <thead>
                     <tr className='table-info'>
@@ -62,22 +58,6 @@ const Plan = () => {
                 </Table>
             </Col>
             <Col sm={3}>
-                <Table responsive='sm' striped bordered size="sm">
-                    <tbody>
-                    <tr>
-                        <td className='table-info'>ZAPŁACONE</td>
-                        <td>{formatNumber(data.filter(d => d.payDate != null).map(x => x.amount).reduce((sum, num) => sum + num, 0))}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>DO ZAPŁATY</td>
-                        <td>{formatNumber(getPayedSum())}</td>
-                    </tr>
-                    <tr>
-                        <td className='table-info'>SUMA</td>
-                        <td>{formatNumber(data.map(x => x.amount).reduce((sum, num) => sum + num, 0))}</td>
-                    </tr>
-                    </tbody>
-                </Table>
                 <h5>PODSUMOWANIE</h5>
                 <BudgetSummary/>
             </Col>

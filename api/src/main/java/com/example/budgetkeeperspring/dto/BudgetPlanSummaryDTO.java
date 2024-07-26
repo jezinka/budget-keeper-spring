@@ -9,11 +9,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BudgetPlanSummaryDTO {
-    private BigDecimal sumPlanned; // wydane
-    private BigDecimal noBuy;
-    private BigDecimal otherExpenses;
-    private BigDecimal total;
-    private BigDecimal sumGoal; // zaplanowane
-    private BigDecimal overGoalDifference;
     private BigDecimal investments;
+    private BigDecimal noPayGoal;
 }

@@ -77,7 +77,7 @@ export default function Budget() {
                 </tbody>
             </Table>
         </Col>
-        <Col sm={5}>
+        <Col sm={3}>
             <h5>NO BUY</h5>
             <Table id='noBuyTable' responsive='sm' striped bordered size="sm">
                 <tbody>
