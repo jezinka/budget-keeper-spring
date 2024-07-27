@@ -32,15 +32,15 @@ export default function BudgetSummary() {
                         <tbody>
                         <tr>
                             <td className='table-info'>NA WEJŚCIU</td>
-                            <td>{moneyAmount.start}</td>
+                            <td>{formatNumber(moneyAmount.start)}</td>
                         </tr>
                         <tr>
                             <td className='table-info'>WPŁYWY</td>
-                            <td>{moneyAmount.incomes}</td>
+                            <td>{formatNumber(moneyAmount.incomes)}</td>
                         </tr>
                         <tr>
                             <td className='table-info'>WSZYSTKIE</td>
-                            <td>{moneyAmount.expenses}</td>
+                            <td>{formatNumber(moneyAmount.expenses)}</td>
                         </tr>
                         <tr>
                             <td className='table-info'>STAN KONTA</td>
@@ -54,7 +54,7 @@ export default function BudgetSummary() {
                         <tbody>
                         <tr>
                             <td className='table-info'>INWESTYCJE</td>
-                            <td>{budgetPlanSummary.investments}</td>
+                            <td>{formatNumber(budgetPlanSummary.investments)}</td>
                         </tr>
                         <tr>
                             <td className='table-info'>WOLNE ŚRODKI</td>

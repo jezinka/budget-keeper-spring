@@ -64,9 +64,9 @@ export default function Budget() {
                 </tr>
                 {budgetPlan.filter(g => g.goal !== 0).map(row => <tr key={row.id}>
                     <td>{row.category}</td>
-                    <td>{row.goal}</td>
+                    <td>{formatNumber(row.goal)}</td>
                     <td>{getExpense(row)}</td>
-                    <td className={row.percentage > 0 ? (row.percentage > 100 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{row.difference}</td>
+                    <td className={row.percentage > 0 ? (row.percentage > 100 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{formatNumber(row.difference)}</td>
                 </tr>)}
                 <tr>
                     <td>RAZEM</td>

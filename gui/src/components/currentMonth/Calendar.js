@@ -1,6 +1,6 @@
 import {Col, Container, Row} from "react-bootstrap";
 import {useEffect, useState} from "react";
-import {getDaysOfWeek} from "../../Utils";
+import {formatNumber, getDaysOfWeek} from "../../Utils";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
@@ -38,7 +38,7 @@ export const Calendar = () => {
                 if (i !== date.getDate()) {
                     className += " bg-info";
                 }
-                tooltipText = day.amount;
+                tooltipText = formatNumber(day.amount);
             }
 
             if (i === date.getDate()) {
