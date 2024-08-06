@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +71,7 @@ public class ExpenseController {
     }
 
     @GetMapping(EXPENSES_PATH + "/yearAtTheGlance/{year}")
-    Map<Integer, Map<String, BigDecimal>> getForSelectedYear(@PathVariable("year") Integer year) {
+    List<MonthCategoryAmountDTO> getForSelectedYear(@PathVariable("year") Integer year) {
         return expenseService.getYearAtGlance(year);
     }
 

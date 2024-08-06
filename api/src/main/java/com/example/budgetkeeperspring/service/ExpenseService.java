@@ -133,19 +133,25 @@ public class ExpenseService {
     }
 
 
-    public Map<Integer, Map<String, BigDecimal>> getYearAtGlance(int year) {
+    public List<MonthCategoryAmountDTO> getYearAtGlance(int year) {
         LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
         LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
+
+        List<MonthCategoryAmountDTO> groupedExpenses = new ArrayList<>();
 
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end)
                 .stream()
                 .filter(p -> p.getCategory() != null && p.getCategory().isUseInYearlyCharts())
                 .toList();
 
-        return yearlyExpenses.stream().collect(groupingBy(
+        yearlyExpenses.stream()
+                .collect(groupingBy(
                 Expense::getTransactionMonth,
                 groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
-                        Expense::getAmount, BigDecimal::add))));
+                        Expense::getAmount, BigDecimal::add))))
+                .forEach((month, value) -> value.forEach((category, amount) -> groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount))));
+
+        return groupedExpenses;
     }
 
     public List<Map<String, Object>> getMonthsPivot(int year) {
@@ -180,7 +186,7 @@ public class ExpenseService {
     public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end, boolean withInvestments) {
         List<MonthCategoryAmountDTO> list = new ArrayList<>();
         List<Expense> yearlyExpenses;
-        if(withInvestments){
+        if (withInvestments) {
             yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
         } else {
             yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutExpenses(begin, end);
