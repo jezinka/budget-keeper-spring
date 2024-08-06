@@ -33,8 +33,14 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
         return (<td style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
     }
 
+    let className;
+    if (expense.goalSucceeded !== null) {
+        className = "triangle " + (expense.goalSucceeded ? "success" : "fail");
+    }
+
     return (
-        <td style={{textAlign: 'right'}} onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
+        <td className={className} style={{textAlign: 'right'}}
+            onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
     );
 }
 

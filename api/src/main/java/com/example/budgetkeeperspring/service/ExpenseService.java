@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.GoalDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
@@ -36,6 +37,7 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
     private final ExpenseMapper expenseMapper;
+    private final GoalService goalService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Optional<Category> category) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
@@ -138,6 +140,7 @@ public class ExpenseService {
         LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
 
         List<MonthCategoryAmountDTO> groupedExpenses = new ArrayList<>();
+        List<GoalDTO> goals = goalService.findAllForYear(year);
 
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end)
                 .stream()
@@ -146,10 +149,16 @@ public class ExpenseService {
 
         yearlyExpenses.stream()
                 .collect(groupingBy(
-                Expense::getTransactionMonth,
-                groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
-                        Expense::getAmount, BigDecimal::add))))
+                        Expense::getTransactionMonth,
+                        groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add))))
                 .forEach((month, value) -> value.forEach((category, amount) -> groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount))));
+
+        goals.forEach(g ->
+                groupedExpenses.stream()
+                        .filter(expense -> expense.getMonth() == g.getDate().getMonthValue() && expense.getCategory().equals(g.getCategoryName()))
+                        .findFirst()
+                        .ifPresent(expense -> expense.setGoalSucceeded(expense.getAmount().compareTo(g.getAmount()) <= 0)));
 
         return groupedExpenses;
     }

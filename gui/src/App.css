@@ -33,3 +33,28 @@ table tr td.over_goal {
 .success_goal {
     background-color: #77e0be;
 }
+
+.triangle {
+    position: relative;
+}
+.triangle:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    display: block;
+    border-left: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+
+    border-top-width: 10px;
+    border-top-style: solid;
+}
+
+.success:after {
+    border-top-color: #19ba20;
+}
+.fail:after {
+    border-top-color: #f00;
+}
