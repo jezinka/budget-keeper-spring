@@ -96,7 +96,7 @@ public class ExpenseService {
         return list;
     }
 
-    public List<Expense> findAll(Map<String, Object> filters) {
+    public List<ExpenseDTO> findAll(Map<String, Object> filters) {
         List<Predicate<Expense>> allPredicates = new ArrayList<>();
 
         if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
@@ -128,6 +128,7 @@ public class ExpenseService {
         return expenseRepository.findAllByOrderByTransactionDateDesc()
                 .stream()
                 .filter(allPredicates.stream().reduce(x -> true, Predicate::and))
+                .map(expenseMapper::mapToDto)
                 .toList();
     }
 
