@@ -12,7 +12,7 @@ public class MonthCategoryAmountDTO {
     private Integer month;
     private String category;
     private BigDecimal amount;
-    private Boolean goalSucceeded;
+    private BigDecimal goalAmount;
 
     public MonthCategoryAmountDTO(Integer month, String category, BigDecimal amount) {
         this.month = month;

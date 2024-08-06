@@ -158,7 +158,7 @@ public class ExpenseService {
                 groupedExpenses.stream()
                         .filter(expense -> expense.getMonth() == g.getDate().getMonthValue() && expense.getCategory().equals(g.getCategoryName()))
                         .findFirst()
-                        .ifPresent(expense -> expense.setGoalSucceeded(expense.getAmount().compareTo(g.getAmount()) <= 0)));
+                        .ifPresent(expense -> expense.setGoalAmount(g.getAmount())));
 
         return groupedExpenses;
     }

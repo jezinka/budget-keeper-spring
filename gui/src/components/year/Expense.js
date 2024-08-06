@@ -1,5 +1,7 @@
 import {formatNumber, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
 import Table from "react-bootstrap/Table";
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
 
@@ -33,13 +35,21 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
         return (<td style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
     }
 
-    let className;
-    if (expense.goalSucceeded !== null) {
-        className = "triangle " + (expense.goalSucceeded ? "success" : "fail");
+    if (expense.goalAmount !== null) {
+        let className = "triangle " + (expense.goalAmount <= expense.amount ? "success" : "fail");
+        return (<OverlayTrigger
+                placement={'top-end'}
+                overlay={<Tooltip id={`tooltip-cell-${expense.id}`}>
+                    {formatNumber(expense.goalAmount)}
+                </Tooltip>}>
+                <td className={className} style={{textAlign: 'right'}}
+                    onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
+            </OverlayTrigger>
+        );
     }
 
     return (
-        <td className={className} style={{textAlign: 'right'}}
+        <td style={{textAlign: 'right'}}
             onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
     );
 }
