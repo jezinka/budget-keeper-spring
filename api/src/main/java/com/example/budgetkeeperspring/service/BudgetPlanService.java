@@ -24,7 +24,7 @@ public class BudgetPlanService {
                 SELECT g.id, c.name, SUM(e.amount) AS expense, g.amount AS goal \
                 FROM goal g \
                 JOIN category c ON c.id = g.category_id \
-                LEFT JOIN expense e ON e.category_id = c.id AND e.transaction_date >= cast(:startDate as DATE) AND e.transaction_date <= cast(:endDate as DATE) \
+                LEFT JOIN expense e ON e.category_id = c.id AND e.transaction_date >= cast(:startDate as DATE) AND e.transaction_date <= cast(:endDate as DATE) AND !e.deleted \
                 WHERE g.amount IS NOT NULL AND g.date >= cast(:startDate as DATE) AND g.date <= cast(:endDate as DATE) \
                 GROUP BY c.name \
                 ORDER BY c.name""";
@@ -59,8 +59,8 @@ public class BudgetPlanService {
                        join category c on e.category_id = c.id \
                        where e.category_id not in (select category_id from goal where date >= cast(:startDate as DATE)  and date <= cast(:endDate as DATE) ) \
                          and e.transaction_date >= cast(:startDate as DATE) \
-                         and e.transaction_date <= cast(:endDate as DATE) \
-                           and c.level = 2""";
+                         and e.transaction_date <= cast(:endDate as DATE) AND !e.deleted \
+                         and c.level = 2""";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("startDate", startDate.toString());
@@ -76,7 +76,7 @@ public class BudgetPlanService {
                                               FROM goal g
                                                        LEFT JOIN expense e
                                                                  ON e.category_id = g.category_id AND e.transaction_date >= CAST(:startDate as DATE) AND
-                                                                    e.transaction_date <= CAST(:endDate as DATE)
+                                                                    e.transaction_date <= CAST(:endDate as DATE) AND !e.deleted
                                               WHERE  g.amount < 0
                                                 AND g.date >= CAST(:startDate as DATE)
                                                 AND g.date <= CAST(:endDate as DATE)
