@@ -40,7 +40,7 @@ export default function Budget() {
 
     function getExpense(row) {
         return <Expense
-            expense={{month: currentMonth, category: row.category, amount: row.expense}}
+            expense={{month: currentMonth, category: row.category, amount: row.expense, goalAmount: row.goal}}
             year={currentYear}
             key={currentMonth + row.category}
             modalHandler={handleShow}
@@ -65,8 +65,8 @@ export default function Budget() {
                 {budgetPlan.filter(g => g.goal !== 0).map(row => <tr key={row.id}>
                     <td>{row.category}</td>
                     <td>{formatNumber(row.goal)}</td>
-                    <td>{getExpense(row)}</td>
-                    <td className={row.percentage > 0 ? (row.percentage > 100 ? 'failed_goal' : 'over_goal') : 'success_goal'}>{formatNumber(row.difference)}</td>
+                    {getExpense(row)}
+                    <td> {formatNumber(row.difference)} </td>
                 </tr>)}
                 <tr>
                     <td>RAZEM</td>
@@ -87,7 +87,7 @@ export default function Budget() {
                 </tr>
                 {budgetPlan.filter(g => g.goal === 0).map(row => <tr key={row.id}>
                     <td>{row.category}</td>
-                    <td className={row.expense === 0 ? 'success_goal' : 'failed_goal'}>{getExpense(row)}</td>
+                    {getExpense(row)}
                 </tr>)}
                 <tr>
                     <td>RAZEM</td>
