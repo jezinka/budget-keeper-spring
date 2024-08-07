@@ -44,9 +44,7 @@ class CategoryControllerTestIT {
 
     @Test
     void category_notFound() {
-        assertThrows(NotFoundException.class, () -> {
-            categoryController.getById(new Random().nextLong());
-        });
+        assertThrows(NotFoundException.class, () -> categoryController.getById(new Random().nextLong()));
     }
 
     @Test

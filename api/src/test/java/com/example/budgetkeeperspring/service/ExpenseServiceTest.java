@@ -1,23 +1,23 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
+import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +34,9 @@ class ExpenseServiceTest {
     @InjectMocks
     ExpenseService expenseService;
 
+    @Spy
+    ExpenseMapper expenseMapper = Mappers.getMapper(ExpenseMapper.class);
+
     @Test
     void findAll_withoutFilters() {
 
@@ -47,11 +50,11 @@ class ExpenseServiceTest {
 
         when(expenseRepository
                 .findAllByOrderByTransactionDateDesc())
-                .thenReturn(new ArrayList<Expense>(
+                .thenReturn(new ArrayList<>(
                         Arrays.asList(a, b))
                 );
 
-        List<Expense> result = expenseService.findAll(new HashMap<>());
+        List<ExpenseDTO> result = expenseService.findAll(new HashMap<>());
 
         assertEquals(2, result.size());
     }
@@ -78,11 +81,11 @@ class ExpenseServiceTest {
 
         when(expenseRepository
                 .findAllByOrderByTransactionDateDesc())
-                .thenReturn(new ArrayList<Expense>(
+                .thenReturn(new ArrayList<>(
                         Arrays.asList(a, b, c, d))
                 );
 
-        List<Expense> result = expenseService.findAll(Map.of(
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
                 "onlyEmptyCategories", true,
                 "onlyExpenses", true,
                 "year", 2023,
@@ -108,11 +111,11 @@ class ExpenseServiceTest {
 
         when(expenseRepository
                 .findAllByOrderByTransactionDateDesc())
-                .thenReturn(new ArrayList<Expense>(
+                .thenReturn(new ArrayList<>(
                         Arrays.asList(a, b))
                 );
 
-        List<Expense> result = expenseService.findAll(Map.of(
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
                 "onlyEmptyCategories", false,
                 "category", "TestA"));
 
@@ -136,7 +139,7 @@ class ExpenseServiceTest {
 
         when(expenseRepository
                 .findAllByTransactionDateBetween(any(), any()))
-                .thenReturn(new ArrayList<Expense>(
+                .thenReturn(new ArrayList<>(
                         Arrays.asList(a, b, c))
                 );
 

@@ -81,7 +81,7 @@ class MoneyAmountServiceTest {
 
         when(expenseRepository
                 .findAllByTransactionDateBetween(any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new ArrayList<Expense>(
+                .thenReturn(new ArrayList<>(
                         Arrays.asList(a, b, c, d, e, f))
                 );
 
@@ -124,7 +124,7 @@ class MoneyAmountServiceTest {
 
         when(expenseRepository
                 .findAllByTransactionDateBetween(any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new ArrayList<Expense>(Arrays.asList(b, f)));
+                .thenReturn(new ArrayList<>(Arrays.asList(b, f)));
 
 
         moneyAmountService.addMoneyAmountForNextMonth();
@@ -133,6 +133,6 @@ class MoneyAmountServiceTest {
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
         assertEquals(102, argumentCaptor.getValue().getAmount().intValue());
-        assertEquals(3, argumentCaptor.getValue().getDate().getMonthValue());
+        assertEquals(LocalDate.now().getMonthValue(), argumentCaptor.getValue().getDate().getMonthValue());
     }
 }
