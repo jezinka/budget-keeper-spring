@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
-import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
-import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
 
 @Slf4j
 @RequiredArgsConstructor

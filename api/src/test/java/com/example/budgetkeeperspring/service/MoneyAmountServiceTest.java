@@ -7,6 +7,7 @@ import com.example.budgetkeeperspring.entity.MoneyAmount;
 import com.example.budgetkeeperspring.mapper.MoneyAmountMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
+import com.example.budgetkeeperspring.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,14 +98,14 @@ class MoneyAmountServiceTest {
     void addMoneyForCurrentMonth() {
         moneyAmountService.addMoneyAmountForCurrentMonth(MoneyAmountDTO.builder()
                 .amount(BigDecimal.valueOf(300))
-                .date(DateUtilsService.getBeginOfCurrentMonth())
+                .date(DateUtils.getBeginOfCurrentMonth())
                 .build());
 
         ArgumentCaptor<MoneyAmount> argumentCaptor = ArgumentCaptor.forClass(MoneyAmount.class);
 
         verify(moneyAmountRepository, times(1)).save(argumentCaptor.capture());
         assertEquals(300, argumentCaptor.getValue().getAmount().intValue());
-        assertEquals(DateUtilsService.getBeginOfCurrentMonth(), argumentCaptor.getValue().getDate());
+        assertEquals(DateUtils.getBeginOfCurrentMonth(), argumentCaptor.getValue().getDate());
     }
 
     @Test

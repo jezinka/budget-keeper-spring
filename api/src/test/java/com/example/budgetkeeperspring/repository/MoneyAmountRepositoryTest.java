@@ -1,7 +1,7 @@
 package com.example.budgetkeeperspring.repository;
 
 import com.example.budgetkeeperspring.entity.MoneyAmount;
-import com.example.budgetkeeperspring.service.DateUtilsService;
+import com.example.budgetkeeperspring.utils.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -21,7 +21,7 @@ class MoneyAmountRepositoryTest {
 
         MoneyAmount moneyAmount = moneyAmountRepository.save(MoneyAmount.builder()
                 .amount(BigDecimal.valueOf(-234.21))
-                .date(DateUtilsService.getBeginOfCurrentMonth())
+                .date(DateUtils.getBeginOfCurrentMonth())
                 .build());
 
         assertThat(moneyAmount.getId()).isNotNull();

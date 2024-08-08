@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
-import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
 
 @RequiredArgsConstructor
 @Service

@@ -10,6 +10,7 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import com.example.budgetkeeperspring.utils.DateUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -136,8 +136,8 @@ public class ExpenseService {
 
 
     public List<MonthCategoryAmountDTO> getYearAtGlance(int year) {
-        LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
-        LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
+        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
+        LocalDate end = DateUtils.getEndOfSelectedYear(year);
 
         List<MonthCategoryAmountDTO> groupedExpenses = new ArrayList<>();
         List<GoalDTO> goals = goalService.findAllForYear(year);
@@ -167,8 +167,8 @@ public class ExpenseService {
         List<Map<String, Object>> list = new ArrayList<>();
         String[] shortMonths = DFS.getShortMonths();
 
-        LocalDate begin = LocalDate.of(year, Month.JANUARY, 1);
-        LocalDate end = LocalDate.of(year, Month.DECEMBER, 31);
+        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
+        LocalDate end = DateUtils.getEndOfSelectedYear(year);
 
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
 

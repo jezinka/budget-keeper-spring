@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.example.budgetkeeperspring.service.DateUtilsService.getBeginOfCurrentMonth;
-import static com.example.budgetkeeperspring.service.DateUtilsService.getEndOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
 
 @RestController
 @RequestMapping("/budgetPlan")
