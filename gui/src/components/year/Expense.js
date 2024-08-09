@@ -6,7 +6,7 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
 
     const renderTooltip = async () => {
-        if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY) {
+        if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY || expense.amount === 0) {
             return
         }
 

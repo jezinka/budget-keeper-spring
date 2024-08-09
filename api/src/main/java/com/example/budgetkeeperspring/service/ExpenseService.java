@@ -155,10 +155,17 @@ public class ExpenseService {
                 .forEach((month, value) -> value.forEach((category, amount) -> groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount))));
 
         goals.forEach(g ->
-                groupedExpenses.stream()
-                        .filter(expense -> expense.getMonth() == g.getDate().getMonthValue() && expense.getCategory().equals(g.getCategoryName()))
-                        .findFirst()
-                        .ifPresent(expense -> expense.setGoalAmount(g.getAmount())));
+        {
+            MonthCategoryAmountDTO monthCategoryAmountDTO = groupedExpenses.stream()
+                    .filter(expense -> expense.getMonth() == g.getDate().getMonthValue() && expense.getCategory().equals(g.getCategoryName()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        MonthCategoryAmountDTO dto = new MonthCategoryAmountDTO(g.getDate().getMonthValue(), g.getCategoryName(), BigDecimal.ZERO);
+                        groupedExpenses.add(dto);
+                        return dto;
+                    });
+            monthCategoryAmountDTO.setGoalAmount(g.getAmount());
+        });
 
         return groupedExpenses;
     }
