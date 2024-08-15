@@ -27,13 +27,7 @@ const YearAtTheGlancePieChart = () => {
                 d.sum = Math.abs(d.sum);
             });
 
-            const sum = getSumFromMap(data, 'sum');
-            const filteredData = data.filter((d) => {
-                return d.sum / sum >= 0.005
-            });
-
-            filteredData.push({category: 'inne', sum: sum - getSumFromMap(filteredData, 'sum')});
-            const sorted = filteredData.sort((a, b) => a.sum - b.sum);
+            const sorted = data.sort((a, b) => a.sum - b.sum);
             const categoriesNames = sorted.map((d) => d.category);
 
             setCategories(categoriesNames.reverse());
