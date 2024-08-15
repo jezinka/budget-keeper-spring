@@ -44,7 +44,8 @@ export default function Budget() {
             year={currentYear}
             key={currentMonth + row.category}
             modalHandler={handleShow}
-            modalContentHandler={setTransactionsDetails}/>;
+            modalContentHandler={setTransactionsDetails}
+            selectCurrentMonth={false}/>;
     }
 
     return (<>

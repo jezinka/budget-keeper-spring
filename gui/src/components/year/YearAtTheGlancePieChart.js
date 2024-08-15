@@ -2,7 +2,7 @@ import {Col, Row} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import {LabelList, Pie, PieChart} from "recharts";
-import {addSumPerMonth, getSumFromMap, handleError, renderCustomizedLabel} from "../../Utils";
+import {addSumPerMonth, handleError, renderCustomizedLabel} from "../../Utils";
 import YearFilter from "./YearFilter";
 import CategoryCheckboxRow from "./CategoryCheckboxRow";
 

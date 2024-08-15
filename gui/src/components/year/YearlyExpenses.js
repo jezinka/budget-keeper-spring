@@ -47,40 +47,38 @@ export default function YearlyExpenses() {
     }, [year])
 
     function ExpenseForMonthAndCategory(currMonth, currCategory) {
+        let expenseAmount = 0;
+
         if (expenses.length === 0) {
-            return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>;
-        }
-        let foundExpense = expenses.find(e => e.month === currMonth && e.category === currCategory);
-        if (foundExpense !== undefined) {
-            return <Expense expense={foundExpense} year={year} key={currMonth + currCategory}
-                            modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
-        } else if (currMonth === SUM_MONTH && currCategory === SUM_CATEGORY) {
-            let expenseAmount = 0;
-            expenses.forEach(exp => {
-                if (selectedCategories.find(sc => exp.category === sc)) {
-                    expenseAmount += exp.amount;
-                }
-            });
-            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
-        } else if (currMonth === SUM_MONTH) {
-            let expenseAmount = 0;
-
-            expenses.filter(e => e.category === currCategory).forEach(e => {
-                expenseAmount += e.amount;
-            })
-
-            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
-        } else if (currCategory === SUM_CATEGORY) {
-            let expenseAmount = 0;
-            expenses.filter(e => e.month === currMonth).forEach(e => {
-                if (selectedCategories.find(sc => e.category === sc)) {
-                    expenseAmount += e.amount;
-                }
-            });
-            return <Expense expense={{"amount": expenseAmount}} year={year} key={currMonth + currCategory}/>;
+            expenseAmount = 0;
         } else {
-            return <td key={currMonth + currCategory} style={{textAlign: 'right'}}>0,00</td>
+            let foundExpense = expenses.find(e => e.month === currMonth && e.category === currCategory);
+
+            if (foundExpense !== undefined) {
+                return <Expense expense={foundExpense} year={year} key={currMonth + currCategory}
+                                modalHandler={handleShow} modalContentHandler={setTransactionsDetails}/>;
+            }
+
+            if (currMonth === SUM_MONTH && currCategory === SUM_CATEGORY) {
+                expenses.forEach(exp => {
+                    if (selectedCategories.find(sc => exp.category === sc)) {
+                        expenseAmount += exp.amount;
+                    }
+                });
+            } else if (currMonth === SUM_MONTH) {
+                expenses.filter(e => e.category === currCategory).forEach(e => {
+                    expenseAmount += e.amount;
+                });
+            } else if (currCategory === SUM_CATEGORY) {
+                expenses.filter(e => e.month === currMonth).forEach(e => {
+                    if (selectedCategories.find(sc => e.category === sc)) {
+                        expenseAmount += e.amount;
+                    }
+                });
+            }
         }
+
+        return <Expense expense={{"amount": expenseAmount, "month": currMonth, "category": currCategory}} year={year} key={currMonth + currCategory}/>;
     }
 
     return (<>
@@ -101,8 +99,12 @@ export default function YearlyExpenses() {
                 <thead>
                 <tr className='table-info'>
                     <th></th>
-                    {MONTHS_ARRAY.map(month => <th key={month}
-                                                   style={{textAlign: "center"}}>{getMonthName(month, 'long')}</th>)}
+                    {MONTHS_ARRAY.map(month => {
+                        let monthName = getMonthName(month, 'long');
+                        let className = (new Date().getMonth() + 1) === month ? "current-month current-month-header" : "";
+                        return <th key={month} className={className} style={{textAlign: "center"}}>{monthName}</th>
+                    })
+                    }
                     <th className="summary">{SUM_CATEGORY}</th>
                 </tr>
                 </thead>

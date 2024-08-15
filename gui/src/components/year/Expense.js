@@ -3,7 +3,7 @@ import Table from "react-bootstrap/Table";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
-const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
+const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurrentMonth = true}) => {
 
     const renderTooltip = async () => {
         if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY || expense.amount === 0) {
@@ -31,12 +31,20 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
         </Table>)
     };
 
+    let className = "";
+    if (selectCurrentMonth && (new Date().getMonth() + 1) === expense.month) {
+        className = "current-month ";
+        if (expense.category === SUM_CATEGORY) {
+            className += "current-month-footer ";
+        }
+    }
+
     if (modalHandler === undefined || modalContentHandler === undefined) {
-        return (<td style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
+        return (<td className={className} style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
     }
 
     if (expense.goalAmount !== null) {
-        let className = "triangle " + (expense.goalAmount <= expense.amount ? "success" : "fail");
+        className += "triangle " + (expense.goalAmount <= expense.amount ? "success" : "fail");
         return (<OverlayTrigger
                 placement={'top-end'}
                 overlay={<Tooltip id={`tooltip-cell-${expense.id}`}>
@@ -49,7 +57,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler}) => {
     }
 
     return (
-        <td style={{textAlign: 'right'}}
+        <td className={className} style={{textAlign: 'right'}}
             onClick={renderTooltip}>{formatNumber(expense.amount)}</td>
     );
 }

@@ -37,6 +37,7 @@ table tr td.over_goal {
 .triangle {
     position: relative;
 }
+
 .triangle:after {
     content: "";
     position: absolute;
@@ -55,6 +56,20 @@ table tr td.over_goal {
 .success:after {
     border-top-color: #19ba20;
 }
+
 .fail:after {
     border-top-color: #f00;
+}
+
+.current-month {
+    border-left: #2694ac 2px solid !important;
+    border-right: #2694ac 2px solid !important;
+}
+
+.current-month-header {
+    border-top: #2694ac 2px solid !important;
+}
+
+.current-month-footer {
+    border-bottom: #2694ac 2px solid !important;
 }
