@@ -21,7 +21,7 @@ public class LogPruneJob {
         logPruneService.execute();
     }
 
-    @Scheduled(cron = "0 0 8 * * SUN")
+    @Scheduled(cron = "0 0 1 * * *")
     public void execute() {
         logPruneService.execute();
     }
