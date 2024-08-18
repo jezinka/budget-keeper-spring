@@ -32,7 +32,7 @@ const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurren
     };
 
     let className = "";
-    if (selectCurrentMonth && (new Date().getMonth() + 1) === expense.month) {
+    if (selectCurrentMonth && year == new Date().getFullYear() && (new Date().getMonth() + 1) === expense.month) {
         className = "current-month ";
         if (expense.category === SUM_CATEGORY) {
             className += "current-month-footer ";

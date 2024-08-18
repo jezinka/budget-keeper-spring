@@ -101,7 +101,7 @@ export default function YearlyExpenses() {
                     <th></th>
                     {MONTHS_ARRAY.map(month => {
                         let monthName = getMonthName(month, 'long');
-                        let className = (new Date().getMonth() + 1) === month ? "current-month current-month-header" : "";
+                        let className = (new Date().getFullYear() == year && new Date().getMonth() + 1) === month ? "current-month current-month-header" : "";
                         return <th key={month} className={className} style={{textAlign: "center"}}>{monthName}</th>
                     })
                     }
