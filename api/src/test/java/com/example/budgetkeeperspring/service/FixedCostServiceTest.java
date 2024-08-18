@@ -31,7 +31,6 @@ class FixedCostServiceTest {
     @Mock
     FixedCostPayedRepository fixedCostPayedRepository;
 
-    @Autowired
     @InjectMocks
     FixedCostService fixedCostService;
 

@@ -30,7 +30,6 @@ class ExpenseServiceTest {
     @Mock
     ExpenseRepository expenseRepository;
 
-    @Autowired
     @InjectMocks
     ExpenseService expenseService;
 
