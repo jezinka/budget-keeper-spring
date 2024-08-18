@@ -65,6 +65,5 @@ export default function BudgetSummary() {
                 </Col>
                 <Col sm={2}/>
             </Row>
-        </>)
-        ;
+        </>);
 }

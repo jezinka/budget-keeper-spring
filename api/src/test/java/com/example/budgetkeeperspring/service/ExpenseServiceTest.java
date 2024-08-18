@@ -2,6 +2,8 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.FireDataDTO;
+import com.example.budgetkeeperspring.dto.YearlyExpensesDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
@@ -13,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -147,5 +148,67 @@ class ExpenseServiceTest {
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(170)) == 0 && p.getDay() == 12));
         assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(20)) == 0 && p.getDay() == 13));
+    }
+
+    @Test
+    void getFireNumber_withAnnualExpenses() {
+        List<YearlyExpensesDTO> yearlyExpenses = Arrays.asList(
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(10000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(15000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(20000))
+        );
+        when(expenseRepository.findAnnualExpensesForPreviousYears()).thenReturn(yearlyExpenses);
+        when(expenseRepository.findAllByCategory_Level(2)).thenReturn(Collections.emptyList());
+
+        FireDataDTO result = expenseService.getFireNumber();
+
+        assertEquals(BigDecimal.valueOf(375000), result.getFireNumber());
+        assertEquals(BigDecimal.ZERO, result.getInvestmentSum());
+    }
+
+    @Test
+    void getFireNumber_withInvestments() {
+        List<YearlyExpensesDTO> yearlyExpenses = Arrays.asList(
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(10000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(15000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(20000))
+        );
+        List<Expense> investments = Arrays.asList(
+                expenseMapper.mapToEntity(ExpenseDTO.builder().transactionDate("2023-12-23").amount(BigDecimal.valueOf(5000)).build()),
+                expenseMapper.mapToEntity(ExpenseDTO.builder().transactionDate("2023-11-25").amount(BigDecimal.valueOf(7000)).build())
+        );
+        when(expenseRepository.findAnnualExpensesForPreviousYears()).thenReturn(yearlyExpenses);
+        when(expenseRepository.findAllByCategory_Level(2)).thenReturn(investments);
+
+        FireDataDTO result = expenseService.getFireNumber();
+
+        assertEquals(BigDecimal.valueOf(375000), result.getFireNumber());
+        assertEquals(BigDecimal.valueOf(12000), result.getInvestmentSum());
+    }
+
+    @Test
+    void getFireNumber_withNoAnnualExpenses() {
+        when(expenseRepository.findAnnualExpensesForPreviousYears()).thenReturn(Collections.emptyList());
+
+        FireDataDTO result = expenseService.getFireNumber();
+
+        assertEquals(BigDecimal.ZERO, result.getFireNumber());
+        assertEquals(BigDecimal.ZERO, result.getInvestmentSum());
+    }
+
+    @Test
+    void getFireNumber_withNegativeExpenses() {
+        List<YearlyExpensesDTO> yearlyExpenses = Arrays.asList(
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(-10000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(-15000)),
+                new YearlyExpensesDTO(2023, BigDecimal.valueOf(-20000))
+        );
+        when(expenseRepository.findAnnualExpensesForPreviousYears()).thenReturn(yearlyExpenses);
+        when(expenseRepository.findAllByCategory_Level(2)).thenReturn(Collections.emptyList());
+
+        FireDataDTO result = expenseService.getFireNumber();
+
+        assertEquals(BigDecimal.valueOf(375000), result.getFireNumber());
+        assertEquals(BigDecimal.ZERO, result.getInvestmentSum());
     }
 }
