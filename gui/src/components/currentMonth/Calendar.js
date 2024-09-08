@@ -22,7 +22,10 @@ export const Calendar = () => {
         let row = [];
         let i = 1;
         const date = new Date();
-        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        let firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        if (firstDay === 0) {
+            firstDay = 7;
+        }
         const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
         const emptyCol = <Col/>;
@@ -74,9 +77,9 @@ export const Calendar = () => {
 
     return (
         <Container>
-        <Col sm={7} className={"ms-5"}>
-            <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
-            {daysRows()}
-        </Col>
-    </Container>)
+            <Col sm={7} className={"ms-5"}>
+                <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
+                {daysRows()}
+            </Col>
+        </Container>)
 }
