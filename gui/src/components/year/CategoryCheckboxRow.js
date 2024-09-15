@@ -5,9 +5,11 @@ import {handleError} from "../../Utils";
 const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategories}) => {
     const [levelSelected, setLevelSelected] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
+    const [levelDescription, setLevelDescription] = useState([]);
 
     useEffect(() => {
         fetchCategories();
+        fetchLevelDescription();
     }, []);
 
     async function fetchCategories() {
@@ -31,12 +33,17 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
         return handleError();
     }
 
-    const levelDescription = {
-        0: "Podstawa",
-        1: "Dostatek",
-        2: "Inwestycje",
-        3: "Ponad"
-    };
+    async function fetchLevelDescription() {
+        const response = await fetch('/budget/categories/levels');
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                return setLevelDescription(data);
+            }
+        }
+        return handleError();
+    }
 
     return (<>
             <Row className={"mb-2"}>
@@ -56,7 +63,12 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                 </Col>
                 {Object.keys(categoryLevels)
                     .filter(l => l >= 0)
-                    .map((level, index) => {
+                    .map((level) => {
+                        let levels = levelDescription.filter(l => l.level == level);
+                        let levelName;
+                        if (levels.length !== 0) {
+                            levelName = levels[0].name;
+                        }
                         return (
                             <Col sm={2} key={level}>
                                 <input
@@ -75,7 +87,9 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                                             setSelectedCategories(selectedSurvivors);
                                         }
                                     }}
-                                /><span className="fw-bold">&nbsp;{levelDescription[level]}</span>
+                                />
+                                <span
+                                    className="fw-bold">&nbsp;{levelName}</span>
                             </Col>
                         )
                     })}

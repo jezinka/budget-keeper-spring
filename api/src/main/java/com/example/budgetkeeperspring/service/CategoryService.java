@@ -1,12 +1,15 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CategoryDTO;
+import com.example.budgetkeeperspring.dto.CategoryLevelDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
 import com.example.budgetkeeperspring.entity.Circ;
+import com.example.budgetkeeperspring.mapper.CategoryLevelMapper;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
+import com.example.budgetkeeperspring.repository.CategoryLevelRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -20,8 +23,10 @@ import java.util.Optional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryLevelRepository categoryLevelRepository;
     private final CategoryConditionRepository categoryConditionRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryLevelMapper categoryLevelMapper;
 
     public List<CategoryDTO> getAll() {
         return categoryRepository
@@ -60,5 +65,12 @@ public class CategoryService {
                 })
                 .map(CategoryCondition::getCategory)
                 .findFirst();
+    }
+
+    public List<CategoryLevelDTO> getAllLevels() {
+        return categoryLevelRepository.findAll()
+                .stream()
+                .map(categoryLevelMapper::mapToDto)
+                .toList();
     }
 }
