@@ -150,7 +150,10 @@ public class ExpenseService {
                         Expense::getTransactionMonth,
                         groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
                                 Expense::getAmount, BigDecimal::add))))
-                .forEach((month, value) -> value.forEach((category, amount) -> groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount))));
+                .forEach((month, value) -> value.forEach((category, amount) -> {
+                    long transactionCount = yearlyExpenses.stream().filter(y -> y.getCategory().getName().equals(category) && y.getTransactionMonth() == month).count();
+                    groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount, transactionCount));
+                }));
 
         goals.forEach(g ->
         {
@@ -260,7 +263,7 @@ public class ExpenseService {
         FireDataDTO fireDataDTO = new FireDataDTO();
 
         List<YearlyExpensesDTO> annualExpensesForPreviousYears = expenseRepository.findAnnualExpensesForPreviousYears();
-        if(annualExpensesForPreviousYears.isEmpty()) {
+        if (annualExpensesForPreviousYears.isEmpty()) {
             fireDataDTO.setFireNumber(BigDecimal.ZERO);
             fireDataDTO.setInvestmentSum(BigDecimal.ZERO);
             return fireDataDTO;

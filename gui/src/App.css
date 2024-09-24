@@ -73,3 +73,7 @@ table tr td.over_goal {
 .current-month-footer {
     border-bottom: #2694ac 2px solid !important;
 }
+
+.no-transactions {
+    font-weight: lighter;
+}

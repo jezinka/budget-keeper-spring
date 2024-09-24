@@ -6,7 +6,7 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurrentMonth = true}) => {
 
     const renderTooltip = async () => {
-        if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY || expense.amount === 0) {
+        if (expense.month === SUM_MONTH || expense.month === SUM_CATEGORY || expense.transactionCount === 0) {
             return
         }
 
@@ -32,8 +32,13 @@ const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurren
     };
 
     let className = "";
+
+    if (expense.transactionCount === undefined || expense.transactionCount === 0) {
+        className += "no-transactions ";
+    }
+
     if (selectCurrentMonth && year == new Date().getFullYear() && (new Date().getMonth() + 1) === expense.month) {
-        className = "current-month ";
+        className += "current-month ";
         if (expense.category === SUM_CATEGORY) {
             className += "current-month-footer ";
         }

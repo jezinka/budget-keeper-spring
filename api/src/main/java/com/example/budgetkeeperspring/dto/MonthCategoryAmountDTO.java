@@ -13,10 +13,16 @@ public class MonthCategoryAmountDTO {
     private String category;
     private BigDecimal amount;
     private BigDecimal goalAmount;
+    private long transactionCount;
 
     public MonthCategoryAmountDTO(Integer month, String category, BigDecimal amount) {
         this.month = month;
         this.category = category;
         this.amount = amount;
+    }
+
+    public MonthCategoryAmountDTO(Integer month, String category, BigDecimal amount, long transactionCount) {
+        this(month, category, amount);
+        this.transactionCount = transactionCount;
     }
 }
