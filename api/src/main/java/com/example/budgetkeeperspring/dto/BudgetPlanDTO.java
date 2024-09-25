@@ -17,6 +17,7 @@ public class BudgetPlanDTO {
     private BigDecimal expense;
     private BigDecimal goal;
     private BigDecimal difference;
+    private int transactionCount;
 
     public BigDecimal getDifference() {
         return expense.subtract(goal);

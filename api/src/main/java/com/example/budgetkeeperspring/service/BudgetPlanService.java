@@ -21,7 +21,7 @@ public class BudgetPlanService {
 
     public List<BudgetPlanDTO> getBudgetPlan(LocalDate startDate, LocalDate endDate) {
         String sql = """
-                SELECT g.id, c.name, SUM(e.amount) AS expense, g.amount AS goal \
+                SELECT g.id, c.name, SUM(e.amount) AS expense, count(e.amount) AS transactionCount, g.amount AS goal \
                 FROM goal g \
                 JOIN category c ON c.id = g.category_id \
                 LEFT JOIN expense e ON e.category_id = c.id AND e.transaction_date >= cast(:startDate as DATE) AND e.transaction_date <= cast(:endDate as DATE) AND !e.deleted \
@@ -39,6 +39,7 @@ public class BudgetPlanService {
             budgetPlan.setCategory(rs.getString("name"));
             budgetPlan.setExpense(rs.getBigDecimal("expense") == null ? BigDecimal.ZERO : rs.getBigDecimal("expense"));
             budgetPlan.setGoal(rs.getBigDecimal("goal") == null ? BigDecimal.ZERO : rs.getBigDecimal("goal"));
+            budgetPlan.setTransactionCount(rs.getInt("transactionCount"));
             return budgetPlan;
         });
     }
