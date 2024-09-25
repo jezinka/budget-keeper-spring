@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -51,7 +49,7 @@ public class RabbitMQService {
         log.info("Received message: " + in);
         Gson g = new Gson();
         ExpenseDTO message = g.fromJson(in, ExpenseDTO.class);
-        Optional<Category> category = categoryService.findCategoryByConditions(message);
+        Category category = categoryService.findCategoryByConditions(message);
         ExpenseDTO savedExpense = expenseService.createExpense(message, category);
         if (savedExpense != null) {
             fixedCostService.updateFixedCost(savedExpense);

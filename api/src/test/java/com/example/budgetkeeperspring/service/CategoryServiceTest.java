@@ -5,13 +5,13 @@ import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
 import com.example.budgetkeeperspring.entity.Circ;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,8 +20,11 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -121,18 +124,16 @@ class CategoryServiceTest {
 
         when(categoryConditionRepository.findAll()).thenReturn(List.of(condition));
 
-        Optional<Category> result = categoryService.findCategoryByConditions(expenseDTO);
+        Category result = categoryService.findCategoryByConditions(expenseDTO);
 
-        assertTrue(result.isPresent());
-        assertEquals("Test Category", result.get().getName());
+        assertEquals("Test Category", result.getName());
     }
 
     @Test
     void findCategoryByConditions_returnsEmptyIfNoConditionsMatch() {
         when(categoryConditionRepository.findAll()).thenReturn(List.of());
-
-        Optional<Category> result = categoryService.findCategoryByConditions(expenseDTO);
-
-        assertTrue(result.isEmpty());
+        assertThrows(NotFoundException.class, () -> {
+            categoryService.findCategoryByConditions(expenseDTO);
+        });
     }
 }

@@ -15,8 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -54,12 +52,12 @@ class RabbitMQServiceTest {
         String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
         ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
         Category category = new Category();
-        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(Optional.of(category));
-        when(expenseService.createExpense(any(ExpenseDTO.class), any(Optional.class))).thenReturn(expenseDTO);
+        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(category);
+        when(expenseService.createExpense(any(ExpenseDTO.class), any(Category.class))).thenReturn(expenseDTO);
 
         rabbitMQService.listenExpenses(messageJson);
 
-        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), any(Optional.class));
+        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), any(Category.class));
         verify(fixedCostService, times(1)).updateFixedCost(any(ExpenseDTO.class));
     }
 
@@ -75,28 +73,29 @@ class RabbitMQServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle null category when expense message is received")
-    void listenExpenses_handlesNullCategory() {
+    @DisplayName("Should not update fixed cost when saved expense is null")
+    void doesNotUpdateFixedCostWhenExpenseIsNull() {
         String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
         ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
-        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(Optional.empty());
-        when(expenseService.createExpense(any(ExpenseDTO.class), any(Optional.class))).thenReturn(expenseDTO);
-
-        rabbitMQService.listenExpenses(messageJson);
-
-        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), any(Optional.class));
-        verify(fixedCostService, times(1)).updateFixedCost(any(ExpenseDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should not update fixed cost when saved expense is null")
-    void listenExpenses_doesNotUpdateFixedCostWhenExpenseIsNull() {
-        String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
-        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(Optional.empty());
-        when(expenseService.createExpense(any(ExpenseDTO.class), any(Optional.class))).thenReturn(null);
+        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(null);
+        when(expenseService.createExpense(any(ExpenseDTO.class), isNull())).thenReturn(null);
 
         rabbitMQService.listenExpenses(messageJson);
 
         verify(fixedCostService, never()).updateFixedCost(any(ExpenseDTO.class));
+    }
+
+    @Test
+    @DisplayName("Should handle null category when expense message is received")
+    void handlesNullCategory() {
+        String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
+        ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
+        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(null);
+        when(expenseService.createExpense(any(ExpenseDTO.class), isNull())).thenReturn(expenseDTO);
+
+        rabbitMQService.listenExpenses(messageJson);
+
+        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), isNull());
+        verify(fixedCostService, times(1)).updateFixedCost(any(ExpenseDTO.class));
     }
 }

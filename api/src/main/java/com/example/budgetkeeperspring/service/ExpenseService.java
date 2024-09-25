@@ -37,9 +37,9 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
 
-    public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Optional<Category> category) {
+    public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
-        expense.setCategory(category.orElse(null));
+        expense.setCategory(category);
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }
 

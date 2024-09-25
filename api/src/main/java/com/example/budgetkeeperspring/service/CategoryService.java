@@ -6,6 +6,7 @@ import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
 import com.example.budgetkeeperspring.entity.Circ;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.CategoryLevelMapper;
 import com.example.budgetkeeperspring.mapper.CategoryMapper;
 import com.example.budgetkeeperspring.repository.CategoryConditionRepository;
@@ -53,7 +54,7 @@ public class CategoryService {
                 .orElse(null)));
     }
 
-    public Optional<Category> findCategoryByConditions(ExpenseDTO expenseDTO) {
+    public Category findCategoryByConditions(ExpenseDTO expenseDTO) {
         String title = expenseDTO.getTitle().toLowerCase();
         String payee = expenseDTO.getPayee().toLowerCase();
 
@@ -64,7 +65,8 @@ public class CategoryService {
                     return (c.getTitle() != null && title.contains(c.getTitle())) || (c.getPayee() != null && payee.contains(c.getPayee()));
                 })
                 .map(CategoryCondition::getCategory)
-                .findFirst();
+                .findFirst()
+                .orElseGet(() -> categoryRepository.findById(-999L).orElseThrow(() -> new NotFoundException("Default category not found")));
     }
 
     public List<CategoryLevelDTO> getAllLevels() {
