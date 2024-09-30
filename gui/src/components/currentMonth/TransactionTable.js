@@ -2,10 +2,8 @@ import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
 import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import {ArrowClockwise, ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
-import {EMPTY_OPTION, formatNumber, handleError} from "../../Utils";
+import {EMPTY_OPTION, formatNumber, handleError, UNKNOWN_CATEGORY} from "../../Utils";
 import AddCategoryModal from "./AddCategoryModal";
-import Tooltip from "react-bootstrap/Tooltip";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
     const [transactions, setTransactions] = useState([]);
@@ -269,24 +267,26 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 </tr>
                 </thead>
                 <tbody>
-                {transactions.map(transaction => <tr key={transaction.id}>
-                    <td>{transaction.transactionDate}</td>
-                    <td>{transaction.title.substring(0, 50)}</td>
-                    <td>{transaction.payee.substring(0, 50)}</td>
-                    <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-                    <td>{transaction.categoryName != null ? transaction.categoryName : ''}</td>
-                    <td style={{textAlign: "center"}}>
-                        <Button variant="outline-primary" size="sm"
-                                onClick={() => editTransaction(transaction.id)}><Pencil/>
-                        </Button>{' '}
-                        <Button variant="outline-primary" size="sm"
-                                onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/>
-                        </Button>{' '}
-                        <Button variant="outline-primary" size="sm"
-                                onClick={() => deleteTransaction(transaction.id)}><Trash/>
-                        </Button>
-                    </td>
-                </tr>)}
+                {transactions.map(transaction => {
+                    return <tr key={transaction.id}>
+                        <td>{transaction.transactionDate}</td>
+                        <td>{transaction.title.substring(0, 50)}</td>
+                        <td>{transaction.payee.substring(0, 50)}</td>
+                        <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
+                        <td style={{color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black")}}>{transaction.categoryName}</td>
+                        <td style={{textAlign: "center"}}>
+                            <Button variant="outline-primary" size="sm"
+                                    onClick={() => editTransaction(transaction.id)}><Pencil/>
+                            </Button>{' '}
+                            <Button variant="outline-primary" size="sm"
+                                    onClick={() => splitTransaction(transaction.id)}><ArrowsAngleExpand/>
+                            </Button>{' '}
+                            <Button variant="outline-primary" size="sm"
+                                    onClick={() => deleteTransaction(transaction.id)}><Trash/>
+                            </Button>
+                        </td>
+                    </tr>;
+                })}
                 </tbody>
             </Table>
         </>
