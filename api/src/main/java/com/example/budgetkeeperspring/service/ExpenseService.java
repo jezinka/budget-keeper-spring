@@ -11,7 +11,6 @@ import com.example.budgetkeeperspring.utils.DateUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -238,13 +237,13 @@ public class ExpenseService {
 
     private Comparator<Expense> getExpenseComparator() {
         return (o1, o2) -> {
-            if (o1.getCategoryName().equals(StringUtils.EMPTY) && o2.getCategoryName().equals(StringUtils.EMPTY)) {
+            if (o1.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY) && o2.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY)) {
                 return o1.getAmount().compareTo(o2.getAmount());
             }
-            if (o1.getCategoryName().equals(StringUtils.EMPTY)) {
+            if (o1.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY)) {
                 return -1;
             }
-            if (o2.getCategoryName().equals(StringUtils.EMPTY)) {
+            if (o2.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY)) {
                 return 1;
             }
             return o1.getAmount().compareTo(o2.getAmount());

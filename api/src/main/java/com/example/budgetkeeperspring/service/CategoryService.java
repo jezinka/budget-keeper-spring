@@ -23,6 +23,7 @@ import java.util.Optional;
 @Service
 public class CategoryService {
 
+    public static final long UNKNOWN_CATEGORY = -999L;
     private final CategoryRepository categoryRepository;
     private final CategoryLevelRepository categoryLevelRepository;
     private final CategoryConditionRepository categoryConditionRepository;
@@ -66,7 +67,7 @@ public class CategoryService {
                 })
                 .map(CategoryCondition::getCategory)
                 .findFirst()
-                .orElseGet(() -> categoryRepository.findById(-999L).orElseThrow(() -> new NotFoundException("Default category not found")));
+                .orElseGet(() -> categoryRepository.findById(UNKNOWN_CATEGORY).orElseThrow(() -> new NotFoundException("Default category not found")));
     }
 
     public List<CategoryLevelDTO> getAllLevels() {
