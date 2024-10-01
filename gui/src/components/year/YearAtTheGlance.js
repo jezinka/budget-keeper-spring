@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
+import {getMonthName, handleError, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH, UNKNOWN_CATEGORY} from "../../Utils";
 import Expense from "./Expense";
 import {Col, Modal, Row} from "react-bootstrap";
 import YearFilter from "./YearFilter";
@@ -101,18 +101,30 @@ export default function YearAtTheGlance() {
                 <thead>
                 <tr className='table-info'>
                     <th></th>
-                    {MONTHS_ARRAY.map(month => {
-                        let monthName = getMonthName(month, 'long');
-                        let className = (new Date().getFullYear() == year && new Date().getMonth() + 1) === month ? "current-month current-month-header" : "";
-                        return <th key={month} className={className} style={{textAlign: "center"}}>{monthName}</th>
-                    })
+                    {
+                        MONTHS_ARRAY.map(month => {
+                            let monthName = getMonthName(month, 'long');
+                            let className = (new Date().getFullYear() == year && new Date().getMonth() + 1) === month ? "current-month current-month-header" : "";
+                            return <th key={month} className={className} style={{textAlign: "center"}}>{monthName}</th>
+                        })
                     }
                     <th className="summary">{SUM_CATEGORY}</th>
                 </tr>
                 </thead>
                 <tbody>
 
+                {categories.filter(c => c.id === UNKNOWN_CATEGORY)
+                    .filter(c => selectedCategories.find(sc => c.name === sc))
+                    .map(currentCategory =>
+                        <tr className="unknown-category" key={currentCategory.id}>
+                            <td>{currentCategory.name}</td>
+                            {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(currentMonth, currentCategory.name))}
+                            {ExpenseForMonthAndCategory(SUM_MONTH, currentCategory.name)}
+                        </tr>
+                    )}
+
                 {categories
+                    .filter(c => c.id !== UNKNOWN_CATEGORY)
                     .filter(c => selectedCategories.find(sc => c.name === sc))
                     .map(currentCategory =>
                         <tr key={currentCategory.id}>
