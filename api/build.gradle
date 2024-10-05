@@ -27,6 +27,7 @@ repositories {
 
 dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.9'
 
     compileOnly 'org.springframework.boot:spring-boot-starter-tomcat:3.0.2'
     compileOnly 'org.projectlombok:lombok:1.18.30'

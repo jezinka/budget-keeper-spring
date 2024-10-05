@@ -4,9 +4,10 @@ import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
 import com.example.budgetkeeperspring.dto.BudgetPlanSummaryDTO;
 import com.example.budgetkeeperspring.service.BudgetPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,5 +38,19 @@ public class BudgetPlanController {
         LocalDate startDate = getBeginOfCurrentMonth();
         LocalDate endDate = getEndOfCurrentMonth();
         return budgetPlanService.getBudgetPlanSummary(startDate, endDate);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please select a file to upload.");
+        }
+
+        boolean success = budgetPlanService.createGoalsFromFile(file);
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File uploaded failed.");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully: " + file.getOriginalFilename());
     }
 }

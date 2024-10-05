@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
-import {Col, Modal} from "react-bootstrap";
+import {Button, Col, Modal, Row} from "react-bootstrap";
 import {formatNumber} from "../../Utils";
 import Expense from "../year/Expense";
+import PlanImport from "./PlanImport";
 
 export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
     const [show, setShow] = useState(false);
     const [transactionsDetails, setTransactionsDetails] = useState([]);
+
+    const [showUploadForm, setShowUploadForm] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -49,12 +52,20 @@ export default function Budget() {
     }
 
     return (<>
+        <Modal show={showUploadForm} onHide={() => setShowUploadForm(false)}>
+            <Modal.Header closeButton> <Modal.Title>Załaduj</Modal.Title> </Modal.Header>
+            <Modal.Body><PlanImport closeHandler={() => setShowUploadForm(false)}/></Modal.Body>
+        </Modal>
+
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton> <Modal.Title>Transakcje</Modal.Title> </Modal.Header>
             <Modal.Body>{transactionsDetails}</Modal.Body>
         </Modal>
         <Col sm={5}>
-            <h5>PLAN</h5>
+            <Row>
+                <Col sm={2}><h5>PLAN</h5></Col>
+                <Col sm={1}> <Button size="sm" variant="info" onClick={() => setShowUploadForm(true)}>Załaduj</Button></Col>
+            </Row>
             <Table id='budgetPlanTable' responsive='sm' striped bordered size="sm">
                 <tbody>
                 <tr className='table-info'>

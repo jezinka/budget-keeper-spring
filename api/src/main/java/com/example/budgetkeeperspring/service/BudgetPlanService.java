@@ -2,21 +2,37 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
 import com.example.budgetkeeperspring.dto.BudgetPlanSummaryDTO;
+import com.example.budgetkeeperspring.entity.Category;
+import com.example.budgetkeeperspring.entity.Goal;
+import com.example.budgetkeeperspring.repository.CategoryRepository;
+import com.example.budgetkeeperspring.repository.GoalRepository;
+import com.example.budgetkeeperspring.utils.DateUtils;
+import com.example.budgetkeeperspring.utils.FileService;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class BudgetPlanService {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final CategoryRepository categoryRepository;
+    private final GoalRepository goalRepository;
 
-    public BudgetPlanService(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public BudgetPlanService(NamedParameterJdbcTemplate namedParameterJdbcTemplate, CategoryRepository categoryRepository, GoalRepository goalRepository) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.categoryRepository = categoryRepository;
+        this.goalRepository = goalRepository;
     }
 
     public List<BudgetPlanDTO> getBudgetPlan(LocalDate startDate, LocalDate endDate) {
@@ -89,5 +105,41 @@ public class BudgetPlanService {
         parameters.addValue("endDate", endDate.toString());
 
         return namedParameterJdbcTemplate.queryForObject(sql, parameters, BigDecimal.class);
+    }
+
+    public boolean createGoalsFromFile(MultipartFile file) {
+        try (CSVReader csvReader = new CSVReader(new FileReader(FileService.getTempFile(file)))) {
+            String[] values;
+            while ((values = csvReader.readNext()) != null) {
+                List<String> list = Arrays.asList(values);
+                createGoal(list);
+            }
+            return true;
+        } catch (IOException e) {
+            System.err.println("Failed to read from file: " + e.getMessage());
+        } catch (CsvValidationException e) {
+            System.err.println("Invalid csv file: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public void createGoal(List<String> list) {
+        Category categoryByName = categoryRepository.findCategoryByName(list.get(0));
+        BigDecimal amount = new BigDecimal(list.get(1).replace(",", "."));
+        LocalDate beginOfCurrentMonth = DateUtils.getBeginOfCurrentMonth();
+        goalRepository
+                .findGoalByCategoryAndDate(categoryByName, beginOfCurrentMonth)
+                .ifPresentOrElse(
+                        g -> {
+                            g.setAmount(g.getAmount().add(amount));
+                            goalRepository.save(g);
+                        },
+                        () -> {
+                            Goal goal = new Goal();
+                            goal.setCategory(categoryByName);
+                            goal.setAmount(amount);
+                            goal.setDate(beginOfCurrentMonth);
+                            goalRepository.save(goal);
+                        });
     }
 }
