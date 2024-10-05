@@ -43,7 +43,7 @@ export default function Budget() {
 
     function getExpense(row) {
         return <Expense
-            expense={{month: currentMonth, category: row.category, amount: row.expense, goalAmount: row.goal}}
+            expense={{month: currentMonth, category: row.category, amount: row.expense, goalAmount: row.goal, transactionCount: row.transactionCount}}
             year={currentYear}
             key={currentMonth + row.category}
             modalHandler={handleShow}
