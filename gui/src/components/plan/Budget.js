@@ -21,6 +21,35 @@ export default function Budget() {
         setBudgetPlan(data);
     }
 
+    const handleExport = async () => {
+        const response = await fetch('/budget/budgetPlan/export', {
+            method: 'GET',
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('content-disposition');
+
+            let filename = 'budgetPlan.csv';
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+                filename = contentDisposition
+                    .split('filename=')[1]
+                    .split(';')[0]
+                    .replace(/['"]/g, '');
+            }
+
+            const a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert('Failed to export file.');
+        }
+    };
+
+
     useEffect(() => {
         loadData();
     }, []);
@@ -43,7 +72,13 @@ export default function Budget() {
 
     function getExpense(row) {
         return <Expense
-            expense={{month: currentMonth, category: row.category, amount: row.expense, goalAmount: row.goal, transactionCount: row.transactionCount}}
+            expense={{
+                month: currentMonth,
+                category: row.category,
+                amount: row.expense,
+                goalAmount: row.goal,
+                transactionCount: row.transactionCount
+            }}
             year={currentYear}
             key={currentMonth + row.category}
             modalHandler={handleShow}
@@ -54,7 +89,10 @@ export default function Budget() {
     return (<>
         <Modal show={showUploadForm} onHide={() => setShowUploadForm(false)}>
             <Modal.Header closeButton> <Modal.Title>Załaduj</Modal.Title> </Modal.Header>
-            <Modal.Body><PlanImport closeHandler={() => setShowUploadForm(false)}/></Modal.Body>
+            <Modal.Body><PlanImport closeHandler={() => {
+                setShowUploadForm(false);
+                loadData();
+            }}/></Modal.Body>
         </Modal>
 
         <Modal show={show} onHide={handleClose}>
@@ -64,7 +102,10 @@ export default function Budget() {
         <Col sm={5}>
             <Row>
                 <Col sm={2}><h5>PLAN</h5></Col>
-                <Col sm={1}> <Button size="sm" variant="info" onClick={() => setShowUploadForm(true)}>Załaduj</Button></Col>
+                <Col sm={1} className={"mx-2"}> <Button size="sm" variant="info"
+                                                        onClick={() => setShowUploadForm(true)}>Załaduj</Button></Col>
+                <Col sm={3} className={"mx-2"}> <Button size="sm" variant="outline-info" onClick={handleExport}>Zrzuć
+                    Templatkę</Button></Col>
             </Row>
             <Table id='budgetPlanTable' responsive='sm' striped bordered size="sm">
                 <tbody>
