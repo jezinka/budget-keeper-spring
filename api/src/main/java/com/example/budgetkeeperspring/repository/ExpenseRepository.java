@@ -24,8 +24,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select new com.example.budgetkeeperspring.dto.YearlyExpensesDTO(year(e.transactionDate), sum(e.amount)) " +
            "from Expense e " +
-           "left join fetch Category c " +
-           "where (c.level is null or c.level not in (2, 4, 5)) " +
+           "join e.category c " +
+           "where (c.level is null or c.level in (0, 1, 3)) " +
            "              and year(e.transactionDate) <= (year(curdate()) - 1) " +
            "group by year(e.transactionDate)")
     List<YearlyExpensesDTO> findAnnualExpensesForPreviousYears();
