@@ -92,7 +92,7 @@ export default function YearAtTheGlance() {
             <YearFilter year={year} formHandler={setYear}/>
         </Row>
         <CategoryCheckboxRow
-            categories={categories.map(c => c.name)}
+            categories={categories}
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
         />

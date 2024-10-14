@@ -30,7 +30,7 @@ const YearAtTheGlancePieChart = () => {
             const sorted = data.sort((a, b) => a.sum - b.sum);
             const categoriesNames = sorted.map((d) => d.category);
 
-            setCategories(categoriesNames.reverse());
+            setCategories(categoriesNames.map(d => ({ "name": d })).reverse());
             setSelectedCategories(categoriesNames);
             return setData(sorted);
         }

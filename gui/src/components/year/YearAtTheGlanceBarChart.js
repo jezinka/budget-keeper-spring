@@ -26,7 +26,7 @@ const YearAtTheGlanceBarChart = () => {
             const sorted = data.sort((a, b) => a.sum - b.sum);
             const categoriesNames = sorted.map((d) => d.category);
 
-            setCategories(categoriesNames);
+            setCategories(categoriesNames.map(d => ({ "name": d })));
             setSelectedCategories(categoriesNames);
             return setData(sorted);
         }

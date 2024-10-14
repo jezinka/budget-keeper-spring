@@ -9,28 +9,24 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
 
     useEffect(() => {
         fetchCategories();
+    }, [categories]);
+
+    useEffect(() => {
         fetchLevelDescription();
     }, []);
 
     async function fetchCategories() {
-        const response = await fetch('/budget/categories/all');
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                const levels = {};
-                data.forEach(c => {
-                    if (c.level in levels) {
-                        levels[c.level].push(c.name);
-                    } else {
-                        levels[c.level] = [c.name];
-                    }
-                });
-                setCategoryLevels(levels);
-                return setLevelSelected(Object.keys(levels));
+        const levels = {};
+        categories.forEach(c => {
+            if (c.level in levels) {
+                levels[c.level].push(c.name);
+            } else {
+                levels[c.level] = [c.name];
             }
-        }
-        return handleError();
+        });
+        setCategoryLevels(levels);
+        return setLevelSelected(Object.keys(levels));
     }
 
     async function fetchLevelDescription() {
@@ -53,7 +49,7 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                            checked={selectedCategories.length === categories.length}
                            onChange={(event) => {
                                if (event.target.checked) {
-                                   setSelectedCategories(categories)
+                                   setSelectedCategories(categories.map(c => c.name))
                                    setLevelSelected(Object.keys(categoryLevels));
                                } else {
                                    setSelectedCategories([])
@@ -95,7 +91,7 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                     })}
             </Row>
             <Row>
-                {categories.map((category) => {
+                {categories.map(c => c.name).map((category) => {
                     return (
                         <Col sm={2} key={category}>
                             <input
