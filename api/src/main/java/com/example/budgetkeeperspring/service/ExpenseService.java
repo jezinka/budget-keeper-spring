@@ -8,9 +8,9 @@ import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -288,21 +288,22 @@ public class ExpenseService {
         return fireDataDTO;
     }
 
-    public JsonObject getLifestyleInflation() {
-        JsonObject data = new JsonObject();
-        JsonArray datapoint = new JsonArray();
+    public ObjectNode getLifestyleInflation() {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode arrayNode = mapper.createArrayNode();
 
         List<LifestyleInflationRecordDTO> records = expenseRepository.countSumOfExpensesByMonthAndCategory();
         records.stream()
                 .collect(groupingBy(LifestyleInflationRecordDTO::getDate))
                 .forEach((k, v) -> {
-                    JsonObject element = new JsonObject();
-                    element.add("date", new JsonPrimitive(k));
-                    v.forEach(record -> element.add(record.getCategory(), new JsonPrimitive(record.getExpensesSum())));
-                    datapoint.add(element);
+                    ObjectNode node = mapper.createObjectNode();
+                    node.put("date", k);
+                    v.forEach(record -> node.put(record.getCategory(), record.getExpensesSum()));
+                    arrayNode.add(node);
                 });
 
-        data.add("data", datapoint);
+        ObjectNode data = mapper.createObjectNode();
+        data.set("data", arrayNode);
         return data;
     }
 }

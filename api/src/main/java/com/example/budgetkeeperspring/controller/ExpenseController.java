@@ -6,7 +6,7 @@ import com.example.budgetkeeperspring.dto.FireDataDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -97,7 +97,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/lifestyleInflation")
-    public JsonObject getLifestyleInflation() {
+    public ObjectNode getLifestyleInflation() {
         return expenseService.getLifestyleInflation();
     }
 }
