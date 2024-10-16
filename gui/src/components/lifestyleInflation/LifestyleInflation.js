@@ -34,7 +34,10 @@ const LifestyleInflation = () => {
         const response = await fetch('/budget/expenses/lifestyleInflation');
         if (response.ok) {
             let data = await response.json();
-            return setData(data.data);
+            let sorted = data.data.sort(function (a, b) {
+                return ('' + a.date).localeCompare(b.date);
+            })
+            return setData(sorted);
         }
         handleError();
     }
