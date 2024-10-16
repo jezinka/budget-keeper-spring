@@ -6,6 +6,7 @@ import com.example.budgetkeeperspring.dto.FireDataDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,18 +22,18 @@ import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMont
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/expenses")
 public class ExpenseController {
 
-    public static final String EXPENSES_PATH = "/expenses";
-    public static final String EXPENSES_PATH_ID = EXPENSES_PATH + "/{id}";
+    public static final String EXPENSES_PATH_ID = "/{id}";
     private final ExpenseService expenseService;
 
-    @PostMapping(EXPENSES_PATH)
+    @PostMapping()
     List<ExpenseDTO> getAllExpenses(@RequestBody HashMap<String, Object> filters) {
         return expenseService.findAll(filters);
     }
 
-    @GetMapping(EXPENSES_PATH + "/currentMonth")
+    @GetMapping("/currentMonth")
     List<ExpenseDTO> getCurrentMonth() {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
@@ -60,38 +61,43 @@ public class ExpenseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(EXPENSES_PATH + "/split/{id}")
+    @PostMapping("/split/{id}")
     ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @Validated @RequestBody List<ExpenseDTO> expenseDTOS) {
         expenseService.splitExpense(id, expenseDTOS);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(EXPENSES_PATH + "/getPivot/{year}")
+    @GetMapping("/getPivot/{year}")
     List<Map<String, Object>> getForSelectedYearPivot(@PathVariable("year") Integer year) {
         return expenseService.getMonthsPivot(year);
     }
 
-    @GetMapping(EXPENSES_PATH + "/yearAtTheGlance/{year}")
+    @GetMapping("/yearAtTheGlance/{year}")
     List<MonthCategoryAmountDTO> getForSelectedYear(@PathVariable("year") Integer year) {
         return expenseService.getYearAtGlance(year);
     }
 
-    @GetMapping(EXPENSES_PATH + "/currentMonthByCategory")
+    @GetMapping("/currentMonthByCategory")
     List<MonthCategoryAmountDTO> getGroupedForCurrentMonth(@RequestParam(value = "withInvestments", required = false) boolean withInvestments) {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
         return expenseService.getGroupedByCategory(begin, end, withInvestments);
     }
 
-    @GetMapping(EXPENSES_PATH + "/dailyExpenses")
+    @GetMapping("/dailyExpenses")
     List<DailyExpensesDTO> getDailyForMonth() {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
         return expenseService.getDailyExpenses(begin, end);
     }
 
-    @GetMapping(EXPENSES_PATH + "/fireNumber")
+    @GetMapping("/fireNumber")
     public FireDataDTO getFireNumber() {
         return expenseService.getFireNumber();
+    }
+
+    @GetMapping("/lifestyleInflation")
+    public JsonObject getLifestyleInflation() {
+        return expenseService.getLifestyleInflation();
     }
 }

@@ -8,6 +8,9 @@ import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -283,5 +286,23 @@ public class ExpenseService {
                 .abs());
 
         return fireDataDTO;
+    }
+
+    public JsonObject getLifestyleInflation() {
+        JsonObject data = new JsonObject();
+        JsonArray datapoint = new JsonArray();
+
+        List<LifestyleInflationRecordDTO> records = expenseRepository.countSumOfExpensesByMonthAndCategory();
+        records.stream()
+                .collect(groupingBy(LifestyleInflationRecordDTO::getDate))
+                .forEach((k, v) -> {
+                    JsonObject element = new JsonObject();
+                    element.add("date", new JsonPrimitive(k));
+                    v.forEach(record -> element.add(record.getCategory(), new JsonPrimitive(record.getExpensesSum())));
+                    datapoint.add(element);
+                });
+
+        data.add("data", datapoint);
+        return data;
     }
 }

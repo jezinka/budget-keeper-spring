@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.repository;
 
+import com.example.budgetkeeperspring.dto.LifestyleInflationRecordDTO;
 import com.example.budgetkeeperspring.dto.YearlyExpensesDTO;
 import com.example.budgetkeeperspring.entity.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +32,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<YearlyExpensesDTO> findAnnualExpensesForPreviousYears();
 
     List<Expense> findAllByCategory_Level(Integer level);
+
+@Query("select new com.example.budgetkeeperspring.dto.LifestyleInflationRecordDTO(" +
+       "CAST(t.date AS string), t.amount, t.name) from (select " +
+       "DATE_FORMAT(e.transactionDate, '%Y-%m') as date, abs(sum(e.amount)) as amount, c.name as name " +
+       "from Expense e " +
+       "join e.category c " +
+       "group by DATE_FORMAT(e.transactionDate, '%Y-%m'), c.name ) t")
+    List<LifestyleInflationRecordDTO> countSumOfExpensesByMonthAndCategory();
 }
