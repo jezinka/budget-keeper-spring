@@ -57,7 +57,12 @@ const LifestyleInflation = () => {
                 <YAxis/>
                 <Tooltip/>
                 <Legend/>
-                {selectedCategories.map((c, index) => <Line key={index} type="monotone" dataKey={c} stroke={monthColors[index%12]}/>)}
+                {selectedCategories.map((c, index) => {
+                    let color = monthColors[index % 12];
+                    return <Line connectNulls key={index}
+                                 type="monotone" dataKey={c}
+                                 fill={color} stroke={color}/>;
+                })}
             </LineChart>
         </Col>
     </>;
