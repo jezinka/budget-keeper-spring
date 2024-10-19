@@ -42,6 +42,24 @@ const LifestyleInflation = () => {
         handleError();
     }
 
+    const CustomTooltip = ({active, payload, label}) => {
+        if (active && payload && payload.length) {
+            // Sort the payload by value (amount) in descending order
+            const sortedPayload = [...payload].sort((a, b) => b.value - a.value);
+
+            return (
+                <div className="custom-tooltip">
+                    <p className="label">{`${label}`}</p>
+                    {sortedPayload.map((entry, index) => (
+                        <p key={`item-${index}`} style={{ color: entry.color }}>
+                            {`${entry.name} : ${entry.value}`}
+                        </p>
+                    ))}
+                </div>
+            );
+        }
+    }
+
     let body = <>
         <Row className={"mt-5 mx-2"}>
             <CategoryCheckboxRow
@@ -55,7 +73,7 @@ const LifestyleInflation = () => {
                 <CartesianGrid strokeDasharray="3 3"/>
                 <XAxis dataKey="date"/>
                 <YAxis/>
-                <Tooltip/>
+                <Tooltip content={<CustomTooltip/>}/>
                 <Legend/>
                 {selectedCategories.map((c, index) => {
                     let color = monthColors[index % 12];
