@@ -51,7 +51,7 @@ const LifestyleInflation = () => {
                 <div className="custom-tooltip">
                     <p className="label">{`${label}`}</p>
                     {sortedPayload.map((entry, index) => (
-                        <p key={`item-${index}`} style={{ color: entry.color }}>
+                        <p key={`item-${index}`} style={{color: entry.color}}>
                             {`${entry.name} : ${entry.value}`}
                         </p>
                     ))}
@@ -73,7 +73,11 @@ const LifestyleInflation = () => {
                 <CartesianGrid strokeDasharray="3 3"/>
                 <XAxis dataKey="date"/>
                 <YAxis/>
-                <Tooltip content={<CustomTooltip/>}/>
+                <Tooltip content={<CustomTooltip/>}
+                         wrapperStyle={{
+                             backgroundColor: "white", borderStyle: "ridge", paddingLeft: "10px", paddingRight: "10px"
+                         }}
+                />
                 <Legend/>
                 {selectedCategories.map((c, index) => {
                     let color = monthColors[index % 12];
