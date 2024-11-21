@@ -39,7 +39,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
            "    select DATE_FORMAT(e.transactionDate, '%Y-%m') as date, abs(sum(e.amount)) as amount, c.name as name, cl.name as categoryLevel " +
            "    from Expense e " +
            "    join e.category c " +
-           "    left join CategoryLevel cl on cl.id = c.level " +
+           "    left join CategoryLevel cl on cl.level = c.level " +
            "    group by DATE_FORMAT(e.transactionDate, '%Y-%m'), c.name, c.level) t")
     List<LifestyleInflationRecordDTO> countSumOfExpensesByMonthAndCategory();
 }
