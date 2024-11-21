@@ -33,11 +33,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     List<Expense> findAllByCategory_Level(Integer level);
 
-@Query("select new com.example.budgetkeeperspring.dto.LifestyleInflationRecordDTO(" +
-       "CAST(t.date AS string), t.amount, t.name) from (select " +
-       "DATE_FORMAT(e.transactionDate, '%Y-%m') as date, abs(sum(e.amount)) as amount, c.name as name " +
-       "from Expense e " +
-       "join e.category c " +
-       "group by DATE_FORMAT(e.transactionDate, '%Y-%m'), c.name ) t")
+    @Query("select new com.example.budgetkeeperspring.dto.LifestyleInflationRecordDTO(" +
+           "CAST(t.date AS string), t.amount, t.name, t.categoryLevel) " +
+           "from (" +
+           "    select DATE_FORMAT(e.transactionDate, '%Y-%m') as date, abs(sum(e.amount)) as amount, c.name as name, cl.name as categoryLevel " +
+           "    from Expense e " +
+           "    join e.category c " +
+           "    left join CategoryLevel cl on cl.id = c.level " +
+           "    group by DATE_FORMAT(e.transactionDate, '%Y-%m'), c.name, c.level) t")
     List<LifestyleInflationRecordDTO> countSumOfExpensesByMonthAndCategory();
 }

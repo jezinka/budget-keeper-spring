@@ -299,11 +299,34 @@ public class ExpenseService {
                     ObjectNode node = mapper.createObjectNode();
                     node.put("date", k);
                     v.forEach(record -> node.put(record.getCategory(), record.getExpensesSum()));
+                    addSumForCategoryLevel(v, node);
+                    addSumForAllCategories(v, node);
                     arrayNode.add(node);
                 });
 
         ObjectNode data = mapper.createObjectNode();
         data.set("data", arrayNode);
         return data;
+    }
+
+    private void addSumForCategoryLevel(List<LifestyleInflationRecordDTO> v, ObjectNode node) {
+        v.stream()
+                .map(LifestyleInflationRecordDTO::getCategoryLevel)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(level -> {
+                    BigDecimal sumForLevel = v.stream()
+                            .filter(record -> level.equals(record.getCategoryLevel()))
+                            .map(LifestyleInflationRecordDTO::getExpensesSum)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    node.put(level, sumForLevel);
+                });
+    }
+
+    private void addSumForAllCategories(List<LifestyleInflationRecordDTO> v, ObjectNode node) {
+        BigDecimal sumForAll = v.stream()
+                .map(LifestyleInflationRecordDTO::getExpensesSum)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        node.put("allCategories", sumForAll);
     }
 }

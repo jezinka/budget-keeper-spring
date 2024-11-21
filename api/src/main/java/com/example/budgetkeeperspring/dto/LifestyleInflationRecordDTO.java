@@ -15,4 +15,5 @@ public class LifestyleInflationRecordDTO {
     private String date;
     private BigDecimal expensesSum;
     private String category;
+    private String categoryLevel;
 }
