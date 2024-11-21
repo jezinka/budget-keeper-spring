@@ -25,6 +25,11 @@ public class CategoryController {
         return categoryService.getAll();
     }
 
+    @GetMapping("/onlyExpenses")
+    List<CategoryDTO> getOnlyExpenses() {
+        return categoryService.getOnlyExpenses();
+    }
+
     @GetMapping("/getActiveForSelectedYear/{year}")
     List<CategoryDTO> getActiveForSelectedYear(@PathVariable("year") Integer year) {
         return categoryService.findActiveForYear(year);
@@ -44,6 +49,7 @@ public class CategoryController {
     CategoryDTO getById(@PathVariable Long id) {
         return categoryService.findById(id).orElseThrow(NotFoundException::new);
     }
+
     @GetMapping("/levels")
     List<CategoryLevelDTO> getLevels() {
         return categoryService.getAllLevels();

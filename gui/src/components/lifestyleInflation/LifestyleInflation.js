@@ -23,7 +23,7 @@ const LifestyleInflation = () => {
     }, [categories]);
 
     async function fetchCategories() {
-        const response = await fetch('/budget/categories/all');
+        const response = await fetch('/budget/categories/onlyExpenses');
 
         if (response.ok) {
             const data = await response.json();
@@ -77,7 +77,7 @@ const LifestyleInflation = () => {
     const CustomTooltip = ({active, payload, label}) => {
         if (active && payload && payload.length) {
             // Sort the payload by value (amount) in descending order
-            const sortedPayload = [...payload].sort((a, b) => b.value - a.value);
+            const sortedPayload = [...payload].sort((a, b) => a.value - b.value);
 
             return (
                 <div className="custom-tooltip">
@@ -208,7 +208,7 @@ const LifestyleInflation = () => {
                        margin={{top: 30, right: 30, left: 20, bottom: 5}}>
                 <CartesianGrid strokeDasharray="3 3"/>
                 <XAxis dataKey="date"/>
-                <YAxis/>
+                <YAxis reversed={true}/>
                 <Tooltip content={<CustomTooltip/>}
                          wrapperStyle={{
                              backgroundColor: "white", borderStyle: "ridge", paddingLeft: "10px", paddingRight: "10px"

@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.dto.CategoryLevelDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
+import com.example.budgetkeeperspring.entity.CategoryLevel;
 import com.example.budgetkeeperspring.entity.Circ;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.CategoryLevelMapper;
@@ -34,6 +35,20 @@ public class CategoryService {
         return categoryRepository
                 .findAll(Sort.by(Sort.Direction.ASC, "name"))
                 .stream()
+                .map(categoryMapper::mapToDto)
+                .toList();
+    }
+
+    public List<CategoryDTO> getOnlyExpenses() {
+        List<Integer> incomeCategoryLevels = categoryLevelRepository.findAllByNameIn(List.of("Wpływy", "Kredyt"))
+                .stream()
+                .map(CategoryLevel::getLevel)
+                .toList();
+
+        return categoryRepository
+                .findAll(Sort.by(Sort.Direction.ASC, "name"))
+                .stream()
+                .filter(c -> c.getLevel() == null || !incomeCategoryLevels.contains(c.getLevel()))
                 .map(categoryMapper::mapToDto)
                 .toList();
     }
