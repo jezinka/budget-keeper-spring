@@ -3,7 +3,6 @@ import TransactionTable from "./TransactionTable";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
-import ExpensesPieChart from "./ExpensesPieChart";
 import {Calendar} from "./Calendar";
 import BudgetSummary from "../plan/BudgetSummary";
 
@@ -40,7 +39,6 @@ const CurrentMonth = () => {
                 </Badge>
             </h5>
             <ExpensesBarChart data={data}/>
-            <ExpensesPieChart data={data}/>
         </Col>
     </>;
     return <Main body={body}/>;
