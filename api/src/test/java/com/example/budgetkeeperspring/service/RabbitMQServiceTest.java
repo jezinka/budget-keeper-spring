@@ -33,9 +33,6 @@ class RabbitMQServiceTest {
     @Mock
     private LogMapper logMapper;
 
-    @Mock
-    private FixedCostService fixedCostService;
-
     @InjectMocks
     private RabbitMQService rabbitMQService;
 
@@ -47,8 +44,8 @@ class RabbitMQServiceTest {
     }
 
     @Test
-    @DisplayName("Should save expense and update fixed cost when valid expense message is received")
-    void listenExpenses_savesExpenseAndUpdatesFixedCost() {
+    @DisplayName("Should save expense when valid expense message is received")
+    void listenExpenses_savesExpense() {
         String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
         ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
         Category category = new Category();
@@ -58,7 +55,6 @@ class RabbitMQServiceTest {
         rabbitMQService.listenExpenses(messageJson);
 
         verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), any(Category.class));
-        verify(fixedCostService, times(1)).updateFixedCost(any(ExpenseDTO.class));
     }
 
     @Test
@@ -73,19 +69,6 @@ class RabbitMQServiceTest {
     }
 
     @Test
-    @DisplayName("Should not update fixed cost when saved expense is null")
-    void doesNotUpdateFixedCostWhenExpenseIsNull() {
-        String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
-        ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
-        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(null);
-        when(expenseService.createExpense(any(ExpenseDTO.class), isNull())).thenReturn(null);
-
-        rabbitMQService.listenExpenses(messageJson);
-
-        verify(fixedCostService, never()).updateFixedCost(any(ExpenseDTO.class));
-    }
-
-    @Test
     @DisplayName("Should handle null category when expense message is received")
     void handlesNullCategory() {
         String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
@@ -96,6 +79,5 @@ class RabbitMQServiceTest {
         rabbitMQService.listenExpenses(messageJson);
 
         verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), isNull());
-        verify(fixedCostService, times(1)).updateFixedCost(any(ExpenseDTO.class));
     }
 }

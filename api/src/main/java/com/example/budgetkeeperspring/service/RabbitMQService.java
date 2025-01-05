@@ -8,7 +8,6 @@ import com.example.budgetkeeperspring.repository.LogRepository;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +32,6 @@ public class RabbitMQService {
     private final CategoryService categoryService;
     private final LogRepository logRepository;
     private final LogMapper logMapper;
-    private final FixedCostService fixedCostService;
 
     @Bean
     public ConnectionFactory connectionFactory() {
@@ -51,9 +49,6 @@ public class RabbitMQService {
         ExpenseDTO message = g.fromJson(in, ExpenseDTO.class);
         Category category = categoryService.findCategoryByConditions(message);
         ExpenseDTO savedExpense = expenseService.createExpense(message, category);
-        if (savedExpense != null) {
-            fixedCostService.updateFixedCost(savedExpense);
-        }
         log.info("Saved expense: " + savedExpense);
     }
 

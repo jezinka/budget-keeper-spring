@@ -4,6 +4,8 @@ import {Button, Col, Modal, Row} from "react-bootstrap";
 import {formatNumber} from "../../Utils";
 import Expense from "../year/Expense";
 import PlanImport from "./PlanImport";
+import BudgetSummary from "./BudgetSummary";
+import Main from "../main/Main";
 
 export default function Budget() {
     const [budgetPlan, setBudgetPlan] = useState([]);
@@ -86,7 +88,7 @@ export default function Budget() {
             selectCurrentMonth={false}/>;
     }
 
-    return (<>
+    let body = <><>
         <Modal show={showUploadForm} onHide={() => setShowUploadForm(false)}>
             <Modal.Header closeButton> <Modal.Title>Załaduj</Modal.Title> </Modal.Header>
             <Modal.Body><PlanImport closeHandler={() => {
@@ -149,5 +151,8 @@ export default function Budget() {
                 </tbody>
             </Table>
         </Col>
-    </>);
+        <Col sm={3}> <BudgetSummary/></Col>
+    </>
+    </>;
+    return <Main body={body}/>;
 }
