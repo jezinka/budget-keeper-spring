@@ -5,7 +5,6 @@ import {formatNumber} from "../../Utils";
 import Table from "react-bootstrap/Table";
 import Budget from "./Budget";
 import BudgetSummary from "./BudgetSummary";
-import FireNumber from "./FireNumber";
 
 const Plan = () => {
     const [data, setData] = useState([]);
@@ -61,7 +60,6 @@ const Plan = () => {
             <Col sm={3}>
                 <h5>PODSUMOWANIE</h5>
                 <BudgetSummary/>
-                <FireNumber/>
             </Col>
         </Row>
         <Row><Budget/></Row>

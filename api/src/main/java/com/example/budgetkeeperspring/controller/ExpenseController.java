@@ -2,7 +2,6 @@ package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.dto.FireDataDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
@@ -89,11 +88,6 @@ public class ExpenseController {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
         return expenseService.getDailyExpenses(begin, end);
-    }
-
-    @GetMapping("/fireNumber")
-    public FireDataDTO getFireNumber() {
-        return expenseService.getFireNumber();
     }
 
     @GetMapping("/lifestyleInflation")

@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.util.*;
@@ -259,33 +258,6 @@ public class ExpenseService {
             return true;
         }
         return false;
-    }
-
-    public FireDataDTO getFireNumber() {
-        FireDataDTO fireDataDTO = new FireDataDTO();
-
-        List<YearlyExpensesDTO> annualExpensesForPreviousYears = expenseRepository.findAnnualExpensesForPreviousYears();
-        if (annualExpensesForPreviousYears.isEmpty()) {
-            fireDataDTO.setFireNumber(BigDecimal.ZERO);
-            fireDataDTO.setInvestmentSum(BigDecimal.ZERO);
-            return fireDataDTO;
-        }
-
-        fireDataDTO.setFireNumber(annualExpensesForPreviousYears.stream()
-                .map(YearlyExpensesDTO::getExpensesSum)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(annualExpensesForPreviousYears.size()), RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(25))
-                .abs());
-
-        fireDataDTO.setInvestmentSum(expenseRepository
-                .findAllByCategory_Level(2)
-                .stream()
-                .map(Expense::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .abs());
-
-        return fireDataDTO;
     }
 
     public ObjectNode getLifestyleInflation() {
