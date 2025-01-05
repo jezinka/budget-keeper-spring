@@ -7,6 +7,7 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
 import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
@@ -39,7 +39,7 @@ public class ExpenseController {
         return expenseService.findAllByTransactionDateBetween(begin, end);
     }
 
-    @GetMapping(EXPENSES_PATH_ID)
+    @GetMapping(value = EXPENSES_PATH_ID)
     ExpenseDTO getById(@PathVariable Long id) {
         return expenseService.findById(id).orElseThrow(NotFoundException::new);
     }
@@ -64,11 +64,6 @@ public class ExpenseController {
     ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @Validated @RequestBody List<ExpenseDTO> expenseDTOS) {
         expenseService.splitExpense(id, expenseDTOS);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/getPivot/{year}")
-    List<Map<String, Object>> getForSelectedYearPivot(@PathVariable("year") Integer year) {
-        return expenseService.getMonthsPivot(year);
     }
 
     @GetMapping("/yearAtTheGlance/{year}")

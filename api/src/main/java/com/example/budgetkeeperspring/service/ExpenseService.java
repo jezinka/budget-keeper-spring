@@ -172,35 +172,6 @@ public class ExpenseService {
         return groupedExpenses;
     }
 
-    public List<Map<String, Object>> getMonthsPivot(int year) {
-        List<Map<String, Object>> list = new ArrayList<>();
-        String[] shortMonths = DFS.getShortMonths();
-
-        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
-        LocalDate end = DateUtils.getEndOfSelectedYear(year);
-
-        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
-
-        yearlyExpenses.stream()
-                .filter(p -> p.getCategory() != null && p.getCategory().isUseInYearlyCharts())
-                .collect(groupingBy(
-                        Expense::getCategoryName,
-                        groupingBy(Expense::getTransactionMonth, reducing(BigDecimal.ZERO,
-                                Expense::getAmount, BigDecimal::add))))
-                .forEach((category, entry) -> {
-                    Map<String, Object> chartEntry = new LinkedHashMap<>();
-                    chartEntry.put(CATEGORY, category);
-                    for (Map.Entry<Integer, BigDecimal> e : entry.entrySet()) {
-                        Integer month = e.getKey();
-                        BigDecimal amount = e.getValue();
-                        chartEntry.put(shortMonths[month - 1], amount);
-                    }
-                    list.add(chartEntry);
-                });
-
-        return list;
-    }
-
     public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end, boolean withInvestments) {
         List<MonthCategoryAmountDTO> list = new ArrayList<>();
         List<Expense> yearlyExpenses;
