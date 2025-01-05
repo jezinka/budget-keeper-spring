@@ -65,9 +65,7 @@ export function getFirstDayOfCurrentMonth() {
 }
 
 export function getDaysOfWeek() {
-    const {format} = new Intl.DateTimeFormat("pl-PL", {weekday: "short"});
-    return [...Array(7).keys()]
-        .map((day) => format(new Date(Date.UTC(new Date().getFullYear(), 0, day + 1))));
+    return ["pon.", "wt.", "śr.", "czw.", "pt.", "sob.", "niedz."];
 }
 
 export const monthColors = [
