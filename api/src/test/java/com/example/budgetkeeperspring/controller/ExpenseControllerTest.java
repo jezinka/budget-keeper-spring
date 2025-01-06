@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Random;
 
-import static com.example.budgetkeeperspring.controller.ExpenseController.EXPENSES_PATH_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +49,7 @@ class ExpenseControllerTest {
     void getById_NotFound() throws Exception {
         given(expenseService.findById(any(Long.class))).willReturn(Optional.empty());
 
-        mockMvc.perform(get(EXPENSES_PATH_ID, new Random().nextLong())
+        mockMvc.perform(get("/expenses/{id}", new Random().nextLong())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -66,7 +65,7 @@ class ExpenseControllerTest {
 
         given(expenseService.findById(123L)).willReturn(Optional.of(expense));
 
-        mockMvc.perform(get(EXPENSES_PATH_ID, expense.getId())
+        mockMvc.perform(get("/expenses/{id}", expense.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -81,8 +80,8 @@ class ExpenseControllerTest {
         Long expenseId = new Random().nextLong();
 
         given(expenseService.deleteById(any())).willReturn(true);
-        
-        mockMvc.perform(delete(EXPENSES_PATH_ID, expenseId)
+
+        mockMvc.perform(delete("/expenses/{id}", expenseId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
