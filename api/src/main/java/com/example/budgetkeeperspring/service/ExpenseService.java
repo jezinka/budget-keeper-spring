@@ -1,6 +1,9 @@
 package com.example.budgetkeeperspring.service;
 
-import com.example.budgetkeeperspring.dto.*;
+import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
+import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.GoalDTO;
+import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
@@ -232,44 +235,29 @@ public class ExpenseService {
     }
 
     public ObjectNode getLifestyleInflation() {
+
+        Map<String, Map<Integer, BigDecimal>> expensesSumForYear = expenseRepository.findAllByOrderByTransactionDateDesc()
+                .stream()
+                .collect(groupingBy(
+                                Expense::getCategoryName,
+                                groupingBy(Expense::getTransactionYear,
+                                        reducing(BigDecimal.ZERO,
+                                                Expense::getAmount, BigDecimal::add))
+                        )
+                );
+
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode arrayNode = mapper.createArrayNode();
 
-        List<LifestyleInflationRecordDTO> records = expenseRepository.countSumOfExpensesByMonthAndCategory();
-        records.stream()
-                .collect(groupingBy(LifestyleInflationRecordDTO::getDate))
-                .forEach((k, v) -> {
-                    ObjectNode node = mapper.createObjectNode();
-                    node.put("date", k);
-                    v.forEach(record -> node.put(record.getCategory(), record.getExpensesSum()));
-                    addSumForCategoryLevel(v, node);
-                    addSumForAllCategories(v, node);
-                    arrayNode.add(node);
-                });
+        expensesSumForYear.forEach((k, v) -> {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("category", k);
+            v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
+            arrayNode.add(node);
+        });
 
         ObjectNode data = mapper.createObjectNode();
         data.set("data", arrayNode);
         return data;
-    }
-
-    private void addSumForCategoryLevel(List<LifestyleInflationRecordDTO> v, ObjectNode node) {
-        v.stream()
-                .map(LifestyleInflationRecordDTO::getCategoryLevel)
-                .filter(Objects::nonNull)
-                .distinct()
-                .forEach(level -> {
-                    BigDecimal sumForLevel = v.stream()
-                            .filter(record -> level.equals(record.getCategoryLevel()))
-                            .map(LifestyleInflationRecordDTO::getExpensesSum)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    node.put(level, sumForLevel);
-                });
-    }
-
-    private void addSumForAllCategories(List<LifestyleInflationRecordDTO> v, ObjectNode node) {
-        BigDecimal sumForAll = v.stream()
-                .map(LifestyleInflationRecordDTO::getExpensesSum)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        node.put("allCategories", sumForAll);
     }
 }
