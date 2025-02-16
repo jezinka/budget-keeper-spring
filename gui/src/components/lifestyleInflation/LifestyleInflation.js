@@ -1,15 +1,24 @@
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
-import {Bar, BarChart, CartesianGrid, Legend, Rectangle, Tooltip, XAxis, YAxis} from "recharts";
+import {Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis} from "recharts";
 import {Col} from "react-bootstrap";
-import {handleError} from "../../Utils";
+import {handleError, monthColors} from "../../Utils";
 
 const LifestyleInflation = () => {
     const [data, setData] = useState([]);
+    const [years, setYears] = useState([]);
 
     useEffect(() => {
         loadData();
     }, []);
+
+    function getSeries() {
+        const series = [];
+        years.forEach((year, index) => {
+            series.push(<Bar dataKey={year} fill={monthColors[index]}/>)
+        });
+        return series;
+    }
 
     async function loadData() {
         const response = await fetch('/budget/expenses/lifestyleInflation');
@@ -17,7 +26,8 @@ const LifestyleInflation = () => {
             let data = await response.json();
             let sorted = data.data.sort(function (a, b) {
                 return ('' + a.category).localeCompare(b.category);
-            })
+            });
+            setYears([...new Set(sorted.map((k) => Object.keys(k)).flat().filter((k) => k !== 'category'))]);
             return setData(sorted);
         }
         handleError();
@@ -36,11 +46,7 @@ const LifestyleInflation = () => {
                 <YAxis/>
                 <Tooltip/>
                 <Legend/>
-                <Bar dataKey="2025" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue"/>}/>
-                <Bar dataKey="2024" fill="#82ca9d" activeBar={<Rectangle fill="gold" stroke="purple"/>}/>
-                <Bar dataKey="2023" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue"/>}/>
-                <Bar dataKey="2022" fill="#82ca9d" activeBar={<Rectangle fill="gold" stroke="purple"/>}/>
-                <Bar dataKey="2021" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue"/>}/>
+                {getSeries()}
             </BarChart>
         </Col>
     </>;

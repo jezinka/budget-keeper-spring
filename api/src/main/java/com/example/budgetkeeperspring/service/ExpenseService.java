@@ -250,10 +250,12 @@ public class ExpenseService {
         ArrayNode arrayNode = mapper.createArrayNode();
 
         expensesSumForYear.forEach((k, v) -> {
-            ObjectNode node = mapper.createObjectNode();
-            node.put("category", k);
-            v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
-            arrayNode.add(node);
+            if (v.containsKey(LocalDate.now().getYear() - 1) || v.containsKey(LocalDate.now().getYear())) {
+                ObjectNode node = mapper.createObjectNode();
+                node.put("category", k);
+                v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
+                arrayNode.add(node);
+            }
         });
 
         ObjectNode data = mapper.createObjectNode();
