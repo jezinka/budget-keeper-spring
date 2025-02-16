@@ -235,9 +235,11 @@ public class ExpenseService {
     }
 
     public ObjectNode getLifestyleInflation() {
-
         Map<String, Map<Integer, BigDecimal>> expensesSumForYear = expenseRepository.findAllByOrderByTransactionDateDesc()
                 .stream()
+                .filter(exp -> !exp.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY))
+                .filter(exp -> !exp.getCategory().getLevel().equals(2))
+                .filter(exp -> !exp.getCategory().getLevel().equals(4))
                 .collect(groupingBy(
                                 Expense::getCategoryName,
                                 groupingBy(Expense::getTransactionYear,
