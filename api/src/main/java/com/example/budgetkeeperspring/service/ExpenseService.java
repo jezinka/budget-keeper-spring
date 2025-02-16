@@ -181,7 +181,7 @@ public class ExpenseService {
         if (withInvestments) {
             yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
         } else {
-            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutExpenses(begin, end);
+            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutInvestments(begin, end);
         }
 
         yearlyExpenses

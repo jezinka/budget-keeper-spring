@@ -20,7 +20,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByOrderByTransactionDateDesc();
 
     @Query("select e from Expense e left join fetch e.category c where e.transactionDate between :begin and :end and c.level <> 2")
-    List<Expense> findAllByTransactionDateBetweenWithoutExpenses(LocalDate begin, LocalDate end);
+    List<Expense> findAllByTransactionDateBetweenWithoutInvestments(LocalDate begin, LocalDate end);
 
     @Query("select new com.example.budgetkeeperspring.dto.LifestyleInflationRecordDTO(" +
            "CAST(t.date AS string), t.amount, t.name, t.categoryLevel) " +
