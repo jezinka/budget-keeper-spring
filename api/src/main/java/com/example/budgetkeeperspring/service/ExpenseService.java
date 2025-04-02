@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,7 +32,6 @@ import static java.util.stream.Collectors.*;
 @Service
 public class ExpenseService {
 
-    private static final DateFormatSymbols DFS = new DateFormatSymbols(new Locale("pl", "PL"));
     private static final String CATEGORY = "category";
 
     private final ExpenseRepository expenseRepository;
@@ -104,7 +102,7 @@ public class ExpenseService {
         List<Predicate<Expense>> allPredicates = new ArrayList<>();
 
         if (filters.getOrDefault("onlyEmptyCategories", false).equals(true)) {
-            allPredicates.add(p -> p.getCategory() == null);
+            allPredicates.add(p -> p.getCategory().getId() == CategoryService.UNKNOWN_CATEGORY);
         }
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             allPredicates.add(p -> p.getAmount().compareTo(BigDecimal.ZERO) < 0);
