@@ -252,9 +252,11 @@ public class ExpenseService {
         expensesSumForYear.forEach((k, v) -> {
             if (v.containsKey(LocalDate.now().getYear() - 1) || v.containsKey(LocalDate.now().getYear())) {
                 ObjectNode node = mapper.createObjectNode();
-                node.put("category", k);
-                v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
-                arrayNode.add(node);
+                if (v.size() > 1) {
+                    node.put("category", k);
+                    v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
+                    arrayNode.add(node);
+                }
             }
         });
 
