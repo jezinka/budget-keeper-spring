@@ -1,14 +1,15 @@
-import React, { useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import React, {useContext, useState} from "react";
+import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import { useCategories, useTransactionForm } from "../../hooks/transactionHooks";
-import { EMPTY_OPTION } from "../../Utils";
+import {getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {EMPTY_OPTION} from "../../Utils";
 import TransactionForm from "./TransactionForm";
+import {CategoryContext} from "../../context/CategoryContext";
 
 export default function SplitTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
-    const { categories, fetchCategories, getCategoriesMap } = useCategories();
-    const { formState, setFormState, handleChange, loadExpense } = useTransactionForm({
+    const {categories, fetchCategories} = useContext(CategoryContext);
+    const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
         id: 0,
         transactionDate: Date.now(),
         title: "",
@@ -23,7 +24,7 @@ export default function SplitTransactionModal(props) {
     const handleSplit = (event) => {
         let value = Number(event.target.value);
         let newValue = Number((formState.baseSplitAmount - value).toFixed(2));
-        setFormState({ ...formState, [event.target.name]: value, amount: newValue });
+        setFormState({...formState, [event.target.name]: value, amount: newValue});
     };
 
     async function submitForm() {
@@ -44,7 +45,7 @@ export default function SplitTransactionModal(props) {
         const response = await fetch('/budget/expenses/split/' + formState.id, {
             method: 'POST',
             body: JSON.stringify(splittedTransactions),
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
         });
 
         props.closeHandler();
@@ -60,7 +61,7 @@ export default function SplitTransactionModal(props) {
             <AddCategoryModal show={showCategoryForm} close={() => {
                 setShowCategoryForm(false);
                 fetchCategories();
-            }} />
+            }}/>
 
             <Modal size="lg" show={props.show} onHide={props.closeHandler} onShow={() => loadExpense(props.id)}>
                 <Modal.Header closeButton>
@@ -71,8 +72,8 @@ export default function SplitTransactionModal(props) {
                         formState={formState}
                         handleChange={handleChange}
                         handleSplit={handleSplit}
-                        splitFlow={props.splitFlow}
-                        getCategoriesMap={getCategoriesMap}
+                        splitFlow={true}
+                        getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
                     />
                 </Modal.Body>

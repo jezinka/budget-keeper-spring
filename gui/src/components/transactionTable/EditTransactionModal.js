@@ -1,14 +1,15 @@
-import React, { useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import React, {useContext, useState} from "react";
+import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import { useCategories, useTransactionForm } from "../../hooks/transactionHooks";
-import { EMPTY_OPTION } from "../../Utils";
+import {getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {EMPTY_OPTION} from "../../Utils";
 import TransactionForm from "./TransactionForm";
+import {CategoryContext} from "../../context/CategoryContext";
 
 export default function EditTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
-    const { categories, fetchCategories, getCategoriesMap } = useCategories();
-    const { formState, handleChange, loadExpense } = useTransactionForm({
+    const {categories, fetchCategories} = useContext(CategoryContext);
+    const {formState, handleChange, loadExpense} = useTransactionForm({
         id: 0,
         transactionDate: Date.now(),
         title: "",
@@ -22,7 +23,7 @@ export default function EditTransactionModal(props) {
         const response = await fetch('/budget/expenses/' + formState.id, {
             method: 'PUT',
             body: JSON.stringify(formState),
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
         });
 
         props.closeHandler();
@@ -38,7 +39,7 @@ export default function EditTransactionModal(props) {
             <AddCategoryModal show={showCategoryForm} close={() => {
                 setShowCategoryForm(false);
                 fetchCategories();
-            }} />
+            }}/>
 
             <Modal size="lg" show={props.show} onHide={props.closeHandler} onShow={() => loadExpense(props.id)}>
                 <Modal.Header closeButton>
@@ -48,8 +49,8 @@ export default function EditTransactionModal(props) {
                     <TransactionForm
                         formState={formState}
                         handleChange={handleChange}
-                        splitFlow={props.splitFlow}
-                        getCategoriesMap={getCategoriesMap}
+                        splitFlow={false}
+                        getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
                     />
                 </Modal.Body>
