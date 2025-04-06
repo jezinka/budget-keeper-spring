@@ -1,14 +1,21 @@
-import {Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
 import TransactionTable from "../currentMonth/TransactionTable";
 import Main from "../main/Main";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import TransactionCounter from "./TransactionCounter";
+import {ArrowClockwise} from "react-bootstrap-icons";
 
 const AllTransactions = () => {
+    const [showSpinner, setShowSpinner] = useState(false);
+    const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
     const [filterFormState, setFilterFormState] = useState({
         onlyEmptyCategories: false, onlyExpenses: false, title: "", payee: ""
     });
+
+    useEffect(() => {
+        loadTransactions();
+    }, []);
 
     const handleFilterChange = (event) => {
         setFilterFormState({...filterFormState, [event.target.name]: event.target.value});
@@ -17,6 +24,17 @@ const AllTransactions = () => {
     const handleFilterCheckboxChange = (event) => {
         setFilterFormState({...filterFormState, [event.target.name]: event.target.checked});
     };
+
+    async function loadTransactions() {
+        setShowSpinner(true);
+        const response = await fetch('/budget/expenses', {
+            method: "POST", body: JSON.stringify(filterFormState), headers: {'Content-Type': 'application/json'},
+        });
+        const data = await response.json();
+        setTransactions(data);
+        setTransactionCounter(data.length);
+        setShowSpinner(false)
+    }
 
     let body = <>
         <Col sm={1}>
@@ -47,7 +65,12 @@ const AllTransactions = () => {
                 </Row>
             </Form>
         </Col>
-        <TransactionTable mode="all" counterHandler={setTransactionCounter} filterForm={filterFormState}/>
+        <Col sm={1}>
+            <Button onClick={loadTransactions}>{showSpinner ?
+                <Spinner size={"sm"} animation="grow"/> : <ArrowClockwise/>}
+            </Button>
+        </Col>
+        <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions}/>
     </>;
 
     return <Main body={body}/>;

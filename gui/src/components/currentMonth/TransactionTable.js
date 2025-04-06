@@ -1,15 +1,13 @@
 import Table from 'react-bootstrap/Table';
 import React, {useEffect, useState} from "react";
-import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
-import {ArrowClockwise, ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
+import {Button, Col, Form, Modal, Row} from "react-bootstrap";
+import {ArrowsAngleExpand, Pencil, Plus, Trash} from "react-bootstrap-icons";
 import {EMPTY_OPTION, formatNumber, handleError, UNKNOWN_CATEGORY} from "../../Utils";
 import AddCategoryModal from "./AddCategoryModal";
 
-export default function TransactionTable({mode, counterHandler, filterForm, reloadCharts}) {
-    const [transactions, setTransactions] = useState([]);
+export default function TransactionTable(props) {
     const [showForm, setShowForm] = useState(false);
     const [showCategoryForm, setShowCategoryForm] = useState(false);
-    const [showSpinner, setShowSpinner] = useState(false);
     const [splitFlow, setSplitFlow] = useState(false);
     const [categories, setCategories] = useState([]);
     const [formState, setFormState] = useState({
@@ -35,34 +33,9 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     };
 
     async function reloadTable() {
-        setShowSpinner(true);
-        const response = await getResponse();
         setShowForm(false);
         setSplitFlow(false);
-        setShowSpinner(false);
-        if (response.ok) {
-            const data = await response.json();
-            if (data) {
-                if (counterHandler !== undefined) {
-                    counterHandler(data.length);
-                }
-                if (reloadCharts !== undefined) {
-                    reloadCharts()
-                }
-                return setTransactions(data);
-            }
-        }
-        return handleError();
-    }
-
-    async function getResponse() {
-        if (mode === "currentMonth") {
-            return await fetch("/budget/expenses/currentMonth");
-        } else {
-            return await fetch('/budget/expenses', {
-                method: "POST", body: JSON.stringify(filterForm), headers: {'Content-Type': 'application/json'},
-            });
-        }
+        props.changeTransactionsHandler();
     }
 
     async function fetchCategories() {
@@ -77,13 +50,15 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
     }
 
     useEffect(() => {
-        reloadTable();
         fetchCategories();
     }, []);
 
     async function deleteTransaction(id) {
         const response = await fetch('/budget/expenses/' + id, {method: 'DELETE'})
-        return await handleResponse(response);
+        if (response.ok) {
+            return reloadTable();
+        }
+        return handleError();
     }
 
     async function editTransaction(id) {
@@ -108,7 +83,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
 
     async function splitTransaction(id) {
         setSplitFlow(true);
-        editTransaction(id);
+        await editTransaction(id);
     }
 
     const handleClose = () => {
@@ -121,7 +96,10 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             method: 'PUT', body: JSON.stringify(formState), headers: {'Content-Type': 'application/json'},
         });
 
-        return await handleResponse(response)
+        if (response.ok) {
+            return reloadTable();
+        }
+        return handleError();
     }
 
     async function submitSplitForm() {
@@ -145,7 +123,10 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
             headers: {'Content-Type': 'application/json'},
         });
 
-        return await handleResponse(response);
+        if (response.ok) {
+            return reloadTable();
+        }
+        return handleError();
     }
 
     function getCategoriesMap() {
@@ -156,24 +137,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
         return categoriesList
     }
 
-    async function handleResponse(response) {
-        if (response.ok) {
-            return reloadTable();
-        }
-        return handleError();
-    }
-
-    function refreshButton() {
-        if (mode === 'all') {
-            return <Col sm={1}>
-                <Button onClick={reloadTable}>{showSpinner ? <Spinner size={"sm"} animation="grow"/> :
-                    <ArrowClockwise/>}</Button>
-            </Col>;
-        }
-    }
-
     return (<>
-            {refreshButton()}
             <AddCategoryModal show={showCategoryForm} close={() => {
                 setShowCategoryForm(false);
                 fetchCategories();
@@ -267,7 +231,7 @@ export default function TransactionTable({mode, counterHandler, filterForm, relo
                 </tr>
                 </thead>
                 <tbody>
-                {transactions.map(transaction => {
+                {props.transactions.map(transaction => {
                     return <tr key={transaction.id}>
                         <td>{transaction.transactionDate}</td>
                         <td>{transaction.title.substring(0, 50)}</td>
