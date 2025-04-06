@@ -2,7 +2,7 @@ import React, {useContext, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
 import {getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
-import {EMPTY_OPTION} from "../../Utils";
+import {EMPTY_OPTION, handleError} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
 
