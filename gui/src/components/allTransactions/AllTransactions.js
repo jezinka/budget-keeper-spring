@@ -1,9 +1,9 @@
 import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
-import TransactionTable from "../currentMonth/TransactionTable";
 import Main from "../main/Main";
 import React, {useEffect, useState} from "react";
 import TransactionCounter from "./TransactionCounter";
 import {ArrowClockwise} from "react-bootstrap-icons";
+import TransactionTable from "../transactionTable/TransactionTable";
 
 const AllTransactions = () => {
     const [showSpinner, setShowSpinner] = useState(false);

@@ -1,5 +1,5 @@
 import {Badge, Col} from "react-bootstrap";
-import TransactionTable from "./TransactionTable";
+import TransactionTable from "../transactionTable/TransactionTable";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
