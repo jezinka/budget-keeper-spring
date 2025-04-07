@@ -1,4 +1,4 @@
-import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Form, Pagination, Row, Spinner} from "react-bootstrap";
 import Main from "../main/Main";
 import React, {useEffect, useState} from "react";
 import TransactionCounter from "./TransactionCounter";
@@ -12,6 +12,9 @@ const AllTransactions = () => {
     const [filterFormState, setFilterFormState] = useState({
         onlyEmptyCategories: false, onlyExpenses: false, title: "", payee: ""
     });
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
 
     useEffect(() => {
         loadTransactions();
@@ -35,6 +38,15 @@ const AllTransactions = () => {
         setTransactionCounter(data.length);
         setShowSpinner(false)
     }
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const paginatedData = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return transactions.slice(startIndex, startIndex + itemsPerPage);
+    };
 
     let body = <>
         <Col sm={1}>
@@ -70,7 +82,19 @@ const AllTransactions = () => {
                 <Spinner size={"sm"} animation="grow"/> : <ArrowClockwise/>}
             </Button>
         </Col>
-        <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions}/>
+        <TransactionTable transactions={paginatedData()} changeTransactionsHandler={loadTransactions}/>
+        <Row className="justify-content-md-center">
+            <Col md={3}>
+                <Pagination>
+                    {[...Array(Math.ceil(transactionCounter / itemsPerPage)).keys()].map(number => (
+                        <Pagination.Item key={number + 1} active={number + 1 === currentPage}
+                                         onClick={() => handlePageChange(number + 1)}>
+                            {number + 1}
+                        </Pagination.Item>
+                    ))}
+                </Pagination>
+            </Col>
+        </Row>
     </>;
 
     return <Main body={body}/>;
