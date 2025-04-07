@@ -86,12 +86,13 @@ const AllTransactions = () => {
         <Row className="justify-content-md-center">
             <Col md={3}>
                 <Pagination>
-                    {[...Array(Math.ceil(transactionCounter / itemsPerPage)).keys()].map(number => (
+                    {[...Array(Math.min(10, Math.ceil(transactionCounter / itemsPerPage))).keys()].map(number => (
                         <Pagination.Item key={number + 1} active={number + 1 === currentPage}
                                          onClick={() => handlePageChange(number + 1)}>
                             {number + 1}
                         </Pagination.Item>
                     ))}
+                    {Math.ceil(transactionCounter / itemsPerPage) > 10 ? <Pagination.Ellipsis disabled={true}/> : ''}
                 </Pagination>
             </Col>
         </Row>
