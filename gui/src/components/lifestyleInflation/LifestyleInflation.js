@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import {Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis} from "recharts";
-import {Col} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 import {handleError, monthColors} from "../../Utils";
 
 const LifestyleInflation = () => {
@@ -34,13 +34,11 @@ const LifestyleInflation = () => {
     }
 
     let body = <>
-
-        <Col>
+        <Col sm={2}>
             <BarChart
-                width={1600}
-                height={500}
-                data={data}
-                margin={{top: 50, right: 30, left: 20, bottom: 5,}}>
+                width={300}
+                height={800}
+                data={data.filter(c => c.category === "na życie")}>
                 <CartesianGrid strokeDasharray="3 3"/>
                 <XAxis dataKey="category"/>
                 <YAxis/>
@@ -48,8 +46,24 @@ const LifestyleInflation = () => {
                 <Legend/>
                 {getSeries()}
             </BarChart>
-        </Col>
-    </>;
+        </Col><Col>
+        <Row>
+            {data.filter(c => c.category !== "na życie").map(d => {
+                return <BarChart
+                    width={300}
+                    height={200}
+                    data={data.filter(c => c.category === d.category)}>
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="category"/>
+                    <YAxis/>
+                    <Tooltip/>
+                    <Legend/>
+                    {getSeries()}
+                </BarChart>
+            })}
+        </Row>
+    </Col>
+    </>
 
     return <Main body={body}/>
 }
