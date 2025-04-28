@@ -13,7 +13,7 @@ const CurrentMonth = () => {
 
     useEffect(() => {
         loadData();
-    }, [withInvestments]);
+    }, [withInvestments, transactions]);
 
     useEffect(() => {
         loadData();

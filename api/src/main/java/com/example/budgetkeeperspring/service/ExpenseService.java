@@ -184,14 +184,16 @@ public class ExpenseService {
 
         yearlyExpenses
                 .stream()
-                .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
                 .collect(groupingBy(Expense::getTransactionMonth,
                         groupingBy(Expense::getCategoryName,
                                 reducing(BigDecimal.ZERO,
                                         Expense::getAmount, BigDecimal::add))))
-                .forEach((month, value) -> value.forEach((category, amount) ->
-                        list.add(new MonthCategoryAmountDTO(month, category, amount.abs())))
-                );
+                .forEach((month, value) ->
+                        value.forEach((category, amount) -> {
+                                    if (amount.compareTo(BigDecimal.ZERO) < 0)
+                                        list.add(new MonthCategoryAmountDTO(month, category, amount.abs()));
+                                }
+                        ));
         return list.stream().sorted(Comparator.comparing(MonthCategoryAmountDTO::getAmount).reversed()).toList();
     }
 
