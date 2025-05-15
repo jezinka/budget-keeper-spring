@@ -250,6 +250,10 @@ public class ExpenseService {
         ArrayNode arrayNode = mapper.createArrayNode();
 
         expensesSumForYear.forEach((k, v) -> {
+            if (v.values().stream().allMatch(amount -> amount.equals(BigDecimal.ZERO))) {
+                return;
+            }
+
             if (v.containsKey(LocalDate.now().getYear() - 1) || v.containsKey(LocalDate.now().getYear())) {
                 ObjectNode node = mapper.createObjectNode();
                 if (v.size() > 1) {
