@@ -250,7 +250,7 @@ public class ExpenseService {
         ArrayNode arrayNode = mapper.createArrayNode();
 
         expensesSumForYear.forEach((k, v) -> {
-            if (v.values().stream().allMatch(amount -> amount.equals(BigDecimal.ZERO))) {
+            if (v.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0)) {
                 return;
             }
 
