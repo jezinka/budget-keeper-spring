@@ -56,6 +56,9 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.h2database:h2:2.1.214'
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 group = 'com.example'

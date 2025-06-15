@@ -11,10 +11,11 @@ import AllTransactions from "./components/allTransactions/AllTransactions";
 import LogsView from "./components/logs/LogsView";
 import LifestyleInflation from "./components/lifestyleInflation/LifestyleInflation";
 import Budget from "./components/plan/Budget";
+import {UserProvider} from "./context/UserContext";
 
 const App = () => {
     return (
-        <>
+        <UserProvider>
             <Router basename="/budget">
                 <Routes>
                     <Route exact path="/" element={<CurrentMonth/>}/>
@@ -25,7 +26,7 @@ const App = () => {
                     <Route path="/gui/logs" element={<LogsView/>}/>
                 </Routes>
             </Router>
-        </>
+        </UserProvider>
     );
 }
 
