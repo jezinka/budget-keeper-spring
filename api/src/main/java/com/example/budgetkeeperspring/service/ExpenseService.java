@@ -50,6 +50,9 @@ public class ExpenseService {
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
+            if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
+                foundExpense.setNote(updateExpenseDTO.getNote());
+            }
             if (updateExpenseDTO.getCategoryId() == -1) {
                 foundExpense.setCategory(null);
             } else {
@@ -173,7 +176,8 @@ public class ExpenseService {
         return groupedExpenses;
     }
 
-    public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end, boolean withInvestments) {
+    public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end,
+                                                             boolean withInvestments) {
         List<MonthCategoryAmountDTO> list = new ArrayList<>();
         List<Expense> yearlyExpenses;
         if (withInvestments) {

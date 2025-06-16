@@ -1,32 +1,41 @@
 import React from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
-import { Plus } from "react-bootstrap-icons";
+import {Button, Col, Form, Row} from "react-bootstrap";
+import {Plus} from "react-bootstrap-icons";
 
-const TransactionForm = ({ formState, handleChange, handleSplit, splitFlow, getCategoriesMap, setShowCategoryForm }) => {
+const TransactionForm = ({formState, handleChange, handleSplit, splitFlow, getCategoriesMap, setShowCategoryForm}) => {
     return (
         <Form>
+            {splitFlow ? '' :
+                <Row className="align-items-center">
+                    <Col sm={11}><Form.Control className={"m-2"} placeholder="Opis:"
+                                               type="text"
+                                               onChange={handleChange}
+                                               name="note"
+                                               value={formState.note}/>
+                    </Col>
+                </Row>}
             <Row>
                 <Col sm={3}>
                     <Form.Control className="m-2"
                                   placeholder="Kiedy:" type="date" disabled onChange={handleChange}
                                   name="transactionDate"
-                                  value={formState.transactionDate} />
+                                  value={formState.transactionDate}/>
                 </Col>
                 <Col sm={8}>
                     <Form.Control className="m-2"
                                   placeholder="Co:" type="text" disabled onChange={handleChange}
                                   name="title"
-                                  value={formState.title} />
+                                  value={formState.title}/>
                 </Col>
                 <Col sm={3}>
                     <Form.Control className="m-2" placeholder="Ile:" type="number" disabled
-                                  name="baseSplitAmount" value={formState.baseSplitAmount} />
+                                  name="baseSplitAmount" value={formState.baseSplitAmount}/>
                 </Col>
-                <Col sm={{ span: 8 }}>
+                <Col sm={{span: 8}}>
                     <Form.Control className="m-2"
                                   placeholder="Kto:" type="text" disabled onChange={handleChange}
                                   name="payee"
-                                  value={formState.payee} />
+                                  value={formState.payee}/>
                 </Col>
             </Row>
             <Row className="align-items-center">
@@ -34,7 +43,7 @@ const TransactionForm = ({ formState, handleChange, handleSplit, splitFlow, getC
                     {splitFlow ?
                         <Form.Control className="m-2" placeholder="Ile:" type="number"
                                       onChange={handleChange}
-                                      name="amount" value={formState.amount} /> : ''}
+                                      name="amount" value={formState.amount}/> : ''}
                 </Col>
                 <Col sm={6}>
                     <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}
@@ -46,14 +55,14 @@ const TransactionForm = ({ formState, handleChange, handleSplit, splitFlow, getC
                 <Col sm={1}>
                     <Button size={"sm"} onClick={() => {
                         setShowCategoryForm(true);
-                    }}> <Plus /> </Button>
+                    }}> <Plus/> </Button>
                 </Col>
             </Row>
             {splitFlow ? <Row>
                 <Col sm={3}>
                     <Form.Control className="m-2" placeholder="Ile:" type="number"
                                   onChange={handleSplit}
-                                  name="splitAmount" value={formState.splitAmount} />
+                                  name="splitAmount" value={formState.splitAmount}/>
                 </Col>
                 <Col sm={8}>
                     <Form.Select className="m-2" placeholder="Kategoria:" onChange={handleChange}

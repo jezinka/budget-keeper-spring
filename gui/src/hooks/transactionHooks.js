@@ -19,6 +19,7 @@ export function useTransactionForm(initialState) {
                     transactionDate: data.transactionDate,
                     title: data.title,
                     payee: data.payee,
+                    note: data.note,
                     amount: data.amount,
                     baseSplitAmount: data.amount,
                     categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION

@@ -14,6 +14,7 @@ export default function EditTransactionModal(props) {
         transactionDate: Date.now(),
         title: "",
         payee: "",
+        note: "",
         baseSplitAmount: 0,
         amount: 0,
         categoryId: EMPTY_OPTION
