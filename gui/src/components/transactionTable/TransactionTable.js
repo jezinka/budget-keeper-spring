@@ -54,8 +54,7 @@ export default function TransactionTable(props) {
                 <thead>
                 <tr className='table-info'>
                     <th>KIEDY</th>
-                    <th>CO</th>
-                    <th>KTO</th>
+                    <th>OPIS</th>
                     <th>ILE</th>
                     <th>KATEGORIA</th>
                     <th style={{textAlign: "center"}}>*</th>

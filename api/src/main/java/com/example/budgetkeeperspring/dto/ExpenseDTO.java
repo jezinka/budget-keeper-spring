@@ -28,4 +28,9 @@ public class ExpenseDTO {
     private Boolean deleted;
 
     private String note;
+
+    public String getDescription() {
+        if (note != null) return note;
+        return String.format("%s - %s", title, payee);
+    }
 }
