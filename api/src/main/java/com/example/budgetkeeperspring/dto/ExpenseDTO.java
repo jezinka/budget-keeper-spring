@@ -30,8 +30,17 @@ public class ExpenseDTO {
     private String note;
 
     public String getDescription() {
-        if (note != null) return note;
-        if (title != null && payee != null) return title + " - " + payee;
-        return title != null ? title : payee;
+        if (note != null) {
+            return note;
+        }
+
+        String description = null;
+        if (title != null && !title.isEmpty() && !title.isBlank()) {
+            description = title;
+        }
+        if (payee != null && !payee.isEmpty() && !payee.isBlank()) {
+            description += " - " + payee;
+        }
+        return description;
     }
 }
