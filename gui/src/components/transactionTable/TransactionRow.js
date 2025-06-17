@@ -8,7 +8,7 @@ const TransactionRow = ({transaction, editTransaction, splitTransaction, deleteT
     return (
         <tr key={transaction.id}>
             <td>{transaction.transactionDate}</td>
-            <td>{transaction.description.substring(0, 50)}</td>
+            <td>{transaction.description}</td>
             <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
             <td style={{color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black")}}>{transaction.categoryName}</td>
             <td style={{textAlign: "center"}}>
