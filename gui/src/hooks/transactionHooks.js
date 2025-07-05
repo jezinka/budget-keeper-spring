@@ -9,6 +9,7 @@ export function useTransactionForm(initialState) {
     };
 
     async function loadExpense(id) {
+        setFormState(initialState);
         const transaction = await fetch('/budget/expenses/' + id, {method: 'GET'});
         if (transaction.ok) {
             const data = await transaction.json();
