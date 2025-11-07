@@ -43,6 +43,7 @@ npm-debug.log
 yarn-error.log
 gui/dist/
 gui/.gradle/
+gui/package-lock.json
 
 ### Generated sources ###
 **/src/main/generated/
