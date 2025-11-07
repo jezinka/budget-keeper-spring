@@ -67,10 +67,12 @@ const AllTransactions = () => {
                                     value={filterFormState.onlyExpenses}/>
                     </Col>
                     <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Opis:</Form.Label>
                         <Form.Control size={"sm"} placeholder="Opis:" type="text" onChange={handleFilterChange}
                                       name="description" value={filterFormState.description}/>
                     </Col>
                     <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Kwota:</Form.Label>
                         <Form.Control size={"sm"} placeholder="Kwota:" type="number" step="0.01" onChange={handleFilterChange}
                                       name="amount" value={filterFormState.amount}/>
                     </Col>
