@@ -116,6 +116,14 @@ public class ExpenseService {
         if (filters.get("month") != null) {
             allPredicates.add(p -> p.getTransactionMonth() == Integer.parseInt(filters.get("month").toString()));
         }
+        if (filters.get("dateFrom") != null && !filters.get("dateFrom").toString().isEmpty()) {
+            LocalDate dateFrom = LocalDate.parse(filters.get("dateFrom").toString());
+            allPredicates.add(p -> !p.getTransactionDate().isBefore(dateFrom));
+        }
+        if (filters.get("dateTo") != null && !filters.get("dateTo").toString().isEmpty()) {
+            LocalDate dateTo = LocalDate.parse(filters.get("dateTo").toString());
+            allPredicates.add(p -> !p.getTransactionDate().isAfter(dateTo));
+        }
         if (filters.get(CATEGORY) != null) {
             allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
         }

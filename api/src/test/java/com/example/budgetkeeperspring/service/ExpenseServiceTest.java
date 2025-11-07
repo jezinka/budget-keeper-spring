@@ -147,4 +147,93 @@ class ExpenseServiceTest {
         assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(170)) == 0 && p.getDay() == 12));
         assertTrue(result.stream().anyMatch(p -> p.getAmount().compareTo(BigDecimal.valueOf(20)) == 0 && p.getDay() == 13));
     }
+
+    @Test
+    void findAll_withDateFromFilter() {
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setTransactionDate(LocalDate.of(2023, 1, 10));
+        a.setCategory(new Category("TestA"));
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setTransactionDate(LocalDate.of(2023, 1, 20));
+        b.setCategory(new Category("TestB"));
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-80));
+        c.setTransactionDate(LocalDate.of(2023, 1, 30));
+        c.setCategory(new Category("TestC"));
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "dateFrom", "2023-01-20"));
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findAll_withDateToFilter() {
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setTransactionDate(LocalDate.of(2023, 1, 10));
+        a.setCategory(new Category("TestA"));
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setTransactionDate(LocalDate.of(2023, 1, 20));
+        b.setCategory(new Category("TestB"));
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-80));
+        c.setTransactionDate(LocalDate.of(2023, 1, 30));
+        c.setCategory(new Category("TestC"));
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "dateTo", "2023-01-20"));
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findAll_withDateRangeFilter() {
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setTransactionDate(LocalDate.of(2023, 1, 10));
+        a.setCategory(new Category("TestA"));
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setTransactionDate(LocalDate.of(2023, 1, 20));
+        b.setCategory(new Category("TestB"));
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-80));
+        c.setTransactionDate(LocalDate.of(2023, 1, 30));
+        c.setCategory(new Category("TestC"));
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "dateFrom", "2023-01-15",
+                "dateTo", "2023-01-25"));
+
+        assertEquals(1, result.size());
+        assertEquals(BigDecimal.valueOf(-120), result.get(0).getAmount());
+    }
 }
