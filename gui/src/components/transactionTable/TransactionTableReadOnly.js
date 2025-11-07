@@ -4,7 +4,7 @@ import {formatNumber, UNKNOWN_CATEGORY} from "../../Utils";
 
 const TransactionRowReadOnly = ({transaction}) => {
     return (
-        <tr key={transaction.id}>
+        <tr>
             <td>{transaction.transactionDate}</td>
             <td>{transaction.description.substring(0, 100)}</td>
             <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
