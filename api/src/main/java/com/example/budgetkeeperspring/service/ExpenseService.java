@@ -110,12 +110,6 @@ public class ExpenseService {
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             allPredicates.add(p -> p.getAmount().compareTo(BigDecimal.ZERO) < 0);
         }
-        if (filters.get("year") != null) {
-            allPredicates.add(p -> p.getTransactionYear() == Integer.parseInt(filters.get("year").toString()));
-        }
-        if (filters.get("month") != null) {
-            allPredicates.add(p -> p.getTransactionMonth() == Integer.parseInt(filters.get("month").toString()));
-        }
         if (filters.get("dateFrom") != null && !filters.get("dateFrom").toString().isEmpty()) {
             LocalDate dateFrom = LocalDate.parse(filters.get("dateFrom").toString());
             allPredicates.add(p -> !p.getTransactionDate().isBefore(dateFrom));

@@ -94,8 +94,8 @@ class ExpenseServiceTest {
         List<ExpenseDTO> result = expenseService.findAll(Map.of(
                 "onlyEmptyCategories", true,
                 "onlyExpenses", true,
-                "year", 2023,
-                "month", 1,
+                "dateFrom", "2023-01-01",
+                "dateTo", "2023-01-31",
                 "title", "test",
                 "payee", "test_user"));
 
