@@ -15,8 +15,8 @@ const MonthlyView = () => {
     async function loadTransactions() {
         const response = await fetch("/budget/expenses/currentMonth");
         const data = await response.json();
-        // Sort by date (oldest first)
-        const sorted = data.sort((a, b) => a.transactionDate.localeCompare(b.transactionDate));
+        // Sort by date (oldest first) - create copy to avoid mutation
+        const sorted = [...data].sort((a, b) => a.transactionDate.localeCompare(b.transactionDate));
         setTransactions(sorted);
     }
 
@@ -24,25 +24,15 @@ const MonthlyView = () => {
     const expenses = transactions.filter(t => t.amount < 0);
     const incomes = transactions.filter(t => t.amount >= 0);
 
-    // Calculate daily sums for expenses
-    const dailyExpenseSums = expenses.reduce((acc, transaction) => {
+    // Helper function to calculate daily sums
+    const calculateDailySums = (transactions) => transactions.reduce((acc, transaction) => {
         const date = transaction.transactionDate;
-        if (!acc[date]) {
-            acc[date] = 0;
-        }
-        acc[date] += transaction.amount;
+        acc[date] = (acc[date] || 0) + transaction.amount;
         return acc;
     }, {});
 
-    // Calculate daily sums for incomes
-    const dailyIncomeSums = incomes.reduce((acc, transaction) => {
-        const date = transaction.transactionDate;
-        if (!acc[date]) {
-            acc[date] = 0;
-        }
-        acc[date] += transaction.amount;
-        return acc;
-    }, {});
+    const dailyExpenseSums = calculateDailySums(expenses);
+    const dailyIncomeSums = calculateDailySums(incomes);
 
     const sortedExpenseDays = Object.keys(dailyExpenseSums).sort((a, b) => a.localeCompare(b));
     const sortedIncomeDays = Object.keys(dailyIncomeSums).sort((a, b) => a.localeCompare(b));
