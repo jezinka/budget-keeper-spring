@@ -52,10 +52,10 @@ const AllTransactions = () => {
         <Col sm={1}>
             <TransactionCounter transactionCounter={transactionCounter}/>
         </Col>
-        <Col sm={8}>
+        <Col sm={10}>
             <Form className="px-4">
                 <Row sm={4}>
-                    <Col sm={4}>
+                    <Col sm={3}>
                         <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
                                     type="switch"
                                     id="onlyEmptyCategories"
@@ -66,25 +66,21 @@ const AllTransactions = () => {
                                     label="Only expenses"
                                     value={filterFormState.onlyExpenses}/>
                     </Col>
-                    <Col sm={3}>
+                    <Col sm={2}>
                         <Form.Control size={"sm"} placeholder="Co:" type="text" onChange={handleFilterChange}
                                       name="title" value={filterFormState.title}/>
                     </Col>
-                    <Col sm={3}>
+                    <Col sm={2}>
                         <Form.Control size={"sm"} placeholder="Kto:" type="text" onChange={handleFilterChange}
                                       name="payee" value={filterFormState.payee}/>
                     </Col>
-                </Row>
-                <Row sm={4} className="mt-2">
-                    <Col sm={3}>
-                        <Form.Label className="text-muted small">Data od:</Form.Label>
+                    <Col sm={2}>
                         <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateFrom" value={filterFormState.dateFrom}/>
+                                      name="dateFrom" value={filterFormState.dateFrom} placeholder="Data od"/>
                     </Col>
-                    <Col sm={3}>
-                        <Form.Label className="text-muted small">Data do:</Form.Label>
+                    <Col sm={2}>
                         <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateTo" value={filterFormState.dateTo}/>
+                                      name="dateTo" value={filterFormState.dateTo} placeholder="Data do"/>
                     </Col>
                 </Row>
             </Form>
