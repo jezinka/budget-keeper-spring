@@ -21,12 +21,12 @@ export default function TransactionTableReadOnly(props) {
     const showSumRow = props.transactions.length > 1;
     
     return (
-        <Table responsive='sm' striped bordered size="sm" style={{tableLayout: 'fixed'}}>
+        <Table responsive='sm' striped bordered size="sm" style={{width: 'auto', maxWidth: '100%'}}>
             <thead>
             <tr className='table-info'>
-                <th style={{width: '60%'}}>OPIS</th>
-                <th style={{width: '20%'}}>ILE</th>
-                <th style={{width: '20%'}}>KATEGORIA</th>
+                <th>OPIS</th>
+                <th style={{width: '120px', textAlign: 'right'}}>ILE</th>
+                <th style={{width: '150px'}}>KATEGORIA</th>
             </tr>
             </thead>
             <tbody>

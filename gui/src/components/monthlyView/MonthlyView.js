@@ -31,11 +31,11 @@ const MonthlyView = () => {
     const sortedDays = Object.keys(transactionsByDay).sort((a, b) => a.localeCompare(b));
 
     let body = <>
-        <Col sm={12}>
+        <Col sm={10}>
             <h2>Wydatki i wpływy za obecny miesiąc</h2>
             {sortedDays.map(day => (
                 <div key={day}>
-                    <h5 className="mt-3 mb-2">{day}</h5>
+                    <h6 className="mt-2 mb-1" style={{fontWeight: 'bold'}}>{day}</h6>
                     <TransactionTableReadOnly transactions={transactionsByDay[day]} />
                 </div>
             ))}
