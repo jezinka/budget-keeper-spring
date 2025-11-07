@@ -96,8 +96,7 @@ class ExpenseServiceTest {
                 "onlyExpenses", true,
                 "dateFrom", "2023-01-01",
                 "dateTo", "2023-01-31",
-                "title", "test",
-                "payee", "test_user"));
+                "description", "test"));
 
         assertEquals(1, result.size());
     }
@@ -243,5 +242,65 @@ class ExpenseServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(BigDecimal.valueOf(-120), result.get(0).getAmount());
+    }
+
+    @Test
+    void findAll_withDescriptionFilter() {
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setTitle("grocery shopping");
+        a.setCategory(new Category("TestA"));
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setPayee("restaurant xyz");
+        b.setCategory(new Category("TestB"));
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-80));
+        c.setNote("shopping for clothes");
+        c.setCategory(new Category("TestC"));
+
+        Expense d = new Expense();
+        d.setAmount(BigDecimal.valueOf(-30));
+        d.setTitle("books");
+        d.setCategory(new Category("TestD"));
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c, d))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "description", "shop"));
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findAll_withAmountFilter() {
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setCategory(new Category("TestA"));
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setCategory(new Category("TestB"));
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-120));
+        c.setCategory(new Category("TestC"));
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "amount", "-120"));
+
+        assertEquals(2, result.size());
     }
 }

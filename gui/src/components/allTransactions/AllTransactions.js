@@ -10,7 +10,7 @@ const AllTransactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
     const [filterFormState, setFilterFormState] = useState({
-        onlyEmptyCategories: false, onlyExpenses: false, title: "", payee: "", dateFrom: "", dateTo: ""
+        onlyEmptyCategories: false, onlyExpenses: false, description: "", amount: "", dateFrom: "", dateTo: ""
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -67,12 +67,12 @@ const AllTransactions = () => {
                                     value={filterFormState.onlyExpenses}/>
                     </Col>
                     <Col sm={2}>
-                        <Form.Control size={"sm"} placeholder="Co:" type="text" onChange={handleFilterChange}
-                                      name="title" value={filterFormState.title}/>
+                        <Form.Control size={"sm"} placeholder="Opis:" type="text" onChange={handleFilterChange}
+                                      name="description" value={filterFormState.description}/>
                     </Col>
                     <Col sm={2}>
-                        <Form.Control size={"sm"} placeholder="Kto:" type="text" onChange={handleFilterChange}
-                                      name="payee" value={filterFormState.payee}/>
+                        <Form.Control size={"sm"} placeholder="Kwota:" type="number" step="0.01" onChange={handleFilterChange}
+                                      name="amount" value={filterFormState.amount}/>
                     </Col>
                     <Col sm={2}>
                         <Form.Control size={"sm"} type="date" onChange={handleFilterChange}

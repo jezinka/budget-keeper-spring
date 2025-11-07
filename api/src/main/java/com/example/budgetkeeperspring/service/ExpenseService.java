@@ -121,11 +121,22 @@ public class ExpenseService {
         if (filters.get(CATEGORY) != null) {
             allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
         }
-        if (!filters.getOrDefault("title", "").equals("")) {
-            allPredicates.add(p -> p.getTitle().toLowerCase().contains(filters.get("title").toString().toLowerCase()));
+        if (!filters.getOrDefault("description", "").equals("")) {
+            String searchTerm = filters.get("description").toString().toLowerCase();
+            allPredicates.add(p -> {
+                boolean matchesTitle = p.getTitle() != null && p.getTitle().toLowerCase().contains(searchTerm);
+                boolean matchesPayee = p.getPayee() != null && p.getPayee().toLowerCase().contains(searchTerm);
+                boolean matchesNote = p.getNote() != null && p.getNote().toLowerCase().contains(searchTerm);
+                return matchesTitle || matchesPayee || matchesNote;
+            });
         }
-        if (!filters.getOrDefault("payee", "").equals("")) {
-            allPredicates.add(p -> p.getPayee().toLowerCase().contains(filters.get("payee").toString().toLowerCase()));
+        if (!filters.getOrDefault("amount", "").equals("")) {
+            try {
+                BigDecimal filterAmount = new BigDecimal(filters.get("amount").toString());
+                allPredicates.add(p -> p.getAmount().compareTo(filterAmount) == 0);
+            } catch (NumberFormatException e) {
+                // If the amount filter is not a valid number, ignore it
+            }
         }
 
         if (allPredicates.isEmpty()) {
