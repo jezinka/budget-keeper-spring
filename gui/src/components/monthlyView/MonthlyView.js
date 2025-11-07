@@ -27,8 +27,8 @@ const MonthlyView = () => {
         setTransactionsByDay(grouped);
     }
 
-    // Sort days in descending order (newest first)
-    const sortedDays = Object.keys(transactionsByDay).sort((a, b) => b.localeCompare(a));
+    // Sort days in ascending order (oldest first)
+    const sortedDays = Object.keys(transactionsByDay).sort((a, b) => a.localeCompare(b));
 
     let body = <>
         <Col sm={12}>
