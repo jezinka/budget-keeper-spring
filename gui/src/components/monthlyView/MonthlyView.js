@@ -37,6 +37,10 @@ const MonthlyView = () => {
     const sortedExpenseDays = Object.keys(dailyExpenseSums).sort((a, b) => a.localeCompare(b));
     const sortedIncomeDays = Object.keys(dailyIncomeSums).sort((a, b) => a.localeCompare(b));
 
+    // Calculate total sums
+    const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
+    const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
+
     let body = <>
         <Col sm={12}>
             <h2>Wydatki i wpływy za obecny miesiąc</h2>
@@ -62,6 +66,10 @@ const MonthlyView = () => {
                                 <td style={{textAlign: 'right'}}>{formatNumber(dailyExpenseSums[day])}</td>
                             </tr>
                         ))}
+                        <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
+                            <td>Razem</td>
+                            <td style={{textAlign: 'right'}}>{formatNumber(totalExpenses)}</td>
+                        </tr>
                         </tbody>
                     </Table>
                 </Col>
@@ -88,6 +96,10 @@ const MonthlyView = () => {
                                 <td style={{textAlign: 'right'}}>{formatNumber(dailyIncomeSums[day])}</td>
                             </tr>
                         ))}
+                        <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
+                            <td>Razem</td>
+                            <td style={{textAlign: 'right'}}>{formatNumber(totalIncomes)}</td>
+                        </tr>
                         </tbody>
                     </Table>
                 </Col>
