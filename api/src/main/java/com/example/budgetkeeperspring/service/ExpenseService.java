@@ -110,20 +110,33 @@ public class ExpenseService {
         if (filters.getOrDefault("onlyExpenses", false).equals(true)) {
             allPredicates.add(p -> p.getAmount().compareTo(BigDecimal.ZERO) < 0);
         }
-        if (filters.get("year") != null) {
-            allPredicates.add(p -> p.getTransactionYear() == Integer.parseInt(filters.get("year").toString()));
+        if (filters.get("dateFrom") != null && !filters.get("dateFrom").toString().isEmpty()) {
+            LocalDate dateFrom = LocalDate.parse(filters.get("dateFrom").toString());
+            allPredicates.add(p -> !p.getTransactionDate().isBefore(dateFrom));
         }
-        if (filters.get("month") != null) {
-            allPredicates.add(p -> p.getTransactionMonth() == Integer.parseInt(filters.get("month").toString()));
+        if (filters.get("dateTo") != null && !filters.get("dateTo").toString().isEmpty()) {
+            LocalDate dateTo = LocalDate.parse(filters.get("dateTo").toString());
+            allPredicates.add(p -> !p.getTransactionDate().isAfter(dateTo));
         }
         if (filters.get(CATEGORY) != null) {
             allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
         }
-        if (!filters.getOrDefault("title", "").equals("")) {
-            allPredicates.add(p -> p.getTitle().toLowerCase().contains(filters.get("title").toString().toLowerCase()));
+        if (!filters.getOrDefault("description", "").equals("")) {
+            String searchTerm = filters.get("description").toString().toLowerCase();
+            allPredicates.add(p -> {
+                boolean matchesTitle = p.getTitle() != null && p.getTitle().toLowerCase().contains(searchTerm);
+                boolean matchesPayee = p.getPayee() != null && p.getPayee().toLowerCase().contains(searchTerm);
+                boolean matchesNote = p.getNote() != null && p.getNote().toLowerCase().contains(searchTerm);
+                return matchesTitle || matchesPayee || matchesNote;
+            });
         }
-        if (!filters.getOrDefault("payee", "").equals("")) {
-            allPredicates.add(p -> p.getPayee().toLowerCase().contains(filters.get("payee").toString().toLowerCase()));
+        if (!filters.getOrDefault("amount", "").equals("")) {
+            try {
+                BigDecimal filterAmount = new BigDecimal(filters.get("amount").toString());
+                allPredicates.add(p -> p.getAmount().compareTo(filterAmount) == 0);
+            } catch (NumberFormatException e) {
+                // If the amount filter is not a valid number, ignore it
+            }
         }
 
         if (allPredicates.isEmpty()) {

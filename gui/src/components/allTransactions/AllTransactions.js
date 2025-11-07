@@ -10,7 +10,7 @@ const AllTransactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
     const [filterFormState, setFilterFormState] = useState({
-        onlyEmptyCategories: false, onlyExpenses: false, title: "", payee: ""
+        onlyEmptyCategories: false, onlyExpenses: false, description: "", amount: "", dateFrom: "", dateTo: ""
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -52,27 +52,39 @@ const AllTransactions = () => {
         <Col sm={1}>
             <TransactionCounter transactionCounter={transactionCounter}/>
         </Col>
-        <Col sm={8}>
+        <Col sm={10}>
             <Form className="px-4">
                 <Row sm={4}>
-                    <Col sm={4}>
-                        <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
+                    <Col sm={3}>
+                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
                                     type="switch"
                                     id="onlyEmptyCategories"
                                     label="Only empty categories" value={filterFormState.onlyEmptyCategories}/>
 
-                        <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
+                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
                                     id="onlyExpenses"
                                     label="Only expenses"
                                     value={filterFormState.onlyExpenses}/>
                     </Col>
-                    <Col sm={3}>
-                        <Form.Control size={"sm"} placeholder="Co:" type="text" onChange={handleFilterChange}
-                                      name="title" value={filterFormState.title}/>
+                    <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Opis:</Form.Label>
+                        <Form.Control size={"sm"} placeholder="Opis:" type="text" onChange={handleFilterChange}
+                                      name="description" value={filterFormState.description}/>
                     </Col>
-                    <Col sm={3}>
-                        <Form.Control size={"sm"} placeholder="Kto:" type="text" onChange={handleFilterChange}
-                                      name="payee" value={filterFormState.payee}/>
+                    <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Kwota:</Form.Label>
+                        <Form.Control size={"sm"} placeholder="Kwota:" type="number" step="0.01" onChange={handleFilterChange}
+                                      name="amount" value={filterFormState.amount}/>
+                    </Col>
+                    <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Data od:</Form.Label>
+                        <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
+                                      name="dateFrom" value={filterFormState.dateFrom}/>
+                    </Col>
+                    <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Data do:</Form.Label>
+                        <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
+                                      name="dateTo" value={filterFormState.dateTo}/>
                     </Col>
                 </Row>
             </Form>

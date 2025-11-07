@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Gradle ###
+.gradle/
+**/build/
+!src/**/build/
+
+### Node ###
+node_modules/
+npm-debug.log
+yarn-error.log
+gui/dist/
+gui/.gradle/
+gui/package-lock.json
+
+### Generated sources ###
+**/src/main/generated/
+
+### Static resources ###
+api/src/main/resources/static/
