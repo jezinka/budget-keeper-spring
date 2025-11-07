@@ -61,21 +61,29 @@ class ExpenseServiceTest {
     @Test
     void findAll_withFilters() {
 
+        Category unknownCategory = Category.builder()
+                .id(CategoryService.UNKNOWN_CATEGORY)
+                .name("Unknown")
+                .build();
+
         Expense a = new Expense();
         a.setAmount(BigDecimal.valueOf(-50));
-        a.setCategory(new Category("TestA"));
+        a.setCategory(Category.builder().id(1L).name("TestA").build());
 
         Expense b = new Expense();
         b.setAmount(BigDecimal.valueOf(-120));
         b.setTransactionDate(LocalDate.of(2023, 1, 14));
         b.setTitle("test");
         b.setPayee("test_user");
+        b.setCategory(unknownCategory);
 
         Expense c = new Expense();
         c.setAmount(BigDecimal.valueOf(120));
+        c.setCategory(Category.builder().id(2L).name("TestC").build());
 
         Expense d = new Expense();
         d.setAmount(BigDecimal.valueOf(-120));
+        d.setCategory(Category.builder().id(3L).name("TestD").build());
 
         when(expenseRepository
                 .findAllByOrderByTransactionDateDesc())
