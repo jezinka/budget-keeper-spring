@@ -56,12 +56,12 @@ const AllTransactions = () => {
             <Form className="px-4">
                 <Row sm={4}>
                     <Col sm={3}>
-                        <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
+                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
                                     type="switch"
                                     id="onlyEmptyCategories"
                                     label="Only empty categories" value={filterFormState.onlyEmptyCategories}/>
 
-                        <Form.Check inline onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
+                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
                                     id="onlyExpenses"
                                     label="Only expenses"
                                     value={filterFormState.onlyExpenses}/>
@@ -75,12 +75,14 @@ const AllTransactions = () => {
                                       name="amount" value={filterFormState.amount}/>
                     </Col>
                     <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Data od:</Form.Label>
                         <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateFrom" value={filterFormState.dateFrom} placeholder="Data od"/>
+                                      name="dateFrom" value={filterFormState.dateFrom}/>
                     </Col>
                     <Col sm={2}>
+                        <Form.Label className="text-muted small mb-0">Data do:</Form.Label>
                         <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateTo" value={filterFormState.dateTo} placeholder="Data do"/>
+                                      name="dateTo" value={filterFormState.dateTo}/>
                     </Col>
                 </Row>
             </Form>
