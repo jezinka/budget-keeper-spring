@@ -11,6 +11,7 @@ import AllTransactions from "./components/allTransactions/AllTransactions";
 import LogsView from "./components/logs/LogsView";
 import LifestyleInflation from "./components/lifestyleInflation/LifestyleInflation";
 import Budget from "./components/plan/Budget";
+import MonthlyView from "./components/monthlyView/MonthlyView";
 
 const App = () => {
     return (
@@ -20,6 +21,7 @@ const App = () => {
                     <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
+                    <Route path="/gui/monthlyView" element={<MonthlyView/>}/>
                     <Route path="/gui/plan" element={<Budget/>}/>
                     <Route path="/gui/lifestyleInflation" element={<LifestyleInflation/>}/>
                     <Route path="/gui/logs" element={<LogsView/>}/>

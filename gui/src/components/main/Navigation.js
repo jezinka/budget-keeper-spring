@@ -8,6 +8,7 @@ const Navigation = () => {
              className="flex-column">
             <Container fluid className="mt-2">
                 <Nav.Link href="/budget">Miesiąc</Nav.Link>
+                <Nav.Link href="/budget/gui/monthlyView">Widok miesięczny</Nav.Link>
                 <Nav.Link href="/budget/gui/yearAtTheGlance">Cały rok</Nav.Link>
                 <Nav.Link href="/budget/gui/plan">Plan</Nav.Link>
                 <Nav.Link href="/budget/gui/lifestyleInflation">Inflacja Życia</Nav.Link>
