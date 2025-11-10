@@ -17,6 +17,8 @@ import java.util.List;
 
 import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
 import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfSelectedMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfSelectedMonth;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,6 +37,13 @@ public class ExpenseController {
     List<ExpenseDTO> getCurrentMonth() {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
+        return expenseService.findAllByTransactionDateBetween(begin, end);
+    }
+
+    @GetMapping("/selectedMonth")
+    List<ExpenseDTO> getSelectedMonth(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+        LocalDate begin = getBeginOfSelectedMonth(year, month);
+        LocalDate end = getEndOfSelectedMonth(year, month);
         return expenseService.findAllByTransactionDateBetween(begin, end);
     }
 

@@ -78,6 +78,20 @@ class ExpenseControllerTestIT {
     }
 
     @Test
+    void selectedMonth_test() {
+        expenseRepository.save(Expense.builder()
+                .amount(BigDecimal.TEN)
+                .title("test_title")
+                .transactionDate(LocalDate.of(2024, 5, 15))
+                .deleted(false)
+                .build());
+
+        List<ExpenseDTO> dtos = expenseController.getSelectedMonth(2024, 5);
+        assertThat(dtos).hasSize(1);
+        assertThat(dtos.get(0).getTransactionDate()).isEqualTo("2024-05-15");
+    }
+
+    @Test
     void testGetById() {
         saveExpense();
 
