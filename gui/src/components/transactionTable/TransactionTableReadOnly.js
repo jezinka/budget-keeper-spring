@@ -2,9 +2,14 @@ import Table from 'react-bootstrap/Table';
 import React from "react";
 import {formatNumber, UNKNOWN_CATEGORY} from "../../Utils";
 
-const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex}) => {
-    // Alternate background color per day
-    const backgroundColor = dayIndex % 2 === 0 ? '#ffffff' : '#f8f9fa';
+const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex, getRowColor}) => {
+    // Use custom color function if provided, otherwise alternate background color per day
+    let backgroundColor;
+    if (getRowColor) {
+        backgroundColor = getRowColor(transaction.categoryLevel, transaction.categoryName);
+    } else {
+        backgroundColor = dayIndex % 2 === 0 ? '#ffffff' : '#f8f9fa';
+    }
     
     return (
         <tr style={{
@@ -21,6 +26,7 @@ const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex})
 
 export default function TransactionTableReadOnly(props) {
     const showDate = props.showDate || false;
+    const getRowColor = props.getRowColor || null;
     
     // Track day changes for visual separation
     let previousDate = null;
@@ -54,6 +60,7 @@ export default function TransactionTableReadOnly(props) {
                         showDate={showDate}
                         isFirstOfDay={isFirstOfDay}
                         dayIndex={dayIndex}
+                        getRowColor={getRowColor}
                     />
                 );
             })}

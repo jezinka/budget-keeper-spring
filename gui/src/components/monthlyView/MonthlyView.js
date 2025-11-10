@@ -36,10 +36,10 @@ const MonthlyView = () => {
         return levelInfo ? levelInfo.name : "Nieznane";
     };
 
-    // Helper function to get background color based on category level and names
-    const getBackgroundColor = (level, categoryNames) => {
+    // Helper function to get background color for transaction rows based on category level and names
+    const getRowBackgroundColor = (level, categoryName) => {
         // Special case for "hazard" category
-        if (categoryNames && categoryNames.some(name => name && name.toLowerCase() === "hazard")) {
+        if (categoryName && categoryName.toLowerCase() === "hazard") {
             return "#ffcccc"; // light red
         }
         
@@ -54,7 +54,6 @@ const MonthlyView = () => {
             case "inwestycje":
                 return "#e4d9f3"; // subtle purple
             case "wpływy":
-            case "kredyt":
                 return "#ffeaa7"; // subtle gold
             default:
                 return "transparent";
@@ -74,7 +73,6 @@ const MonthlyView = () => {
             case "inwestycje":
                 return "#9b59b6"; // purple
             case "wpływy":
-            case "kredyt":
                 return "#f39c12"; // gold
             default:
                 return "#6c757d"; // gray
@@ -85,7 +83,20 @@ const MonthlyView = () => {
     const expenses = transactions.filter(t => t.amount < 0);
     const incomes = transactions.filter(t => t.amount >= 0);
 
-    // Helper function to calculate sums by category level
+    // Helper function to calculate daily sums (for summary table)
+    const calculateDailySums = (transactions) => transactions.reduce((acc, transaction) => {
+        const date = transaction.transactionDate;
+        acc[date] = (acc[date] || 0) + transaction.amount;
+        return acc;
+    }, {});
+
+    const dailyExpenseSums = calculateDailySums(expenses);
+    const dailyIncomeSums = calculateDailySums(incomes);
+
+    const sortedExpenseDays = Object.keys(dailyExpenseSums).sort((a, b) => a.localeCompare(b));
+    const sortedIncomeDays = Object.keys(dailyIncomeSums).sort((a, b) => a.localeCompare(b));
+
+    // Helper function to calculate sums by category level (for pie chart)
     const calculateCategoryLevelSums = (transactions) => {
         return transactions.reduce((acc, transaction) => {
             const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined 
@@ -96,27 +107,18 @@ const MonthlyView = () => {
             if (!acc[level]) {
                 acc[level] = {
                     sum: 0,
-                    levelName: levelName,
-                    categoryNames: []
+                    levelName: levelName
                 };
             }
             acc[level].sum += Math.abs(transaction.amount);
-            // Track all category names for this level
-            if (transaction.categoryName && !acc[level].categoryNames.includes(transaction.categoryName)) {
-                acc[level].categoryNames.push(transaction.categoryName);
-            }
             return acc;
         }, {});
     };
 
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
-    const categoryLevelIncomeSums = calculateCategoryLevelSums(incomes);
 
     // Sort by level
     const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
-        .map(k => parseInt(k))
-        .sort((a, b) => a - b);
-    const sortedIncomeLevels = Object.keys(categoryLevelIncomeSums)
         .map(k => parseInt(k))
         .sort((a, b) => a - b);
 
@@ -138,27 +140,24 @@ const MonthlyView = () => {
             <Row className="mt-3">
                 <Col sm={8}>
                     <h4>Wydatki</h4>
-                    <TransactionTableReadOnly transactions={expenses} showDate={true} />
+                    <TransactionTableReadOnly transactions={expenses} showDate={true} getRowColor={getRowBackgroundColor} />
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wydatków</h4>
-                    <Table responsive='sm' bordered size="sm">
+                    <Table responsive='sm' striped bordered size="sm">
                         <thead>
                         <tr className='table-info'>
-                            <th>Kategoria</th>
+                            <th>Dzień</th>
                             <th style={{textAlign: 'right'}}>Suma</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {sortedExpenseLevels.map(level => {
-                            const levelData = categoryLevelExpenseSums[level];
-                            return (
-                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryNames)}}>
-                                    <td>{levelData.levelName}</td>
-                                    <td style={{textAlign: 'right'}}>{formatNumber(-levelData.sum)}</td>
-                                </tr>
-                            );
-                        })}
+                        {sortedExpenseDays.map(day => (
+                            <tr key={day}>
+                                <td>{day}</td>
+                                <td style={{textAlign: 'right'}}>{formatNumber(dailyExpenseSums[day])}</td>
+                            </tr>
+                        ))}
                         <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
                             <td>Razem</td>
                             <td style={{textAlign: 'right'}}>{formatNumber(totalExpenses)}</td>
@@ -197,27 +196,24 @@ const MonthlyView = () => {
             <Row className="mt-4">
                 <Col sm={8}>
                     <h4>Wpływy</h4>
-                    <TransactionTableReadOnly transactions={incomes} showDate={true} />
+                    <TransactionTableReadOnly transactions={incomes} showDate={true} getRowColor={getRowBackgroundColor} />
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wpływów</h4>
-                    <Table responsive='sm' bordered size="sm">
+                    <Table responsive='sm' striped bordered size="sm">
                         <thead>
                         <tr className='table-info'>
-                            <th>Kategoria</th>
+                            <th>Dzień</th>
                             <th style={{textAlign: 'right'}}>Suma</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {sortedIncomeLevels.map(level => {
-                            const levelData = categoryLevelIncomeSums[level];
-                            return (
-                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryNames)}}>
-                                    <td>{levelData.levelName}</td>
-                                    <td style={{textAlign: 'right'}}>{formatNumber(levelData.sum)}</td>
-                                </tr>
-                            );
-                        })}
+                        {sortedIncomeDays.map(day => (
+                            <tr key={day}>
+                                <td>{day}</td>
+                                <td style={{textAlign: 'right'}}>{formatNumber(dailyIncomeSums[day])}</td>
+                            </tr>
+                        ))}
                         <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
                             <td>Razem</td>
                             <td style={{textAlign: 'right'}}>{formatNumber(totalIncomes)}</td>
