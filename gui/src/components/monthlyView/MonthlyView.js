@@ -36,47 +36,40 @@ const MonthlyView = () => {
         return levelInfo ? levelInfo.name : "Nieznane";
     };
 
-    // Helper function to get background color for transaction rows based on category level and names
+    // Color configuration for category levels
+    const categoryLevelColors = {
+        "podstawa": { background: "#d4edda", chart: "#28a745" }, // green
+        "dostatek": { background: "#fff3cd", chart: "#ffc107" }, // yellow
+        "ponad": { background: "#ffe4cc", chart: "#fd7e14" }, // orange
+        "inwestycje": { background: "#e4d9f3", chart: "#9b59b6" }, // purple
+        "wpływy": { background: "#ffeaa7", chart: "#f39c12" } // gold
+    };
+
+    // Helper function to get color for a category level
+    const getColorForLevel = (level, type = 'background') => {
+        const levelName = getCategoryLevelName(level);
+        const colors = categoryLevelColors[levelName.toLowerCase()];
+        
+        if (colors) {
+            return colors[type];
+        }
+        
+        return type === 'background' ? 'transparent' : '#6c757d'; // default: transparent bg or gray chart
+    };
+
+    // Helper function to get background color for transaction rows
     const getRowBackgroundColor = (level, categoryName) => {
         // Special case for "hazard" category
         if (categoryName && categoryName.toLowerCase() === "hazard") {
             return "#ffcccc"; // light red
         }
         
-        const levelName = getCategoryLevelName(level);
-        switch(levelName.toLowerCase()) {
-            case "podstawa":
-                return "#d4edda"; // subtle green
-            case "dostatek":
-                return "#fff3cd"; // subtle yellow
-            case "ponad":
-                return "#ffe4cc"; // subtle orange
-            case "inwestycje":
-                return "#e4d9f3"; // subtle purple
-            case "wpływy":
-                return "#ffeaa7"; // subtle gold
-            default:
-                return "transparent";
-        }
+        return getColorForLevel(level, 'background');
     };
 
     // Helper function to get chart color based on category level
     const getChartColor = (level) => {
-        const levelName = getCategoryLevelName(level);
-        switch(levelName.toLowerCase()) {
-            case "podstawa":
-                return "#28a745"; // green
-            case "dostatek":
-                return "#ffc107"; // yellow
-            case "ponad":
-                return "#fd7e14"; // orange
-            case "inwestycje":
-                return "#9b59b6"; // purple
-            case "wpływy":
-                return "#f39c12"; // gold
-            default:
-                return "#6c757d"; // gray
-        }
+        return getColorForLevel(level, 'chart');
     };
 
     // Separate expenses and incomes
