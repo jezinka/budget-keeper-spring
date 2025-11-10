@@ -36,10 +36,10 @@ const MonthlyView = () => {
         return levelInfo ? levelInfo.name : "Nieznane";
     };
 
-    // Helper function to get background color based on category level and name
-    const getBackgroundColor = (level, categoryName) => {
+    // Helper function to get background color based on category level and names
+    const getBackgroundColor = (level, categoryNames) => {
         // Special case for "hazard" category
-        if (categoryName && categoryName.toLowerCase() === "hazard") {
+        if (categoryNames && categoryNames.some(name => name && name.toLowerCase() === "hazard")) {
             return "#ffcccc"; // light red
         }
         
@@ -97,10 +97,14 @@ const MonthlyView = () => {
                 acc[level] = {
                     sum: 0,
                     levelName: levelName,
-                    categoryName: transaction.categoryName
+                    categoryNames: []
                 };
             }
             acc[level].sum += Math.abs(transaction.amount);
+            // Track all category names for this level
+            if (transaction.categoryName && !acc[level].categoryNames.includes(transaction.categoryName)) {
+                acc[level].categoryNames.push(transaction.categoryName);
+            }
             return acc;
         }, {});
     };
@@ -149,7 +153,7 @@ const MonthlyView = () => {
                         {sortedExpenseLevels.map(level => {
                             const levelData = categoryLevelExpenseSums[level];
                             return (
-                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryName)}}>
+                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryNames)}}>
                                     <td>{levelData.levelName}</td>
                                     <td style={{textAlign: 'right'}}>{formatNumber(-levelData.sum)}</td>
                                 </tr>
@@ -208,7 +212,7 @@ const MonthlyView = () => {
                         {sortedIncomeLevels.map(level => {
                             const levelData = categoryLevelIncomeSums[level];
                             return (
-                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryName)}}>
+                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryNames)}}>
                                     <td>{levelData.levelName}</td>
                                     <td style={{textAlign: 'right'}}>{formatNumber(levelData.sum)}</td>
                                 </tr>
