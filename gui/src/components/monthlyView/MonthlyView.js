@@ -4,7 +4,7 @@ import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
 import {formatNumber, getMonthName} from "../../Utils";
-import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from "recharts";
+import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid} from "recharts";
 import MonthYearFilter from "./MonthYearFilter";
 
 const MonthlyView = () => {
@@ -134,17 +134,32 @@ const MonthlyView = () => {
         level: level
     }));
 
-    const incomePieData = sortedIncomeLevels.map(level => ({
-        name: categoryLevelIncomeSums[level].levelName,
-        value: categoryLevelIncomeSums[level].sum,
-        level: level
+    // Prepare data for top expenses pie chart (per transaction)
+    const topExpenses = [...expenses]
+        .sort((a, b) => a.amount - b.amount) // Most negative first
+        .slice(0, 10)
+        .map(t => ({
+            name: t.description.substring(0, 30) + (t.description.length > 30 ? '...' : ''),
+            value: Math.abs(t.amount),
+            fullDescription: t.description
+        }));
+
+    // Prepare data for daily expenses bar chart
+    const getDayOfWeek = (dateString) => {
+        const days = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
+        const date = new Date(dateString);
+        return days[date.getDay()];
+    };
+
+    const dailyExpensesChartData = sortedExpenseDays.map(day => ({
+        date: day,
+        dayOfWeek: getDayOfWeek(day),
+        amount: Math.abs(dailyExpenseSums[day]),
+        label: `${day.substring(5)} (${getDayOfWeek(day)})`
     }));
 
-    // Prepare data for income vs expense comparison pie chart
-    const comparisonPieData = [
-        { name: 'Wpływy', value: Math.abs(totalIncomes), color: '#28a745' },
-        { name: 'Wydatki', value: Math.abs(totalExpenses), color: '#dc3545' }
-    ];
+    const maxDailyExpense = Math.max(...dailyExpensesChartData.map(d => d.amount));
+    const minDailyExpense = Math.min(...dailyExpensesChartData.map(d => d.amount));
 
     let body = <>
         <Col sm={12}>
@@ -190,7 +205,7 @@ const MonthlyView = () => {
             <Row className="mt-4">
                 {expensePieData.length > 0 && (
                     <Col sm={4}>
-                        <h4>Wykres wydatków</h4>
+                        <h4>Wydatki wg poziomów</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -213,13 +228,13 @@ const MonthlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
-                {incomePieData.length > 0 && (
+                {topExpenses.length > 0 && (
                     <Col sm={4}>
-                        <h4>Wykres wpływów</h4>
+                        <h4>Największe wydatki</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
-                                    data={incomePieData}
+                                    data={topExpenses}
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
@@ -228,38 +243,51 @@ const MonthlyView = () => {
                                     fill="#8884d8"
                                     dataKey="value"
                                 >
-                                    {incomePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getChartColor(entry.level)} />
+                                    {topExpenses.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value) => formatNumber(value)} />
+                                <Tooltip 
+                                    formatter={(value) => formatNumber(-value)}
+                                    labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
+                                />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
                     </Col>
                 )}
-                {comparisonPieData.length > 0 && (
+                {dailyExpensesChartData.length > 0 && (
                     <Col sm={4}>
-                        <h4>Porównanie wpływy vs wydatki</h4>
+                        <h4>Wydatki dzienne</h4>
                         <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={comparisonPieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                >
-                                    {comparisonPieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                            <BarChart data={dailyExpensesChartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis 
+                                    dataKey="dayOfWeek" 
+                                    tick={{fontSize: 12}}
+                                />
+                                <YAxis 
+                                    tick={{fontSize: 10}}
+                                    tickFormatter={(value) => formatNumber(-value)}
+                                />
+                                <Tooltip 
+                                    formatter={(value) => formatNumber(-value)}
+                                    labelFormatter={(label, payload) => payload[0]?.payload?.label || label}
+                                />
+                                <Bar dataKey="amount">
+                                    {dailyExpensesChartData.map((entry, index) => (
+                                        <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={
+                                                entry.amount === maxDailyExpense ? '#dc3545' : 
+                                                entry.amount === minDailyExpense ? '#28a745' : 
+                                                entry.dayOfWeek === 'So' || entry.dayOfWeek === 'Nd' ? '#ffc107' :
+                                                '#6c757d'
+                                            }
+                                        />
                                     ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => formatNumber(value)} />
-                                <Legend />
-                            </PieChart>
+                                </Bar>
+                            </BarChart>
                         </ResponsiveContainer>
                     </Col>
                 )}
