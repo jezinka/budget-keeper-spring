@@ -130,36 +130,14 @@ const MonthlyView = () => {
     }));
 
     // Prepare data for top expenses pie chart (per transaction)
-    const allExpensesSorted = [...expenses]
+    const topExpenses = [...expenses]
         .sort((a, b) => a.amount - b.amount) // Most negative first
+        .slice(0, 10) // Top 10 expenses
         .map(t => ({
             name: t.description.substring(0, 30) + (t.description.length > 30 ? '...' : ''),
             value: Math.abs(t.amount),
             fullDescription: t.description
         }));
-    
-    const totalExpensesValue = allExpensesSorted.reduce((sum, e) => sum + e.value, 0);
-    const threshold = totalExpensesValue * 0.04; // 4% threshold
-    
-    const significantExpenses = [];
-    let otherExpensesValue = 0;
-    
-    allExpensesSorted.forEach(expense => {
-        if (expense.value >= threshold) {
-            significantExpenses.push(expense);
-        } else {
-            otherExpensesValue += expense.value;
-        }
-    });
-    
-    const topExpenses = significantExpenses;
-    if (otherExpensesValue > 0) {
-        topExpenses.push({
-            name: 'Inne',
-            value: otherExpensesValue,
-            fullDescription: 'Inne wydatki (< 4%)'
-        });
-    }
 
     // Prepare data for daily expenses bar chart
     const getDayOfWeek = (dateString) => {
