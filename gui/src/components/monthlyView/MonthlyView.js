@@ -4,12 +4,15 @@ import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
 import {formatNumber} from "../../Utils";
+import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from "recharts";
 
 const MonthlyView = () => {
     const [transactions, setTransactions] = useState([]);
+    const [categoryLevels, setCategoryLevels] = useState([]);
 
     useEffect(() => {
         loadTransactions();
+        loadCategoryLevels();
     }, []);
 
     async function loadTransactions() {
@@ -20,11 +23,60 @@ const MonthlyView = () => {
         setTransactions(sorted);
     }
 
+    async function loadCategoryLevels() {
+        const response = await fetch("/budget/categories/levels");
+        const data = await response.json();
+        setCategoryLevels(data);
+    }
+
+    // Helper function to get category level name
+    const getCategoryLevelName = (level) => {
+        if (level === null || level === undefined) return "Nieznane";
+        const levelInfo = categoryLevels.find(cl => parseInt(cl.level) === level);
+        return levelInfo ? levelInfo.name : "Nieznane";
+    };
+
+    // Color configuration for category levels
+    const categoryLevelColors = {
+        "podstawa": { background: "#d4edda", chart: "#28a745" }, // green
+        "dostatek": { background: "#fff3cd", chart: "#ffc107" }, // yellow
+        "ponad": { background: "#ffe4cc", chart: "#fd7e14" }, // orange
+        "inwestycje": { background: "#e4d9f3", chart: "#9b59b6" }, // purple
+        "wpływy": { background: "#ffeaa7", chart: "#f39c12" } // gold
+    };
+
+    // Helper function to get color for a category level
+    const getColorForLevel = (level, type = 'background') => {
+        const levelName = getCategoryLevelName(level);
+        const colors = categoryLevelColors[levelName.toLowerCase()];
+        
+        if (colors) {
+            return colors[type];
+        }
+        
+        return type === 'background' ? 'transparent' : '#6c757d'; // default: transparent bg or gray chart
+    };
+
+    // Helper function to get background color for transaction rows
+    const getRowBackgroundColor = (level, categoryName) => {
+        // Special case for "hazard" category
+        if (categoryName && categoryName.toLowerCase() === "hazard") {
+            return "#ffcccc"; // light red
+        }
+        
+        return getColorForLevel(level, 'background');
+    };
+
+    // Helper function to get chart color based on category level
+    const getChartColor = (level) => {
+        return getColorForLevel(level, 'chart');
+    };
+
     // Separate expenses and incomes
     const expenses = transactions.filter(t => t.amount < 0);
     const incomes = transactions.filter(t => t.amount >= 0);
 
-    // Helper function to calculate daily sums
+    // Helper function to calculate daily sums (for summary table)
     const calculateDailySums = (transactions) => transactions.reduce((acc, transaction) => {
         const date = transaction.transactionDate;
         acc[date] = (acc[date] || 0) + transaction.amount;
@@ -37,9 +89,42 @@ const MonthlyView = () => {
     const sortedExpenseDays = Object.keys(dailyExpenseSums).sort((a, b) => a.localeCompare(b));
     const sortedIncomeDays = Object.keys(dailyIncomeSums).sort((a, b) => a.localeCompare(b));
 
+    // Helper function to calculate sums by category level (for pie chart)
+    const calculateCategoryLevelSums = (transactions) => {
+        return transactions.reduce((acc, transaction) => {
+            const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined 
+                ? transaction.categoryLevel 
+                : -1;
+            const levelName = getCategoryLevelName(level);
+            
+            if (!acc[level]) {
+                acc[level] = {
+                    sum: 0,
+                    levelName: levelName
+                };
+            }
+            acc[level].sum += Math.abs(transaction.amount);
+            return acc;
+        }, {});
+    };
+
+    const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
+
+    // Sort by level
+    const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
+        .map(k => parseInt(k))
+        .sort((a, b) => a - b);
+
     // Calculate total sums
     const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
     const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
+
+    // Prepare data for pie chart
+    const expensePieData = sortedExpenseLevels.map(level => ({
+        name: categoryLevelExpenseSums[level].levelName,
+        value: categoryLevelExpenseSums[level].sum,
+        level: level
+    }));
 
     let body = <>
         <Col sm={12}>
@@ -48,7 +133,7 @@ const MonthlyView = () => {
             <Row className="mt-3">
                 <Col sm={8}>
                     <h4>Wydatki</h4>
-                    <TransactionTableReadOnly transactions={expenses} showDate={true} />
+                    <TransactionTableReadOnly transactions={expenses} showDate={true} getRowColor={getRowBackgroundColor} />
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wydatków</h4>
@@ -72,13 +157,39 @@ const MonthlyView = () => {
                         </tr>
                         </tbody>
                     </Table>
+
+                    {expensePieData.length > 0 && (
+                        <>
+                            <h4 className="mt-4">Wykres wydatków</h4>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={expensePieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {expensePieData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={getChartColor(entry.level)} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => formatNumber(-value)} />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </>
+                    )}
                 </Col>
             </Row>
 
             <Row className="mt-4">
                 <Col sm={8}>
                     <h4>Wpływy</h4>
-                    <TransactionTableReadOnly transactions={incomes} showDate={true} />
+                    <TransactionTableReadOnly transactions={incomes} showDate={true} getRowColor={getRowBackgroundColor} />
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wpływów</h4>

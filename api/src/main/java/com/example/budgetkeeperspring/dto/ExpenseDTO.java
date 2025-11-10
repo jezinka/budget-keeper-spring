@@ -25,6 +25,7 @@ public class ExpenseDTO {
 
     private Long categoryId;
     private String categoryName;
+    private Integer categoryLevel;
     private Boolean deleted;
 
     private String note;

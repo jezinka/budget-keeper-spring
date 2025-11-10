@@ -2,25 +2,34 @@ import Table from 'react-bootstrap/Table';
 import React from "react";
 import {formatNumber, UNKNOWN_CATEGORY} from "../../Utils";
 
-const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex}) => {
-    // Alternate background color per day
-    const backgroundColor = dayIndex % 2 === 0 ? '#ffffff' : '#f8f9fa';
+const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex, getRowColor}) => {
+    // Use custom color function if provided, otherwise alternate background color per day
+    let backgroundColor;
+    if (getRowColor) {
+        backgroundColor = getRowColor(transaction.categoryLevel, transaction.categoryName);
+    } else {
+        backgroundColor = dayIndex % 2 === 0 ? '#ffffff' : '#f8f9fa';
+    }
+    
+    const cellStyle = {
+        backgroundColor: backgroundColor
+    };
+    
+    const borderStyle = isFirstOfDay ? '3px solid #495057' : undefined;
     
     return (
-        <tr style={{
-            backgroundColor: backgroundColor,
-            borderTop: isFirstOfDay ? '3px solid #495057' : undefined
-        }}>
-            {showDate && <td>{transaction.transactionDate}</td>}
-            <td>{transaction.description.substring(0, 100)}</td>
-            <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-            <td style={{color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black")}}>{transaction.categoryName}</td>
+        <tr>
+            {showDate && <td style={{...cellStyle, borderTop: borderStyle}}>{transaction.transactionDate}</td>}
+            <td style={{...cellStyle, borderTop: borderStyle}}>{transaction.description.substring(0, 100)}</td>
+            <td style={{...cellStyle, textAlign: 'right', borderTop: borderStyle}}>{formatNumber(transaction.amount)}</td>
+            <td style={{...cellStyle, color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black"), borderTop: borderStyle}}>{transaction.categoryName}</td>
         </tr>
     );
 };
 
 export default function TransactionTableReadOnly(props) {
     const showDate = props.showDate || false;
+    const getRowColor = props.getRowColor || null;
     
     // Track day changes for visual separation
     let previousDate = null;
@@ -54,6 +63,7 @@ export default function TransactionTableReadOnly(props) {
                         showDate={showDate}
                         isFirstOfDay={isFirstOfDay}
                         dayIndex={dayIndex}
+                        getRowColor={getRowColor}
                     />
                 );
             })}
