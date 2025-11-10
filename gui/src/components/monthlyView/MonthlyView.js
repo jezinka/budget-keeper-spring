@@ -3,20 +3,23 @@ import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
-import {formatNumber} from "../../Utils";
+import {formatNumber, getMonthName} from "../../Utils";
 import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from "recharts";
+import MonthYearFilter from "./MonthYearFilter";
 
 const MonthlyView = () => {
     const [transactions, setTransactions] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
 
     useEffect(() => {
         loadTransactions();
         loadCategoryLevels();
-    }, []);
+    }, [year, month]);
 
     async function loadTransactions() {
-        const response = await fetch("/budget/expenses/currentMonth");
+        const response = await fetch(`/budget/expenses/selectedMonth?year=${year}&month=${month}`);
         const data = await response.json();
         // Sort by date (oldest first) - create copy to avoid mutation
         const sorted = [...data].sort((a, b) => a.transactionDate.localeCompare(b.transactionDate));
@@ -128,7 +131,14 @@ const MonthlyView = () => {
 
     let body = <>
         <Col sm={12}>
-            <h2>Wydatki i wpływy za obecny miesiąc</h2>
+            <h2>Wydatki i wpływy za {getMonthName(month, 'long')} {year}</h2>
+            
+            <MonthYearFilter 
+                year={year} 
+                month={month} 
+                onYearChange={setYear} 
+                onMonthChange={setMonth} 
+            />
             
             <Row className="mt-3">
                 <Col sm={8}>

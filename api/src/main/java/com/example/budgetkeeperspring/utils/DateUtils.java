@@ -24,4 +24,12 @@ public class DateUtils {
     public static LocalDate getEndOfSelectedYear(Integer year){
         return LocalDate.of(year, Month.DECEMBER, 31);
     }
+
+    public static LocalDate getBeginOfSelectedMonth(Integer year, Integer month){
+        return LocalDate.of(year, month, 1);
+    }
+
+    public static LocalDate getEndOfSelectedMonth(Integer year, Integer month){
+        return LocalDate.of(year, month, 1).with(TemporalAdjusters.lastDayOfMonth());
+    }
 }
