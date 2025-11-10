@@ -4,12 +4,15 @@ import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
 import {formatNumber} from "../../Utils";
+import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from "recharts";
 
 const MonthlyView = () => {
     const [transactions, setTransactions] = useState([]);
+    const [categoryLevels, setCategoryLevels] = useState([]);
 
     useEffect(() => {
         loadTransactions();
+        loadCategoryLevels();
     }, []);
 
     async function loadTransactions() {
@@ -20,26 +23,109 @@ const MonthlyView = () => {
         setTransactions(sorted);
     }
 
+    async function loadCategoryLevels() {
+        const response = await fetch("/budget/categories/levels");
+        const data = await response.json();
+        setCategoryLevels(data);
+    }
+
+    // Helper function to get category level name
+    const getCategoryLevelName = (level) => {
+        if (level === null || level === undefined) return "Nieznane";
+        const levelInfo = categoryLevels.find(cl => parseInt(cl.level) === level);
+        return levelInfo ? levelInfo.name : "Nieznane";
+    };
+
+    // Helper function to get background color based on category level and name
+    const getBackgroundColor = (level, categoryName) => {
+        // Special case for "hazard" category
+        if (categoryName && categoryName.toLowerCase() === "hazard") {
+            return "#ffcccc"; // light red
+        }
+        
+        const levelName = getCategoryLevelName(level);
+        switch(levelName.toLowerCase()) {
+            case "podstawa":
+                return "#d4edda"; // subtle green
+            case "dostatek":
+                return "#fff3cd"; // subtle yellow
+            case "ponad":
+                return "#ffe4cc"; // subtle orange
+            case "inwestycje":
+                return "#e4d9f3"; // subtle purple
+            case "wpływy":
+            case "kredyt":
+                return "#ffeaa7"; // subtle gold
+            default:
+                return "transparent";
+        }
+    };
+
+    // Helper function to get chart color based on category level
+    const getChartColor = (level) => {
+        const levelName = getCategoryLevelName(level);
+        switch(levelName.toLowerCase()) {
+            case "podstawa":
+                return "#28a745"; // green
+            case "dostatek":
+                return "#ffc107"; // yellow
+            case "ponad":
+                return "#fd7e14"; // orange
+            case "inwestycje":
+                return "#9b59b6"; // purple
+            case "wpływy":
+            case "kredyt":
+                return "#f39c12"; // gold
+            default:
+                return "#6c757d"; // gray
+        }
+    };
+
     // Separate expenses and incomes
     const expenses = transactions.filter(t => t.amount < 0);
     const incomes = transactions.filter(t => t.amount >= 0);
 
-    // Helper function to calculate daily sums
-    const calculateDailySums = (transactions) => transactions.reduce((acc, transaction) => {
-        const date = transaction.transactionDate;
-        acc[date] = (acc[date] || 0) + transaction.amount;
-        return acc;
-    }, {});
+    // Helper function to calculate sums by category level
+    const calculateCategoryLevelSums = (transactions) => {
+        return transactions.reduce((acc, transaction) => {
+            const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined 
+                ? transaction.categoryLevel 
+                : -1;
+            const levelName = getCategoryLevelName(level);
+            
+            if (!acc[level]) {
+                acc[level] = {
+                    sum: 0,
+                    levelName: levelName,
+                    categoryName: transaction.categoryName
+                };
+            }
+            acc[level].sum += Math.abs(transaction.amount);
+            return acc;
+        }, {});
+    };
 
-    const dailyExpenseSums = calculateDailySums(expenses);
-    const dailyIncomeSums = calculateDailySums(incomes);
+    const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
+    const categoryLevelIncomeSums = calculateCategoryLevelSums(incomes);
 
-    const sortedExpenseDays = Object.keys(dailyExpenseSums).sort((a, b) => a.localeCompare(b));
-    const sortedIncomeDays = Object.keys(dailyIncomeSums).sort((a, b) => a.localeCompare(b));
+    // Sort by level
+    const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
+        .map(k => parseInt(k))
+        .sort((a, b) => a - b);
+    const sortedIncomeLevels = Object.keys(categoryLevelIncomeSums)
+        .map(k => parseInt(k))
+        .sort((a, b) => a - b);
 
     // Calculate total sums
     const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
     const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
+
+    // Prepare data for pie chart
+    const expensePieData = sortedExpenseLevels.map(level => ({
+        name: categoryLevelExpenseSums[level].levelName,
+        value: categoryLevelExpenseSums[level].sum,
+        level: level
+    }));
 
     let body = <>
         <Col sm={12}>
@@ -52,26 +138,55 @@ const MonthlyView = () => {
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wydatków</h4>
-                    <Table responsive='sm' striped bordered size="sm">
+                    <Table responsive='sm' bordered size="sm">
                         <thead>
                         <tr className='table-info'>
-                            <th>Dzień</th>
+                            <th>Kategoria</th>
                             <th style={{textAlign: 'right'}}>Suma</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {sortedExpenseDays.map(day => (
-                            <tr key={day}>
-                                <td>{day}</td>
-                                <td style={{textAlign: 'right'}}>{formatNumber(dailyExpenseSums[day])}</td>
-                            </tr>
-                        ))}
+                        {sortedExpenseLevels.map(level => {
+                            const levelData = categoryLevelExpenseSums[level];
+                            return (
+                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryName)}}>
+                                    <td>{levelData.levelName}</td>
+                                    <td style={{textAlign: 'right'}}>{formatNumber(-levelData.sum)}</td>
+                                </tr>
+                            );
+                        })}
                         <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
                             <td>Razem</td>
                             <td style={{textAlign: 'right'}}>{formatNumber(totalExpenses)}</td>
                         </tr>
                         </tbody>
                     </Table>
+
+                    {expensePieData.length > 0 && (
+                        <>
+                            <h4 className="mt-4">Wykres wydatków</h4>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={expensePieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {expensePieData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={getChartColor(entry.level)} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => formatNumber(-value)} />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </>
+                    )}
                 </Col>
             </Row>
 
@@ -82,20 +197,23 @@ const MonthlyView = () => {
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wpływów</h4>
-                    <Table responsive='sm' striped bordered size="sm">
+                    <Table responsive='sm' bordered size="sm">
                         <thead>
                         <tr className='table-info'>
-                            <th>Dzień</th>
+                            <th>Kategoria</th>
                             <th style={{textAlign: 'right'}}>Suma</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {sortedIncomeDays.map(day => (
-                            <tr key={day}>
-                                <td>{day}</td>
-                                <td style={{textAlign: 'right'}}>{formatNumber(dailyIncomeSums[day])}</td>
-                            </tr>
-                        ))}
+                        {sortedIncomeLevels.map(level => {
+                            const levelData = categoryLevelIncomeSums[level];
+                            return (
+                                <tr key={level} style={{backgroundColor: getBackgroundColor(level, levelData.categoryName)}}>
+                                    <td>{levelData.levelName}</td>
+                                    <td style={{textAlign: 'right'}}>{formatNumber(levelData.sum)}</td>
+                                </tr>
+                            );
+                        })}
                         <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
                             <td>Razem</td>
                             <td style={{textAlign: 'right'}}>{formatNumber(totalIncomes)}</td>
