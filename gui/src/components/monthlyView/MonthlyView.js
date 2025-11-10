@@ -112,9 +112,14 @@ const MonthlyView = () => {
     };
 
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
+    const categoryLevelIncomeSums = calculateCategoryLevelSums(incomes);
 
     // Sort by level
     const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
+        .map(k => parseInt(k))
+        .sort((a, b) => a - b);
+    
+    const sortedIncomeLevels = Object.keys(categoryLevelIncomeSums)
         .map(k => parseInt(k))
         .sort((a, b) => a - b);
 
@@ -122,12 +127,24 @@ const MonthlyView = () => {
     const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
     const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
 
-    // Prepare data for pie chart
+    // Prepare data for pie charts
     const expensePieData = sortedExpenseLevels.map(level => ({
         name: categoryLevelExpenseSums[level].levelName,
         value: categoryLevelExpenseSums[level].sum,
         level: level
     }));
+
+    const incomePieData = sortedIncomeLevels.map(level => ({
+        name: categoryLevelIncomeSums[level].levelName,
+        value: categoryLevelIncomeSums[level].sum,
+        level: level
+    }));
+
+    // Prepare data for income vs expense comparison pie chart
+    const comparisonPieData = [
+        { name: 'Wpływy', value: Math.abs(totalIncomes), color: '#28a745' },
+        { name: 'Wydatki', value: Math.abs(totalExpenses), color: '#dc3545' }
+    ];
 
     let body = <>
         <Col sm={12}>
@@ -170,9 +187,9 @@ const MonthlyView = () => {
                 </Col>
             </Row>
 
-            {expensePieData.length > 0 && (
-                <Row className="mt-4">
-                    <Col sm={12}>
+            <Row className="mt-4">
+                {expensePieData.length > 0 && (
+                    <Col sm={4}>
                         <h4>Wykres wydatków</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
@@ -195,8 +212,58 @@ const MonthlyView = () => {
                             </PieChart>
                         </ResponsiveContainer>
                     </Col>
-                </Row>
-            )}
+                )}
+                {incomePieData.length > 0 && (
+                    <Col sm={4}>
+                        <h4>Wykres wpływów</h4>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={incomePieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                >
+                                    {incomePieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={getChartColor(entry.level)} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value) => formatNumber(value)} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </Col>
+                )}
+                {comparisonPieData.length > 0 && (
+                    <Col sm={4}>
+                        <h4>Porównanie wpływy vs wydatki</h4>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={comparisonPieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                >
+                                    {comparisonPieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value) => formatNumber(value)} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </Col>
+                )}
+            </Row>
 
             <Row className="mt-4">
                 <Col sm={8}>
