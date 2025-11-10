@@ -112,14 +112,9 @@ const MonthlyView = () => {
     };
 
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
-    const categoryLevelIncomeSums = calculateCategoryLevelSums(incomes);
 
     // Sort by level
     const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
-        .map(k => parseInt(k))
-        .sort((a, b) => a - b);
-    
-    const sortedIncomeLevels = Object.keys(categoryLevelIncomeSums)
         .map(k => parseInt(k))
         .sort((a, b) => a - b);
 
@@ -135,14 +130,36 @@ const MonthlyView = () => {
     }));
 
     // Prepare data for top expenses pie chart (per transaction)
-    const topExpenses = [...expenses]
+    const allExpensesSorted = [...expenses]
         .sort((a, b) => a.amount - b.amount) // Most negative first
-        .slice(0, 10)
         .map(t => ({
             name: t.description.substring(0, 30) + (t.description.length > 30 ? '...' : ''),
             value: Math.abs(t.amount),
             fullDescription: t.description
         }));
+    
+    const totalExpensesValue = allExpensesSorted.reduce((sum, e) => sum + e.value, 0);
+    const threshold = totalExpensesValue * 0.04; // 4% threshold
+    
+    const significantExpenses = [];
+    let otherExpensesValue = 0;
+    
+    allExpensesSorted.forEach(expense => {
+        if (expense.value >= threshold) {
+            significantExpenses.push(expense);
+        } else {
+            otherExpensesValue += expense.value;
+        }
+    });
+    
+    const topExpenses = significantExpenses;
+    if (otherExpensesValue > 0) {
+        topExpenses.push({
+            name: 'Inne',
+            value: otherExpensesValue,
+            fullDescription: 'Inne wydatki (< 4%)'
+        });
+    }
 
     // Prepare data for daily expenses bar chart
     const getDayOfWeek = (dateString) => {
@@ -251,7 +268,6 @@ const MonthlyView = () => {
                                     formatter={(value) => formatNumber(-value)}
                                     labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
                                 />
-                                <Legend />
                             </PieChart>
                         </ResponsiveContainer>
                     </Col>
