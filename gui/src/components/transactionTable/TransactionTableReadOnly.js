@@ -11,15 +11,18 @@ const TransactionRowReadOnly = ({transaction, showDate, isFirstOfDay, dayIndex, 
         backgroundColor = dayIndex % 2 === 0 ? '#ffffff' : '#f8f9fa';
     }
     
+    const cellStyle = {
+        backgroundColor: backgroundColor
+    };
+    
+    const borderStyle = isFirstOfDay ? '3px solid #495057' : undefined;
+    
     return (
-        <tr style={{
-            backgroundColor: backgroundColor,
-            borderTop: isFirstOfDay ? '3px solid #495057' : undefined
-        }}>
-            {showDate && <td>{transaction.transactionDate}</td>}
-            <td>{transaction.description.substring(0, 100)}</td>
-            <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
-            <td style={{color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black")}}>{transaction.categoryName}</td>
+        <tr>
+            {showDate && <td style={{...cellStyle, borderTop: borderStyle}}>{transaction.transactionDate}</td>}
+            <td style={{...cellStyle, borderTop: borderStyle}}>{transaction.description.substring(0, 100)}</td>
+            <td style={{...cellStyle, textAlign: 'right', borderTop: borderStyle}}>{formatNumber(transaction.amount)}</td>
+            <td style={{...cellStyle, color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black"), borderTop: borderStyle}}>{transaction.categoryName}</td>
         </tr>
     );
 };
