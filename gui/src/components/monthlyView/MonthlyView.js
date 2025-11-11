@@ -138,14 +138,17 @@ const MonthlyView = () => {
     const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
 
     // Prepare data for pie charts
-    const expensePieData = sortedExpenseLevels.map(level => ({
-        name: categoryLevelExpenseSums[level].levelName,
-        value: categoryLevelExpenseSums[level].sum,
-        level: level
-    }));
+    const expensePieData = sortedExpenseLevels
+        .filter(t => t !== 4)
+        .map(level => ({
+            name: categoryLevelExpenseSums[level].levelName,
+            value: categoryLevelExpenseSums[level].sum,
+            level: level
+        }));
 
     // Prepare data for top expenses pie chart (per transaction)
     const topExpenses = [...expenses]
+        .filter(t => t.categoryLevel !== 2 && t.categoryLevel !== 4)
         .sort((a, b) => a.amount - b.amount) // Most negative first
         .slice(0, 10) // Top 10 expenses
         .map(t => ({
