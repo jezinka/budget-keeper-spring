@@ -80,7 +80,9 @@ const MonthlyView = () => {
     const incomes = transactions.filter(t => t.amount >= 0);
 
     // Helper function to calculate daily sums (for summary table)
-    const calculateDailySums = (transactions) => transactions.reduce((acc, transaction) => {
+    const calculateDailySums = (transactions) => transactions
+        .filter(t => t.categoryLevel !== 2)
+        .reduce((acc, transaction) => {
         const date = transaction.transactionDate;
         acc[date] = (acc[date] || 0) + transaction.amount;
         return acc;
