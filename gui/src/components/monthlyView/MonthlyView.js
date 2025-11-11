@@ -109,7 +109,6 @@ const MonthlyView = () => {
     // Helper function to calculate sums by category level (for pie chart)
     const calculateCategoryLevelSums = (transactions) => {
         return transactions
-            .filter(t => t.categoryLevel !== 2)
             .reduce((acc, transaction) => {
                 const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined
                     ? transaction.categoryLevel
