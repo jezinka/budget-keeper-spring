@@ -4,7 +4,19 @@ import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
 import {formatNumber, getMonthName} from "../../Utils";
-import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid} from "recharts";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from "recharts";
 import MonthYearFilter from "./MonthYearFilter";
 
 const MonthlyView = () => {
@@ -41,22 +53,22 @@ const MonthlyView = () => {
 
     // Color configuration for category levels
     const categoryLevelColors = {
-        "podstawa": { background: "#d4edda", chart: "#28a745" }, // green
-        "dostatek": { background: "#fff3cd", chart: "#ffc107" }, // yellow
-        "ponad": { background: "#ffe4cc", chart: "#fd7e14" }, // orange
-        "inwestycje": { background: "#e4d9f3", chart: "#9b59b6" }, // purple
-        "wpływy": { background: "#ffeaa7", chart: "#f39c12" } // gold
+        "podstawa": {background: "#d4edda", chart: "#28a745"}, // green
+        "dostatek": {background: "#fff3cd", chart: "#ffc107"}, // yellow
+        "ponad": {background: "#ffe4cc", chart: "#fd7e14"}, // orange
+        "inwestycje": {background: "#e4d9f3", chart: "#9b59b6"}, // purple
+        "wpływy": {background: "#ffeaa7", chart: "#f39c12"} // gold
     };
 
     // Helper function to get color for a category level
     const getColorForLevel = (level, type = 'background') => {
         const levelName = getCategoryLevelName(level);
         const colors = categoryLevelColors[levelName.toLowerCase()];
-        
+
         if (colors) {
             return colors[type];
         }
-        
+
         return type === 'background' ? 'transparent' : '#6c757d'; // default: transparent bg or gray chart
     };
 
@@ -66,7 +78,7 @@ const MonthlyView = () => {
         if (categoryName && categoryName.toLowerCase() === "hazard") {
             return "#ffcccc"; // light red
         }
-        
+
         return getColorForLevel(level, 'background');
     };
 
@@ -83,10 +95,10 @@ const MonthlyView = () => {
     const calculateDailySums = (transactions) => transactions
         .filter(t => t.categoryLevel !== 2)
         .reduce((acc, transaction) => {
-        const date = transaction.transactionDate;
-        acc[date] = (acc[date] || 0) + transaction.amount;
-        return acc;
-    }, {});
+            const date = transaction.transactionDate;
+            acc[date] = (acc[date] || 0) + transaction.amount;
+            return acc;
+        }, {});
 
     const dailyExpenseSums = calculateDailySums(expenses);
     const dailyIncomeSums = calculateDailySums(incomes);
@@ -96,21 +108,23 @@ const MonthlyView = () => {
 
     // Helper function to calculate sums by category level (for pie chart)
     const calculateCategoryLevelSums = (transactions) => {
-        return transactions.reduce((acc, transaction) => {
-            const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined 
-                ? transaction.categoryLevel 
-                : -1;
-            const levelName = getCategoryLevelName(level);
-            
-            if (!acc[level]) {
-                acc[level] = {
-                    sum: 0,
-                    levelName: levelName
-                };
-            }
-            acc[level].sum += Math.abs(transaction.amount);
-            return acc;
-        }, {});
+        return transactions
+            .filter(t => t.categoryLevel !== 2)
+            .reduce((acc, transaction) => {
+                const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined
+                    ? transaction.categoryLevel
+                    : -1;
+                const levelName = getCategoryLevelName(level);
+
+                if (!acc[level]) {
+                    acc[level] = {
+                        sum: 0,
+                        levelName: levelName
+                    };
+                }
+                acc[level].sum += Math.abs(transaction.amount);
+                return acc;
+            }, {});
     };
 
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
@@ -161,18 +175,19 @@ const MonthlyView = () => {
     let body = <>
         <Col sm={12}>
             <h2>Wydatki i wpływy za {getMonthName(month, 'long')} {year}</h2>
-            
-            <MonthYearFilter 
-                year={year} 
-                month={month} 
-                onYearChange={setYear} 
-                onMonthChange={setMonth} 
+
+            <MonthYearFilter
+                year={year}
+                month={month}
+                onYearChange={setYear}
+                onMonthChange={setMonth}
             />
-            
+
             <Row className="mt-3">
                 <Col sm={8}>
                     <h4>Wpływy</h4>
-                    <TransactionTableReadOnly transactions={incomes} showDate={true} getRowColor={getRowBackgroundColor} />
+                    <TransactionTableReadOnly transactions={incomes} showDate={true}
+                                              getRowColor={getRowBackgroundColor}/>
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wpływów</h4>
@@ -216,11 +231,11 @@ const MonthlyView = () => {
                                     dataKey="value"
                                 >
                                     {expensePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getChartColor(entry.level)} />
+                                        <Cell key={`cell-${index}`} fill={getChartColor(entry.level)}/>
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value) => formatNumber(-value)} />
-                                <Legend />
+                                <Tooltip formatter={(value) => formatNumber(-value)}/>
+                                <Legend/>
                             </PieChart>
                         </ResponsiveContainer>
                     </Col>
@@ -241,10 +256,10 @@ const MonthlyView = () => {
                                     dataKey="value"
                                 >
                                     {topExpenses.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`} />
+                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
                                     ))}
                                 </Pie>
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value) => formatNumber(-value)}
                                     labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
                                 />
@@ -257,28 +272,28 @@ const MonthlyView = () => {
                         <h4>Wydatki dzienne</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={dailyExpensesChartData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis 
-                                    dataKey="dayOfWeek" 
+                                <CartesianGrid strokeDasharray="3 3"/>
+                                <XAxis
+                                    dataKey="dayOfWeek"
                                     tick={{fontSize: 12}}
                                 />
-                                <YAxis 
+                                <YAxis
                                     tick={{fontSize: 10}}
                                     tickFormatter={(value) => formatNumber(-value)}
                                 />
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value) => formatNumber(-value)}
                                     labelFormatter={(label, payload) => payload[0]?.payload?.label || label}
                                 />
                                 <Bar dataKey="amount">
                                     {dailyExpensesChartData.map((entry, index) => (
-                                        <Cell 
-                                            key={`cell-${index}`} 
+                                        <Cell
+                                            key={`cell-${index}`}
                                             fill={
-                                                entry.amount === maxDailyExpense ? '#dc3545' : 
-                                                entry.amount === minDailyExpense ? '#28a745' : 
-                                                entry.dayOfWeek === 'So' || entry.dayOfWeek === 'Nd' ? '#ffc107' :
-                                                '#6c757d'
+                                                entry.amount === maxDailyExpense ? '#dc3545' :
+                                                    entry.amount === minDailyExpense ? '#28a745' :
+                                                        entry.dayOfWeek === 'So' || entry.dayOfWeek === 'Nd' ? '#ffc107' :
+                                                            '#6c757d'
                                             }
                                         />
                                     ))}
@@ -292,7 +307,8 @@ const MonthlyView = () => {
             <Row className="mt-4">
                 <Col sm={8}>
                     <h4>Wydatki</h4>
-                    <TransactionTableReadOnly transactions={expenses} showDate={true} getRowColor={getRowBackgroundColor} />
+                    <TransactionTableReadOnly transactions={expenses} showDate={true}
+                                              getRowColor={getRowBackgroundColor}/>
                 </Col>
                 <Col sm={4}>
                     <h4>Podsumowanie wydatków</h4>
@@ -320,7 +336,7 @@ const MonthlyView = () => {
             </Row>
         </Col>
     </>;
-    
+
     return <Main body={body}/>;
 }
 
