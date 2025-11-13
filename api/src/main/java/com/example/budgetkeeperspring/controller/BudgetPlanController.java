@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
 import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
@@ -71,4 +73,36 @@ public class BudgetPlanController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(new InputStreamResource(byteArrayInputStream));
     }
+
+    @PostMapping("/autoFill")
+    public ResponseEntity<String> autoFillGoals(@RequestParam(value = "months", required = false, defaultValue = "3") int months) {
+        String result = budgetPlanService.autoFillGoalsFromAverage(months);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteGoal(@PathVariable("id") Long id) {
+        try {
+            budgetPlanService.deleteGoal(id);
+            return ResponseEntity.ok("Deleted");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete goal: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateGoal(@PathVariable("id") Long id, @RequestBody Map<String, Object> body) {
+        try {
+            Object amountObj = body.get("amount");
+            if (amountObj == null) {
+                amountObj = "0";
+            }
+            BigDecimal amount = new BigDecimal(amountObj.toString());
+            budgetPlanService.updateGoalAmount(id, amount);
+            return ResponseEntity.ok("Updated");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update goal: " + e.getMessage());
+        }
+    }
+
 }

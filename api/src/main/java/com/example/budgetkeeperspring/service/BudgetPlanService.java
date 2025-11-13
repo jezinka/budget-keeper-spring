@@ -173,6 +173,7 @@ public class BudgetPlanService {
                 .stream()
                 .filter(c -> c.getId() != UNKNOWN_CATEGORY)
                 .filter(c -> c.getLevel() != null && List.of(0, 1, 3).contains(c.getLevel()))
+                .filter(c -> isCategoryActiveLastMonths(c.getId(), 12)) // only categories used in last 12 months
                 .map(Category::getName)
                 .toList();
 
@@ -189,4 +190,107 @@ public class BudgetPlanService {
         }
         return writer.toString();
     }
+
+    /**
+     * Sprawdza, czy dana kategoria miała transakcje w przeciągu ostatnich {@code months} miesięcy.
+     */
+    private boolean isCategoryActiveLastMonths(Long categoryId, int months) {
+        String sql = "SELECT COUNT(1) FROM expense e WHERE e.category_id = :categoryId AND e.transaction_date >= CAST(:startDate as DATE) AND e.transaction_date <= CAST(:endDate as DATE) AND !e.deleted";
+
+        LocalDate endDate = DateUtils.getEndOfCurrentMonth();
+        LocalDate startDate = endDate.minusMonths(months - 1).withDayOfMonth(1);
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("categoryId", categoryId);
+        parameters.addValue("startDate", startDate.toString());
+        parameters.addValue("endDate", endDate.toString());
+
+        try {
+            Integer count = namedParameterJdbcTemplate.queryForObject(sql, parameters, Integer.class);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            System.err.println("Failed to check activity for category " + categoryId + ": " + e.getMessage());
+            // jeśli nie można sprawdzić, załóżmy, że kategoria jest aktywna, aby nie usuwać danych przez pomyłkę
+            return true;
+        }
+    }
+
+    /**
+     * Wypełnia cele (Goal) dla bieżącego miesiąca średnią z wydatków z ostatnich N miesięcy
+     * dla kategorii, które są używane do planowania (level 0,1,3 i nie UNKNOWN_CATEGORY).
+     * Jeśli cel już istnieje - aktualizuje jego kwotę.
+     * Zwraca informacyjną wiadomość.
+     */
+    public String autoFillGoalsFromAverage(int months) {
+        if (months <= 0) {
+            return "Months must be greater than 0";
+        }
+
+        List<Category> categories = categoryRepository.findAll()
+                .stream()
+                .filter(c -> c.getId() != UNKNOWN_CATEGORY)
+                .filter(c -> c.getLevel() != null && List.of(0, 1, 3).contains(c.getLevel()))
+                .filter(c -> isCategoryActiveLastMonths(c.getId(), 12)) // skip categories unused in last 12 months
+                .toList();
+
+        for (Category category : categories) {
+            BigDecimal avg = calculateAverageExpenseForCategory(category.getId(), months);
+            if (avg == null) {
+                continue;
+            }
+            // zaokrąglij do 2 miejsc
+            BigDecimal rounded = avg.setScale(2, java.math.RoundingMode.HALF_UP);
+
+            LocalDate beginOfCurrentMonth = DateUtils.getBeginOfCurrentMonth();
+            goalRepository.findGoalByCategoryAndDate(category, beginOfCurrentMonth)
+                    .map(g -> {
+                        g.setAmount(rounded);
+                        return goalRepository.save(g);
+                    })
+                    .orElseGet(() -> {
+                        Goal newGoal = new Goal();
+                        newGoal.setCategory(category);
+                        newGoal.setAmount(rounded);
+                        newGoal.setDate(beginOfCurrentMonth);
+                        return goalRepository.save(newGoal);
+                    });
+        }
+        return "Auto-fill completed";
+    }
+
+    private BigDecimal calculateAverageExpenseForCategory(Long categoryId, int months) {
+        String sql = "SELECT COALESCE(SUM(e.amount), 0) / :months as avg_monthly FROM expense e WHERE e.category_id = :categoryId AND e.transaction_date >= CAST(:startDate as DATE) AND e.transaction_date <= CAST(:endDate as DATE) AND !e.deleted";
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        LocalDate endDate = DateUtils.getEndOfCurrentMonth();
+        LocalDate startDate = endDate.minusMonths(months - 1).withDayOfMonth(1);
+
+        parameters.addValue("categoryId", categoryId);
+        parameters.addValue("startDate", startDate.toString());
+        parameters.addValue("endDate", endDate.toString());
+        parameters.addValue("months", months);
+
+        try {
+            BigDecimal result = namedParameterJdbcTemplate.queryForObject(sql, parameters, BigDecimal.class);
+            return result == null ? BigDecimal.ZERO : result;
+        } catch (Exception e) {
+            System.err.println("Failed to calculate average for category " + categoryId + ": " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void deleteGoal(Long id) {
+        if (goalRepository.existsById(id)) {
+            goalRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("Goal with id " + id + " not found");
+        }
+    }
+
+    public void updateGoalAmount(Long id, BigDecimal newAmount) {
+        Goal goal = goalRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Goal with id " + id + " not found"));
+        goal.setAmount(newAmount);
+        goalRepository.save(goal);
+    }
+
 }
