@@ -10,9 +10,13 @@ const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurren
             return
         }
 
+        const month = expense.month;
+        const dateFrom = new Date(year, month - 1, 2).toISOString().slice(0, 10);
+        const dateTo = new Date(year, month, 1).toISOString().slice(0, 10);
+
         const response = await fetch('/budget/expenses', {
             method: "POST",
-            body: JSON.stringify({month: expense.month, year: year, category: expense.category}),
+            body: JSON.stringify({dateFrom: dateFrom, dateTo: dateTo, category: expense.category}),
             headers: {'Content-Type': 'application/json'},
         });
         const data = await response.json()
