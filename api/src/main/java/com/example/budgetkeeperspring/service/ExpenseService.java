@@ -255,6 +255,7 @@ public class ExpenseService {
         Map<String, Map<Integer, BigDecimal>> expensesSumForYear = expenseRepository.findAllByOrderByTransactionDateDesc()
                 .stream()
                 .filter(exp -> !exp.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY))
+                .filter(exp -> exp.getCategory().getLevel() != null && !List.of(2, 4, 5).contains(exp.getCategory().getLevel()))
                 .collect(groupingBy(
                                 Expense::getCategoryName,
                                 groupingBy(Expense::getTransactionYear,
