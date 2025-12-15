@@ -45,7 +45,7 @@ export default function EditTransactionModal(props) {
                 payee: formState.payee,
                 note: formState.note,
                 manually: formState.manually,
-                categoryId: formState.categoryId === EMPTY_OPTION ? null : (formState.categoryId === -1 ? -1 : formState.categoryId)
+                categoryId: formState.categoryId === EMPTY_OPTION ? null : formState.categoryId
             };
 
             const response = await fetch('/budget/expenses/create', {

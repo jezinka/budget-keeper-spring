@@ -38,7 +38,6 @@ public class ExpenseService {
     private final CategoryRepository categoryRepository;
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
-    private final CategoryService categoryService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
@@ -55,14 +54,10 @@ public class ExpenseService {
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO) {
         Category category;
         if (expenseDTO.getCategoryId() == null) {
-            // try to find category by title/payee conditions
-            category = categoryService.findCategoryByConditions(expenseDTO);
-        } else if (expenseDTO.getCategoryId() == -1) {
-            // explicit "no category"
-            category = null;
-        } else {
-            category = categoryRepository.findById(expenseDTO.getCategoryId()).orElseThrow(NotFoundException::new);
+            expenseDTO.setCategoryId(CategoryService.UNKNOWN_CATEGORY);
         }
+        category = categoryRepository.findById(expenseDTO.getCategoryId()).orElseThrow(NotFoundException::new);
+
         return createExpense(expenseDTO, category);
     }
 
