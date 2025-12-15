@@ -65,7 +65,7 @@ public class Expense {
     private boolean deleted = Boolean.FALSE;
 
     @Builder.Default
-    private boolean manually = Boolean.FALSE;
+    private Boolean manually = Boolean.FALSE;
 
     private String note;
 
