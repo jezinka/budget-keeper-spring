@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,16 @@ public class ExpenseController {
     @PostMapping()
     List<ExpenseDTO> getAllExpenses(@RequestBody HashMap<String, Object> filters) {
         return expenseService.findAll(filters);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ExpenseDTO> createExpense(@Validated @RequestBody ExpenseDTO expenseDTO) {
+        ExpenseDTO created = expenseService.createExpense(expenseDTO);
+        // Optionally set Location header - using id if available
+        if (created.getId() != null) {
+            return ResponseEntity.created(URI.create("/expenses/" + created.getId())).body(created);
+        }
+        return ResponseEntity.status(201).body(created);
     }
 
     @GetMapping("/currentMonth")

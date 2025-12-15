@@ -1,15 +1,17 @@
-import {Badge, Col} from "react-bootstrap";
+import {Badge, Col, Button} from "react-bootstrap";
 import TransactionTable from "../transactionTable/TransactionTable";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import ExpensesBarChart from "./ExpensesBarChart";
 import {Calendar} from "./Calendar";
 import BudgetSummary from "../plan/BudgetSummary";
+import EditTransactionModal from "../transactionTable/EditTransactionModal";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [withInvestments, setWithInvestments] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -32,6 +34,8 @@ const CurrentMonth = () => {
         setTransactions(data);
     }
 
+    // modal handles form state
+
     let body = <>
         <Col sm={8}>
             <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions}/>
@@ -50,6 +54,11 @@ const CurrentMonth = () => {
                     /> Inwestycje
                 </Badge>
             </h5>
+
+            <h5 className="mt-3">Dodaj wydatek</h5>
+            <Button size="sm" variant="primary" onClick={() => setShowAddModal(true)}>Dodaj</Button>
+            <EditTransactionModal show={showAddModal} id={null} closeHandler={() => setShowAddModal(false)} changeTransactionsHandler={() => { setShowAddModal(false); loadTransactions(); loadData(); }} />
+
             <ExpensesBarChart data={data}/>
         </Col>
     </>;

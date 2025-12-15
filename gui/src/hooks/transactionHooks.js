@@ -23,7 +23,8 @@ export function useTransactionForm(initialState) {
                     note: data.note,
                     amount: data.amount,
                     baseSplitAmount: data.amount,
-                    categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION
+                    categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION,
+                    manually: data.manually
                 });
             }
         } else {

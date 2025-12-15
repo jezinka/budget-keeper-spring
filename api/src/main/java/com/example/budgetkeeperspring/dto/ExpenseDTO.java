@@ -30,6 +30,8 @@ public class ExpenseDTO {
 
     private String note;
 
+    private Boolean manually;
+
     public String getDescription() {
         if (note != null) {
             return note;

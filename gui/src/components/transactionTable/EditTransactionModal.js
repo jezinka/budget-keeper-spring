@@ -9,31 +9,82 @@ import {CategoryContext} from "../../context/CategoryContext";
 export default function EditTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
     const {categories, fetchCategories} = useContext(CategoryContext);
-    const {formState, handleChange, loadExpense} = useTransactionForm({
-        id: 0,
-        transactionDate: Date.now(),
+    const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
+        id: null,
+        transactionDate: new Date().toISOString().slice(0,10),
         title: "",
         payee: "",
-        note: "",
+        note: null,
         baseSplitAmount: 0,
         amount: 0,
-        categoryId: EMPTY_OPTION
+        categoryId: EMPTY_OPTION,
+        manually: false
     });
 
     async function submitForm() {
-        const response = await fetch('/budget/expenses/' + formState.id, {
-            method: 'PUT',
-            body: JSON.stringify(formState),
-            headers: {'Content-Type': 'application/json'},
-        });
+        // jeśli istnieje id -> edycja, inaczej tworzenie
+        if (formState.id) {
+            const response = await fetch('/budget/expenses/' + formState.id, {
+                method: 'PUT',
+                body: JSON.stringify(formState),
+                headers: {'Content-Type': 'application/json'},
+            });
 
-        props.closeHandler();
-        if (response.ok) {
-            props.changeTransactionsHandler();
+            props.closeHandler();
+            if (response.ok) {
+                props.changeTransactionsHandler();
+            } else {
+                handleError();
+            }
         } else {
-            handleError();
+            // create
+            const payload = {
+                amount: formState.baseSplitAmount,
+                transactionDate: formState.transactionDate,
+                title: formState.title,
+                payee: formState.payee,
+                note: formState.note,
+                manually: formState.manually,
+                categoryId: formState.categoryId === EMPTY_OPTION ? null : (formState.categoryId === -1 ? -1 : formState.categoryId)
+            };
+
+            const response = await fetch('/budget/expenses/create', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {'Content-Type': 'application/json'},
+            });
+
+            props.closeHandler();
+            if (response.ok) {
+                props.changeTransactionsHandler();
+            } else {
+                handleError();
+            }
         }
     }
+
+    function prepareForCreate() {
+        setFormState({
+            id: null,
+            transactionDate: new Date().toISOString().slice(0,10),
+            title: "",
+            payee: "",
+            note: null,
+            baseSplitAmount: 0,
+            amount: 0,
+            categoryId: EMPTY_OPTION,
+            manually: true
+        });
+    }
+
+    // onShow: jeśli props.id jest ustawione -> załaduj expense, inaczej przygotuj pusty formularz
+    const onShowHandler = () => {
+        if (props.id) {
+            loadExpense(props.id);
+        } else {
+            prepareForCreate();
+        }
+    };
 
     return (
         <>
@@ -42,9 +93,9 @@ export default function EditTransactionModal(props) {
                 fetchCategories();
             }}/>
 
-            <Modal size="lg" show={props.show} onHide={props.closeHandler} onShow={() => loadExpense(props.id)}>
+            <Modal size="lg" show={props.show} onHide={props.closeHandler} onShow={onShowHandler}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edytuj transakcję:</Modal.Title>
+                    <Modal.Title>{formState && formState.id ? 'Edytuj transakcję:' : 'Dodaj transakcję:'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <TransactionForm
@@ -53,11 +104,12 @@ export default function EditTransactionModal(props) {
                         splitFlow={false}
                         getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
+                        editable={formState.manually === true || formState.id === null}
                     />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={props.closeHandler}> Zamknij </Button>
-                    <Button variant="primary" onClick={submitForm}> Zapisz </Button>
+                    <Button variant="primary" onClick={submitForm}> {formState && formState.id ? 'Zapisz' : 'Dodaj'} </Button>
                 </Modal.Footer>
             </Modal>
         </>

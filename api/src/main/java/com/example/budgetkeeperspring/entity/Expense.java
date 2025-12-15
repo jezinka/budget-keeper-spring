@@ -64,6 +64,9 @@ public class Expense {
     @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
+    @Builder.Default
+    private boolean manually = Boolean.FALSE;
+
     private String note;
 
     public String getCategoryName() {
