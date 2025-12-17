@@ -1,15 +1,15 @@
 import {Col, Form} from "react-bootstrap";
 import React from "react";
+import {FIRST_YEAR} from "../../Utils";
 
-const YearFilter = ({year, formHandler}) => {
+const YearFilter = ({year, onYearChange}) => {
 
     const handleChange = (event) => {
-        formHandler(event.target.value);
+        onYearChange(parseInt(event.target.value));
     };
 
-    let firstYear = 2021;
     let currentYear = new Date().getFullYear();
-    const yearList = Array.from({length: currentYear - firstYear + 1}, (_, i) => currentYear - i)
+    const yearList = Array.from({length: currentYear - FIRST_YEAR + 1}, (_, i) => currentYear - i)
 
     return <Col sm={1}>
         <Form>

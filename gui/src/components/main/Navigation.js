@@ -11,6 +11,7 @@ const Navigation = () => {
                 <Nav.Link href="/budget/gui/monthlyView">Widok miesięczny</Nav.Link>
                 <Nav.Link href="/budget/gui/yearAtTheGlance">Cały rok</Nav.Link>
                 <Nav.Link href="/budget/gui/plan">Plan</Nav.Link>
+                <Nav.Link href="/budget/gui/yearlyView">Roczne podsumowanie</Nav.Link>
                 <Nav.Link href="/budget/gui/lifestyleInflation">Inflacja Życia</Nav.Link>
                 <hr/>
                 <Nav.Link href="/budget/gui/allTransactions">Wszystkie transakcje</Nav.Link>

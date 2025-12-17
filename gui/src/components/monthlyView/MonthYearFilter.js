@@ -1,6 +1,6 @@
 import {Col, Form, Row} from "react-bootstrap";
 import React from "react";
-import {getMonthName} from "../../Utils";
+import {FIRST_YEAR, getMonthName} from "../../Utils";
 
 const MonthYearFilter = ({year, month, onYearChange, onMonthChange}) => {
 
@@ -12,10 +12,8 @@ const MonthYearFilter = ({year, month, onYearChange, onMonthChange}) => {
         onMonthChange(parseInt(event.target.value));
     };
 
-    let firstYear = 2021;
     let currentYear = new Date().getFullYear();
-    const yearList = Array.from({length: currentYear - firstYear + 1}, (_, i) => currentYear - i);
-
+    const yearList = Array.from({length: currentYear - FIRST_YEAR + 1}, (_, i) => currentYear - i);
     const months = Array.from({length: 12}, (_, i) => i + 1);
 
     return (

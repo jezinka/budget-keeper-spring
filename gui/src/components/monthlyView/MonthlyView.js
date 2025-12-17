@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
 import TransactionTableReadOnly from "../transactionTable/TransactionTableReadOnly";
 import Table from "react-bootstrap/Table";
-import {formatNumber, getMonthName} from "../../Utils";
+import {formatNumber, getMonthName, categoryLevelColors} from "../../Utils";
 import {
     Bar,
     BarChart,
@@ -26,6 +26,7 @@ const MonthlyView = () => {
     const [month, setMonth] = useState(new Date().getMonth() + 1);
 
     useEffect(() => {
+        // always load transactions and category levels for the selected year/month
         loadTransactions();
         loadCategoryLevels();
     }, [year, month]);
@@ -51,20 +52,9 @@ const MonthlyView = () => {
         return levelInfo ? levelInfo.name : "Nieznane";
     };
 
-    // Color configuration for category levels
-    const categoryLevelColors = {
-        "podstawa": {background: "#d4edda", chart: "#28a745"}, // green
-        "dostatek": {background: "#fff3cd", chart: "#ffc107"}, // yellow
-        "ponad": {background: "#ffe4cc", chart: "#fd7e14"}, // orange
-        "inwestycje": {background: "#e4d9f3", chart: "#9b59b6"}, // purple
-        "wpływy": {background: "#ffeaa7", chart: "#f39c12"} // gold
-    };
-
     // Helper function to get color for a category level
     const getColorForLevel = (level, type = 'background') => {
-        const levelName = getCategoryLevelName(level);
-        const colors = categoryLevelColors[levelName.toLowerCase()];
-
+        const colors = categoryLevelColors[level];
         if (colors) {
             return colors[type];
         }
@@ -171,12 +161,11 @@ const MonthlyView = () => {
         label: `${day.substring(5)} (${getDayOfWeek(day)})`
     }));
 
-    const maxDailyExpense = Math.max(...dailyExpensesChartData.map(d => d.amount));
-    const minDailyExpense = Math.min(...dailyExpensesChartData.map(d => d.amount));
+    const maxDailyExpense = dailyExpensesChartData.length > 0 ? Math.max(...dailyExpensesChartData.map(d => d.amount)) : 0;
 
     let body = <>
         <Col sm={12}>
-            <h2>Wydatki i wpływy za {getMonthName(month, 'long')} {year}</h2>
+            <h2>{`Wydatki i wpływy za ${getMonthName(month, 'long')} ${year}`}</h2>
 
             <MonthYearFilter
                 year={year}
@@ -192,7 +181,7 @@ const MonthlyView = () => {
                                               getRowColor={getRowBackgroundColor}/>
                 </Col>
                 <Col sm={4}>
-                    <h4>Podsumowanie wpływów</h4>
+                    <h4>Podsumowanie</h4>
                     <Table responsive='sm' striped bordered size="sm">
                         <thead>
                         <tr className='table-info'>
@@ -275,29 +264,14 @@ const MonthlyView = () => {
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={dailyExpensesChartData}>
                                 <CartesianGrid strokeDasharray="3 3"/>
-                                <XAxis
-                                    dataKey="dayOfWeek"
-                                    tick={{fontSize: 12}}
-                                />
-                                <YAxis
-                                    tick={{fontSize: 10}}
-                                    tickFormatter={(value) => formatNumber(-value)}
-                                />
-                                <Tooltip
-                                    formatter={(value) => formatNumber(-value)}
-                                    labelFormatter={(label, payload) => payload[0]?.payload?.label || label}
-                                />
+                                <XAxis dataKey="dayOfWeek" tick={{fontSize: 12}}/>
+                                <YAxis tick={{fontSize: 10}} tickFormatter={(value) => formatNumber(-value)}/>
+                                <Tooltip formatter={(value) => formatNumber(-value)}
+                                         labelFormatter={(label, payload) => payload[0]?.payload?.label || label}/>
                                 <Bar dataKey="amount">
                                     {dailyExpensesChartData.map((entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={
-                                                entry.amount === maxDailyExpense ? '#dc3545' :
-                                                    entry.amount === minDailyExpense ? '#28a745' :
-                                                        entry.dayOfWeek === 'So' || entry.dayOfWeek === 'Nd' ? '#ffc107' :
-                                                            '#6c757d'
-                                            }
-                                        />
+                                        <Cell key={`cell-${index}`}
+                                              fill={entry.amount === maxDailyExpense ? '#dc3545' : (entry.dayOfWeek === 'So' || entry.dayOfWeek === 'Nd' ? '#ffc107' : '#6c757d')}/>
                                     ))}
                                 </Bar>
                             </BarChart>
@@ -313,7 +287,6 @@ const MonthlyView = () => {
                                               getRowColor={getRowBackgroundColor}/>
                 </Col>
                 <Col sm={4}>
-                    <h4>Podsumowanie wydatków</h4>
                     <Table responsive='sm' striped bordered size="sm">
                         <thead>
                         <tr className='table-info'>

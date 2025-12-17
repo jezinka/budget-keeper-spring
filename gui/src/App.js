@@ -12,6 +12,7 @@ import LogsView from "./components/logs/LogsView";
 import LifestyleInflation from "./components/lifestyleInflation/LifestyleInflation";
 import Budget from "./components/plan/Budget";
 import MonthlyView from "./components/monthlyView/MonthlyView";
+import YearlyView from "./components/year/YearlyView";
 
 const App = () => {
     return (
@@ -20,6 +21,7 @@ const App = () => {
                 <Routes>
                     <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>
+                    <Route path="/gui/yearlyView" element={<YearlyView/>}/>
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
                     <Route path="/gui/monthlyView" element={<MonthlyView/>}/>
                     <Route path="/gui/plan" element={<Budget/>}/>

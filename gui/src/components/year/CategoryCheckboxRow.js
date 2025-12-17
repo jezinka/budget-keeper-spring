@@ -57,6 +57,8 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                                }
                            }}/><span className="fw-bold">&nbsp;Zaznacz/odznacz wszystkie</span>
                 </Col>
+            </Row>
+            <Row className={"mb-2"}>
                 {Object.keys(categoryLevels)
                     .filter(l => l >= 0)
                     .map((level) => {
@@ -66,7 +68,7 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
                             levelName = levels[0].name;
                         }
                         return (
-                            <Col sm={2} key={level}>
+                            <Col sm={1} key={level}>
                                 <input
                                     type="checkbox"
                                     checked={levelSelected.indexOf(level) !== -1}
@@ -93,7 +95,7 @@ const CategoryCheckboxRow = ({categories, selectedCategories, setSelectedCategor
             <Row>
                 {categories.map(c => c.name).map((category) => {
                     return (
-                        <Col sm={2} key={category}>
+                        <Col sm={1} key={category}>
                             <input
                                 type="checkbox"
                                 checked={selectedCategories.find(c => c === category) !== undefined}

@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
+import com.example.budgetkeeperspring.utils.DateUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,13 @@ public class ExpenseController {
     List<ExpenseDTO> getSelectedMonth(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
         LocalDate begin = getBeginOfSelectedMonth(year, month);
         LocalDate end = getEndOfSelectedMonth(year, month);
+        return expenseService.findAllByTransactionDateBetween(begin, end);
+    }
+
+    @GetMapping("/selectedYear")
+    List<ExpenseDTO> getSelectedYear(@RequestParam("year") Integer year) {
+        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
+        LocalDate end = DateUtils.getEndOfSelectedYear(year);
         return expenseService.findAllByTransactionDateBetween(begin, end);
     }
 
