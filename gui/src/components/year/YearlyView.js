@@ -146,7 +146,7 @@ const YearlyView = () => {
 
             <YearFilter
                 year={year}
-                onYearChange={setYear}
+                formHandler={setYear}
             />
 
             <Row className="mt-3">

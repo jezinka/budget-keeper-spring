@@ -2,10 +2,10 @@ import {Col, Form} from "react-bootstrap";
 import React from "react";
 import {FIRST_YEAR} from "../../Utils";
 
-const YearFilter = ({year, onYearChange}) => {
+const YearFilter = ({year, formHandler}) => {
 
     const handleChange = (event) => {
-        onYearChange(parseInt(event.target.value));
+        formHandler(parseInt(event.target.value));
     };
 
     let currentYear = new Date().getFullYear();
