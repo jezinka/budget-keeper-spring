@@ -1,14 +1,19 @@
 import React, {useEffect, useState} from "react";
-import {Col, Row, Table} from "react-bootstrap";
-import {categoryLevelColors, formatNumber, getMonthName} from "../../Utils";
+import {Col, Modal, Row, Table} from "react-bootstrap";
+import {categoryLevelColors, formatNumber, getMonthName, SUM_MONTH} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
+import Expense from "./Expense";
 
 const YearlyView = () => {
     const [transactions, setTransactions] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
+    const [transactionsDetails, setTransactionsDetails] = useState([]);
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     useEffect(() => {
         // always load transactions and category levels for the selected year/month
@@ -149,6 +154,12 @@ const YearlyView = () => {
     const totalIncomeYear = monthlyIncomeSums.reduce((a, b) => a + b, 0);
 
     let body = <>
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Transakcje</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{transactionsDetails}</Modal.Body>
+        </Modal>
         <Col sm={12}>
             <h2>{`Wydatki i wpływy za ${year}`}</h2>
 
@@ -185,10 +196,31 @@ const YearlyView = () => {
                                         <tr key={l.level}>
                                             <td>{l.name}</td>
                                             {months.map(m => (
-                                                <td key={m}
-                                                    style={{textAlign: 'right'}}>{formatNumber(monthlyLevelSums[m][l.level] || 0)}</td>
+                                                <Expense
+                                                    key={m}
+                                                    expense={{
+                                                        amount: monthlyLevelSums[m][l.level] || 0,
+                                                        month: m,
+                                                        category: l.name,
+                                                        categoryLevel: l.level,
+                                                        transactionCount: 1
+                                                    }}
+                                                    year={year}
+                                                    modalHandler={handleShow}
+                                                    modalContentHandler={setTransactionsDetails}
+                                                />
                                             ))}
-                                            <td style={{textAlign: 'right'}}>{formatNumber(rowTotal)}</td>
+                                            <Expense
+                                                key="total"
+                                                expense={{
+                                                    amount: rowTotal,
+                                                    month: SUM_MONTH,
+                                                    category: l.name,
+                                                    categoryLevel: l.level,
+                                                    transactionCount: 0
+                                                }}
+                                                year={year}
+                                            />
                                         </tr>
                                     );
                                 })}
@@ -196,9 +228,28 @@ const YearlyView = () => {
                                 <tfoot>
                                 <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
                                     <td>Razem</td>
-                                    {monthTotals.map((t, idx) => <td key={idx}
-                                                                     style={{textAlign: 'right'}}>{formatNumber(t)}</td>)}
-                                    <td style={{textAlign: 'right'}}>{formatNumber(grandTotal)}</td>
+                                    {monthTotals.map((t, idx) => (
+                                        <Expense
+                                            key={idx}
+                                            expense={{
+                                                amount: t,
+                                                month: idx + 1,
+                                                category: 'SUMA',
+                                                transactionCount: 0
+                                            }}
+                                            year={year}
+                                        />
+                                    ))}
+                                    <Expense
+                                        key="grand-total"
+                                        expense={{
+                                            amount: grandTotal,
+                                            month: SUM_MONTH,
+                                            category: 'SUMA',
+                                            transactionCount: 0
+                                        }}
+                                        year={year}
+                                    />
                                 </tr>
                                 </tfoot>
                             </Table>
@@ -276,9 +327,32 @@ const YearlyView = () => {
                             <tbody>
                             <tr>
                                 <td>Wpływy</td>
-                                {monthlyIncomeSums.map((val, idx) => <td key={idx}
-                                                                         style={{textAlign: 'right'}}>{formatNumber(val)}</td>)}
-                                <td style={{textAlign: 'right'}}>{formatNumber(totalIncomeYear)}</td>
+                                {monthlyIncomeSums.map((val, idx) => (
+                                    <Expense
+                                        key={idx}
+                                        expense={{
+                                            amount: val,
+                                            month: idx + 1,
+                                            category: 'Wpływy',
+                                            categoryLevel: 4,
+                                            transactionCount: 1
+                                        }}
+                                        year={year}
+                                        modalHandler={handleShow}
+                                        modalContentHandler={setTransactionsDetails}
+                                    />
+                                ))}
+                                <Expense
+                                    key="total"
+                                    expense={{
+                                        amount: totalIncomeYear,
+                                        month: SUM_MONTH,
+                                        category: 'Wpływy',
+                                        categoryLevel: 4,
+                                        transactionCount: 0
+                                    }}
+                                    year={year}
+                                />
                             </tr>
                             </tbody>
                         </Table>

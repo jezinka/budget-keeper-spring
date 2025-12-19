@@ -33,6 +33,7 @@ import static java.util.stream.Collectors.*;
 public class ExpenseService {
 
     private static final String CATEGORY = "category";
+    private static final String CATEGORY_LEVEL = "categoryLevel";
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
@@ -136,6 +137,16 @@ public class ExpenseService {
         }
         if (filters.get(CATEGORY) != null) {
             allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
+        }
+        if (filters.get(CATEGORY_LEVEL) != null) {
+            try {
+                Integer categoryLevel = Integer.parseInt(filters.get(CATEGORY_LEVEL).toString());
+                allPredicates.add(p -> p.getCategory() != null 
+                    && p.getCategory().getLevel() != null 
+                    && categoryLevel.equals(p.getCategory().getLevel()));
+            } catch (NumberFormatException e) {
+                // If the categoryLevel filter is not a valid integer, ignore it
+            }
         }
         if (!filters.getOrDefault("description", "").equals("")) {
             String searchTerm = filters.get("description").toString().toLowerCase();
