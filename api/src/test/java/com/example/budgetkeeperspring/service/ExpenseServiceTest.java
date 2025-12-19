@@ -334,6 +334,6 @@ class ExpenseServiceTest {
                 "categoryLevel", "0"));
 
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(e -> e.getCategoryLevel() != null && e.getCategoryLevel() == 0));
+        assertTrue(result.stream().allMatch(e -> e.getCategoryLevel() != null && e.getCategoryLevel().equals(0)));
     }
 }
