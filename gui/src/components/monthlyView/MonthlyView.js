@@ -111,7 +111,7 @@ const MonthlyView = () => {
                         levelName: levelName
                     };
                 }
-                acc[level].sum += Math.abs(transaction.amount);
+                acc[level].sum += transaction.amount;
                 return acc;
             }, {});
     };

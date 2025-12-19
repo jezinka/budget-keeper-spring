@@ -69,14 +69,13 @@ const YearlyView = () => {
                         levelName: levelName
                     };
                 }
-                acc[level].sum += Math.abs(transaction.amount);
+                acc[level].sum += transaction.amount;
                 return acc;
             }, {});
     };
 
     // totals per level computed from the raw expenses (all negative transactions)
-    const levelTotalsAll = calculateCategoryLevelSums(expenses);
-    const categoryLevelExpenseSums = levelTotalsAll;
+    const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
 
     // Sort by level
     const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
@@ -89,7 +88,7 @@ const YearlyView = () => {
         .filter(t => t !== 4)
         .map(level => ({
             name: categoryLevelExpenseSums[level].levelName,
-            value: categoryLevelExpenseSums[level].sum,
+            value: Math.abs(categoryLevelExpenseSums[level].sum),
             level: level
         }));
 
@@ -99,14 +98,14 @@ const YearlyView = () => {
         .filter(t => t.categoryLevel !== 2 && t.categoryLevel !== 4)
         .reduce((acc, t) => {
             const desc = (t.description || '').trim() || '(brak opisu)';
-            acc[desc] = (acc[desc] || 0) + Math.abs(t.amount);
+            acc[desc] = (acc[desc] || 0) + t.amount;
             return acc;
         }, {});
 
     const topExpenses = Object.entries(expensesByDescription)
         .map(([desc, sum]) => ({
             name: desc.substring(0, 30) + (desc.length > 30 ? '...' : ''),
-            value: sum,
+            value: Math.abs(sum),
             fullDescription: desc
         }))
         .sort((a, b) => b.value - a.value) // largest first
@@ -116,9 +115,9 @@ const YearlyView = () => {
     // build list of levels to display (use categoryLevels if available, otherwise derive from data)
     const levelsListRaw = (categoryLevels && categoryLevels.length > 0)
         ? categoryLevels.map(cl => ({level: parseInt(cl.level), name: cl.name})).sort((a, b) => a.level - b.level)
-        : Object.keys(levelTotalsAll).map(k => ({
+        : Object.keys(calculateCategoryLevelSums(expenses)).map(k => ({
             level: parseInt(k),
-            name: levelTotalsAll[k].levelName
+            name: (calculateCategoryLevelSums(expenses))[k].levelName
         })).sort((a, b) => a.level - b.level);
 
     // main table should not include category level 4 (wpływy) — extract levels for main table
@@ -137,14 +136,14 @@ const YearlyView = () => {
         const m = d.getMonth() + 1;
         const lvl = e.categoryLevel !== null && e.categoryLevel !== undefined ? e.categoryLevel : -1;
         if (!monthlyLevelSums[m]) monthlyLevelSums[m] = {};
-        monthlyLevelSums[m][lvl] = (monthlyLevelSums[m][lvl] || 0) + Math.abs(e.amount);
+        monthlyLevelSums[m][lvl] = (monthlyLevelSums[m][lvl] || 0) + e.amount;
     });
 
     // --- new: monthly sums for incomes (category level 4) computed from positive transactions ---
     const monthlyIncomeSums = Array.from({length: 12}, () => 0);
     incomes.forEach(t => {
         const m = new Date(t.transactionDate).getMonth(); // 0..11
-        monthlyIncomeSums[m] = (monthlyIncomeSums[m] || 0) + Math.abs(t.amount);
+        monthlyIncomeSums[m] = (monthlyIncomeSums[m] || 0) + t.amount;
     });
     const totalIncomeYear = monthlyIncomeSums.reduce((a, b) => a + b, 0);
 
