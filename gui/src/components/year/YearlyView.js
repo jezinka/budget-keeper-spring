@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row, Table} from "react-bootstrap";
-import {categoryLevelColors, formatNumber, getMonthName} from "../../Utils";
+import {categoryLevelColors, formatNumber, getMonthName, SUM_MONTH} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
@@ -193,7 +193,7 @@ const YearlyView = () => {
                                                 key="total"
                                                 expense={{
                                                     amount: rowTotal,
-                                                    month: null,
+                                                    month: SUM_MONTH,
                                                     category: l.name,
                                                     transactionCount: 0
                                                 }}
@@ -222,7 +222,7 @@ const YearlyView = () => {
                                         key="grand-total"
                                         expense={{
                                             amount: grandTotal,
-                                            month: null,
+                                            month: SUM_MONTH,
                                             category: 'SUMA',
                                             transactionCount: 0
                                         }}
@@ -321,7 +321,7 @@ const YearlyView = () => {
                                     key="total"
                                     expense={{
                                         amount: totalIncomeYear,
-                                        month: null,
+                                        month: SUM_MONTH,
                                         category: 'Wpływy',
                                         transactionCount: 0
                                     }}
