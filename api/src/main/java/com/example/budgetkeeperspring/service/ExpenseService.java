@@ -390,22 +390,27 @@ public class ExpenseService {
                 .filter(summary -> summary.getTotalSum().compareTo(BigDecimal.ZERO) != 0) // Filter out zero totals
                 .toList();
 
-        // Calculate monthly income sums and transaction counts (level 4)
+        // Calculate monthly income sums and transaction counts (level 4) in single pass
+        Map<Integer, BigDecimal> incomeSumsMap = new HashMap<>();
+        Map<Integer, Long> incomeCountsMap = new HashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            incomeSumsMap.put(month, BigDecimal.ZERO);
+            incomeCountsMap.put(month, 0L);
+        }
+        
+        incomes.forEach(t -> {
+            int month = t.getTransactionMonth();
+            incomeSumsMap.put(month, incomeSumsMap.get(month).add(t.getAmount()));
+            incomeCountsMap.put(month, incomeCountsMap.get(month) + 1);
+        });
+        
         List<BigDecimal> monthlyIncomeSums = new ArrayList<>();
         List<Long> monthlyIncomeTransactionCounts = new ArrayList<>();
         for (int month = 1; month <= 12; month++) {
-            final int m = month;
-            BigDecimal monthSum = incomes.stream()
-                    .filter(t -> t.getTransactionMonth() == m)
-                    .map(Expense::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            monthlyIncomeSums.add(monthSum);
-            
-            long monthCount = incomes.stream()
-                    .filter(t -> t.getTransactionMonth() == m)
-                    .count();
-            monthlyIncomeTransactionCounts.add(monthCount);
+            monthlyIncomeSums.add(incomeSumsMap.get(month));
+            monthlyIncomeTransactionCounts.add(incomeCountsMap.get(month));
         }
+        
         BigDecimal totalIncomeYear = monthlyIncomeSums.stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
