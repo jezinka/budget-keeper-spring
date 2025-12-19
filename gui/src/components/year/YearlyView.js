@@ -50,9 +50,9 @@ const YearlyView = () => {
     // Helper function to get chart color based on category level
     const getChartColor = (level) => getColorForLevel(level, 'chart');
 
-    // Separate expenses and incomes
-    const expenses = transactions.filter(t => t.categoryLevel != 4);
-    const incomes = transactions.filter(t => t.categoryLevel == 4);
+    // Separate expenses and incomes (use strict numeric comparisons)
+    const expenses = transactions.filter(t => Number(t.categoryLevel) !== 4);
+    const incomes = transactions.filter(t => Number(t.categoryLevel) === 4);
 
     // Helper function to calculate sums by category level (for pie chart)
     const calculateCategoryLevelSums = (transactions) => {
@@ -93,16 +93,24 @@ const YearlyView = () => {
             level: level
         }));
 
-    // Prepare data for top expenses pie chart (per transaction)
-    const topExpenses = [...expenses]
+    // Prepare data for top expenses pie chart (distinct by description)
+    // Aggregate expenses by description (exclude categoryLevel 2 and 4)
+    const expensesByDescription = expenses
         .filter(t => t.categoryLevel !== 2 && t.categoryLevel !== 4)
-        .sort((a, b) => a.amount - b.amount) // Most negative first
-        .slice(0, 10) // Top 10 expenses
-        .map(t => ({
-            name: t.description.substring(0, 30) + (t.description.length > 30 ? '...' : ''),
-            value: Math.abs(t.amount),
-            fullDescription: t.description
-        }));
+        .reduce((acc, t) => {
+            const desc = (t.description || '').trim() || '(brak opisu)';
+            acc[desc] = (acc[desc] || 0) + Math.abs(t.amount);
+            return acc;
+        }, {});
+
+    const topExpenses = Object.entries(expensesByDescription)
+        .map(([desc, sum]) => ({
+            name: desc.substring(0, 30) + (desc.length > 30 ? '...' : ''),
+            value: sum,
+            fullDescription: desc
+        }))
+        .sort((a, b) => b.value - a.value) // largest first
+        .slice(0, 10);
 
     // --- new: monthly sums per category level (expenses only) ---
     // build list of levels to display (use categoryLevels if available, otherwise derive from data)
@@ -123,20 +131,20 @@ const YearlyView = () => {
         levelsListRaw.forEach(l => monthlyLevelSums[m][l.level] = 0);
     }
 
-    // aggregate expenses per month and per level
+    // aggregate expenses per month and per level (use absolute values so table shows positive sums)
     expenses.forEach(e => {
         const d = new Date(e.transactionDate);
         const m = d.getMonth() + 1;
         const lvl = e.categoryLevel !== null && e.categoryLevel !== undefined ? e.categoryLevel : -1;
         if (!monthlyLevelSums[m]) monthlyLevelSums[m] = {};
-        monthlyLevelSums[m][lvl] = (monthlyLevelSums[m][lvl] || 0) + e.amount;
+        monthlyLevelSums[m][lvl] = (monthlyLevelSums[m][lvl] || 0) + Math.abs(e.amount);
     });
 
     // --- new: monthly sums for incomes (category level 4) computed from positive transactions ---
     const monthlyIncomeSums = Array.from({length: 12}, () => 0);
     incomes.forEach(t => {
         const m = new Date(t.transactionDate).getMonth(); // 0..11
-        monthlyIncomeSums[m] = (monthlyIncomeSums[m] || 0) + t.amount;
+        monthlyIncomeSums[m] = (monthlyIncomeSums[m] || 0) + Math.abs(t.amount);
     });
     const totalIncomeYear = monthlyIncomeSums.reduce((a, b) => a + b, 0);
 
@@ -217,7 +225,7 @@ const YearlyView = () => {
                                     <Cell key={`cell-${index}`} fill={getChartColor(entry.level)}/>
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value) => formatNumber(-value)}/>
+                            <Tooltip formatter={(value) => formatNumber(value)}/>
                             <Legend/>
                         </PieChart>
                     </ResponsiveContainer>
@@ -242,7 +250,7 @@ const YearlyView = () => {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value) => formatNumber(-value)}
+                                    formatter={(value) => formatNumber(value)}
                                     labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
                                 />
                             </PieChart>
