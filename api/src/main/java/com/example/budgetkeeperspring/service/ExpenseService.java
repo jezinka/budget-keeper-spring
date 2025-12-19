@@ -141,7 +141,9 @@ public class ExpenseService {
         if (filters.get(CATEGORY_LEVEL) != null) {
             try {
                 Integer categoryLevel = Integer.parseInt(filters.get(CATEGORY_LEVEL).toString());
-                allPredicates.add(p -> p.getCategory() != null && categoryLevel.equals(p.getCategory().getLevel()));
+                allPredicates.add(p -> p.getCategory() != null 
+                    && p.getCategory().getLevel() != null 
+                    && categoryLevel.equals(p.getCategory().getLevel()));
             } catch (NumberFormatException e) {
                 // If the categoryLevel filter is not a valid integer, ignore it
             }
