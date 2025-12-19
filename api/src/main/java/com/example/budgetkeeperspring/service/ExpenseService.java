@@ -4,6 +4,7 @@ import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.GoalDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.dto.YearlyViewDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
@@ -312,5 +313,140 @@ public class ExpenseService {
         ObjectNode data = mapper.createObjectNode();
         data.set("data", arrayNode);
         return data;
+    }
+
+    public YearlyViewDTO getYearlyViewData(int year) {
+        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
+        LocalDate end = DateUtils.getEndOfSelectedYear(year);
+
+        List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+
+        // Separate expenses and incomes
+        List<Expense> expenses = yearlyExpenses.stream()
+                .filter(t -> t.getCategory() != null && (t.getCategory().getLevel() == null || t.getCategory().getLevel() != 4))
+                .toList();
+        List<Expense> incomes = yearlyExpenses.stream()
+                .filter(t -> t.getCategory() != null && t.getCategory().getLevel() != null && t.getCategory().getLevel() == 4)
+                .toList();
+
+        // Get all unique category levels from expenses (excluding level 4)
+        Map<Integer, String> levelNames = expenses.stream()
+                .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
+                .collect(groupingBy(e -> e.getCategory().getLevel()))
+                .keySet().stream()
+                .collect(toMap(
+                        level -> level,
+                        level -> expenses.stream()
+                                .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null && e.getCategory().getLevel().equals(level))
+                                .findFirst()
+                                .map(e -> {
+                                    // Get level name from CategoryLevel if available
+                                    return categoryRepository.findAll().stream()
+                                            .filter(c -> c.getLevel() != null && c.getLevel().equals(level))
+                                            .findFirst()
+                                            .map(Category::getName)
+                                            .orElse("Level " + level);
+                                })
+                                .orElse("Level " + level)
+                ));
+
+        // Calculate monthly sums per category level
+        List<YearlyViewDTO.CategoryLevelSummary> categoryLevelSummaries = levelNames.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    Integer level = entry.getKey();
+                    String name = entry.getValue();
+
+                    // Calculate monthly sums for this level
+                    Map<Integer, BigDecimal> monthlySums = new java.util.HashMap<>();
+                    for (int month = 1; month <= 12; month++) {
+                        monthlySums.put(month, BigDecimal.ZERO);
+                    }
+
+                    expenses.stream()
+                            .filter(e -> e.getCategory() != null && level.equals(e.getCategory().getLevel()))
+                            .forEach(e -> {
+                                int month = e.getTransactionMonth();
+                                BigDecimal currentSum = monthlySums.getOrDefault(month, BigDecimal.ZERO);
+                                monthlySums.put(month, currentSum.add(e.getAmount()));
+                            });
+
+                    // Calculate total for this level
+                    BigDecimal totalSum = monthlySums.values().stream()
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return YearlyViewDTO.CategoryLevelSummary.builder()
+                            .level(level)
+                            .name(name)
+                            .monthlySums(monthlySums)
+                            .totalSum(totalSum)
+                            .build();
+                })
+                .filter(summary -> summary.getTotalSum().compareTo(BigDecimal.ZERO) != 0) // Filter out zero totals
+                .toList();
+
+        // Calculate monthly income sums (level 4)
+        List<BigDecimal> monthlyIncomeSums = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            final int m = month;
+            BigDecimal monthSum = incomes.stream()
+                    .filter(t -> t.getTransactionMonth() == m)
+                    .map(Expense::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            monthlyIncomeSums.add(monthSum);
+        }
+        BigDecimal totalIncomeYear = monthlyIncomeSums.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Prepare pie chart data (expenses by level, excluding level 4)
+        Map<Integer, BigDecimal> levelTotals = expenses.stream()
+                .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
+                .collect(groupingBy(
+                        e -> e.getCategory().getLevel(),
+                        reducing(BigDecimal.ZERO, e -> e.getAmount().abs(), BigDecimal::add)
+                ));
+
+        List<YearlyViewDTO.PieChartData> expensePieData = levelTotals.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> YearlyViewDTO.PieChartData.builder()
+                        .level(entry.getKey())
+                        .name(levelNames.getOrDefault(entry.getKey(), "Level " + entry.getKey()))
+                        .value(entry.getValue())
+                        .build())
+                .toList();
+
+        // Calculate top expenses (distinct by description, excluding levels 2 and 4)
+        Map<String, BigDecimal> expensesByDescription = expenses.stream()
+                .filter(t -> t.getCategory() != null && t.getCategory().getLevel() != null)
+                .filter(t -> t.getCategory().getLevel() != 2 && t.getCategory().getLevel() != 4)
+                .collect(groupingBy(
+                        t -> t.getTitle() != null && !t.getTitle().isBlank() ? t.getTitle().trim() : "(brak opisu)",
+                        reducing(BigDecimal.ZERO, t -> t.getAmount().abs(), BigDecimal::add)
+                ));
+
+        List<YearlyViewDTO.TopExpenseData> topExpenses = expensesByDescription.entrySet().stream()
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .limit(10)
+                .map(entry -> {
+                    String fullDesc = entry.getKey();
+                    String truncatedName = fullDesc.length() > 30 
+                            ? fullDesc.substring(0, 30) + "..." 
+                            : fullDesc;
+                    return YearlyViewDTO.TopExpenseData.builder()
+                            .name(truncatedName)
+                            .fullDescription(fullDesc)
+                            .value(entry.getValue())
+                            .build();
+                })
+                .toList();
+
+        return YearlyViewDTO.builder()
+                .year(year)
+                .categoryLevels(categoryLevelSummaries)
+                .monthlyIncomeSums(monthlyIncomeSums)
+                .totalIncomeYear(totalIncomeYear)
+                .expensePieData(expensePieData)
+                .topExpenses(topExpenses)
+                .build();
     }
 }

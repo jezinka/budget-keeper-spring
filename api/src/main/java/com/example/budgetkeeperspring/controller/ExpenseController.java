@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.dto.YearlyViewDTO;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -115,5 +116,10 @@ public class ExpenseController {
     @GetMapping("/lifestyleInflation")
     public ObjectNode getLifestyleInflation() {
         return expenseService.getLifestyleInflation();
+    }
+
+    @GetMapping("/yearlyView/{year}")
+    public YearlyViewDTO getYearlyViewData(@PathVariable("year") Integer year) {
+        return expenseService.getYearlyViewData(year);
     }
 }
