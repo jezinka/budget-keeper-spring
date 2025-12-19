@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Col, Row, Table} from "react-bootstrap";
+import {Col, Modal, Row, Table} from "react-bootstrap";
 import {categoryLevelColors, formatNumber, getMonthName, SUM_MONTH} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
@@ -10,6 +10,10 @@ const YearlyView = () => {
     const [transactions, setTransactions] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
+    const [transactionsDetails, setTransactionsDetails] = useState([]);
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     useEffect(() => {
         // always load transactions and category levels for the selected year/month
@@ -142,6 +146,12 @@ const YearlyView = () => {
     const totalIncomeYear = monthlyIncomeSums.reduce((a, b) => a + b, 0);
 
     let body = <>
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Transakcje</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{transactionsDetails}</Modal.Body>
+        </Modal>
         <Col sm={12}>
             <h2>{`Wydatki i wpływy za ${year}`}</h2>
 
@@ -184,9 +194,12 @@ const YearlyView = () => {
                                                         amount: monthlyLevelSums[m][l.level] || 0,
                                                         month: m,
                                                         category: l.name,
-                                                        transactionCount: 0
+                                                        categoryLevel: l.level,
+                                                        transactionCount: 1
                                                     }}
                                                     year={year}
+                                                    modalHandler={handleShow}
+                                                    modalContentHandler={setTransactionsDetails}
                                                 />
                                             ))}
                                             <Expense
@@ -195,6 +208,7 @@ const YearlyView = () => {
                                                     amount: rowTotal,
                                                     month: SUM_MONTH,
                                                     category: l.name,
+                                                    categoryLevel: l.level,
                                                     transactionCount: 0
                                                 }}
                                                 year={year}
@@ -312,9 +326,12 @@ const YearlyView = () => {
                                             amount: val,
                                             month: idx + 1,
                                             category: 'Wpływy',
-                                            transactionCount: 0
+                                            categoryLevel: 4,
+                                            transactionCount: 1
                                         }}
                                         year={year}
+                                        modalHandler={handleShow}
+                                        modalContentHandler={setTransactionsDetails}
                                     />
                                 ))}
                                 <Expense
@@ -323,6 +340,7 @@ const YearlyView = () => {
                                         amount: totalIncomeYear,
                                         month: SUM_MONTH,
                                         category: 'Wpływy',
+                                        categoryLevel: 4,
                                         transactionCount: 0
                                     }}
                                     year={year}

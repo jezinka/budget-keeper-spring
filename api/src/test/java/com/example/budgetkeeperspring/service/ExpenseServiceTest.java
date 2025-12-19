@@ -303,4 +303,37 @@ class ExpenseServiceTest {
 
         assertEquals(2, result.size());
     }
+
+    @Test
+    void findAll_withCategoryLevelFilter() {
+        Category categoryLevel0 = new Category("Level0Category");
+        categoryLevel0.setLevel(0);
+
+        Category categoryLevel1 = new Category("Level1Category");
+        categoryLevel1.setLevel(1);
+
+        Expense a = new Expense();
+        a.setAmount(BigDecimal.valueOf(-50));
+        a.setCategory(categoryLevel0);
+
+        Expense b = new Expense();
+        b.setAmount(BigDecimal.valueOf(-120));
+        b.setCategory(categoryLevel1);
+
+        Expense c = new Expense();
+        c.setAmount(BigDecimal.valueOf(-30));
+        c.setCategory(categoryLevel0);
+
+        when(expenseRepository
+                .findAllByOrderByTransactionDateDesc())
+                .thenReturn(new ArrayList<>(
+                        Arrays.asList(a, b, c))
+                );
+
+        List<ExpenseDTO> result = expenseService.findAll(Map.of(
+                "categoryLevel", "0"));
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream().allMatch(e -> e.getCategoryLevel() != null && e.getCategoryLevel() == 0));
+    }
 }

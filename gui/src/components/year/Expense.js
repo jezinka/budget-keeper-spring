@@ -14,9 +14,21 @@ const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurren
         const dateFrom = new Date(year, month - 1, 2).toISOString().slice(0, 10);
         const dateTo = new Date(year, month, 1).toISOString().slice(0, 10);
 
+        // Build request body - use categoryLevel if available, otherwise fall back to category
+        const requestBody = {
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        };
+        
+        if (expense.categoryLevel !== undefined && expense.categoryLevel !== null) {
+            requestBody.categoryLevel = expense.categoryLevel;
+        } else if (expense.category) {
+            requestBody.category = expense.category;
+        }
+
         const response = await fetch('/budget/expenses', {
             method: "POST",
-            body: JSON.stringify({dateFrom: dateFrom, dateTo: dateTo, category: expense.category}),
+            body: JSON.stringify(requestBody),
             headers: {'Content-Type': 'application/json'},
         });
         const data = await response.json()
