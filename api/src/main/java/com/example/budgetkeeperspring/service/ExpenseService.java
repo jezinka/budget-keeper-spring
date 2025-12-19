@@ -35,6 +35,7 @@ public class ExpenseService {
 
     private static final String CATEGORY = "category";
     private static final String CATEGORY_LEVEL = "categoryLevel";
+    private static final String NO_DESCRIPTION = "(brak opisu)";
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
@@ -329,6 +330,16 @@ public class ExpenseService {
                 .filter(t -> t.getCategory() != null && t.getCategory().getLevel() != null && t.getCategory().getLevel() == 4)
                 .toList();
 
+        // Fetch all categories once to avoid N+1 query problem
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Integer, String> levelToNameMap = allCategories.stream()
+                .filter(c -> c.getLevel() != null)
+                .collect(toMap(
+                        Category::getLevel,
+                        Category::getName,
+                        (existing, replacement) -> existing  // Keep first if duplicates
+                ));
+
         // Get all unique category levels from expenses (excluding level 4)
         Map<Integer, String> levelNames = expenses.stream()
                 .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
@@ -336,18 +347,7 @@ public class ExpenseService {
                 .keySet().stream()
                 .collect(toMap(
                         level -> level,
-                        level -> expenses.stream()
-                                .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null && e.getCategory().getLevel().equals(level))
-                                .findFirst()
-                                .map(e -> {
-                                    // Get level name from CategoryLevel if available
-                                    return categoryRepository.findAll().stream()
-                                            .filter(c -> c.getLevel() != null && c.getLevel().equals(level))
-                                            .findFirst()
-                                            .map(Category::getName)
-                                            .orElse("Level " + level);
-                                })
-                                .orElse("Level " + level)
+                        level -> levelToNameMap.getOrDefault(level, "Level " + level)
                 ));
 
         // Calculate monthly sums per category level
@@ -358,7 +358,7 @@ public class ExpenseService {
                     String name = entry.getValue();
 
                     // Calculate monthly sums for this level
-                    Map<Integer, BigDecimal> monthlySums = new java.util.HashMap<>();
+                    Map<Integer, BigDecimal> monthlySums = new HashMap<>();
                     for (int month = 1; month <= 12; month++) {
                         monthlySums.put(month, BigDecimal.ZERO);
                     }
@@ -420,7 +420,7 @@ public class ExpenseService {
                 .filter(t -> t.getCategory() != null && t.getCategory().getLevel() != null)
                 .filter(t -> t.getCategory().getLevel() != 2 && t.getCategory().getLevel() != 4)
                 .collect(groupingBy(
-                        t -> t.getTitle() != null && !t.getTitle().isBlank() ? t.getTitle().trim() : "(brak opisu)",
+                        t -> t.getTitle() != null && !t.getTitle().isBlank() ? t.getTitle().trim() : NO_DESCRIPTION,
                         reducing(BigDecimal.ZERO, t -> t.getAmount().abs(), BigDecimal::add)
                 ));
 
