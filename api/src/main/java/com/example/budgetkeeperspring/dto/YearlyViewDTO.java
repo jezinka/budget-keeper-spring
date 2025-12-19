@@ -17,6 +17,7 @@ public class YearlyViewDTO {
     private Integer year;
     private List<CategoryLevelSummary> categoryLevels;
     private List<BigDecimal> monthlyIncomeSums; // 12 values (one per month)
+    private List<Long> monthlyIncomeTransactionCounts; // 12 values (one per month)
     private BigDecimal totalIncomeYear;
     private List<PieChartData> expensePieData;
     private List<TopExpenseData> topExpenses;
@@ -29,6 +30,7 @@ public class YearlyViewDTO {
         private Integer level;
         private String name;
         private Map<Integer, BigDecimal> monthlySums; // month (1-12) -> amount
+        private Map<Integer, Long> monthlyTransactionCounts; // month (1-12) -> count
         private BigDecimal totalSum;
     }
     

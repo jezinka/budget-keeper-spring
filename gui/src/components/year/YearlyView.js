@@ -89,7 +89,7 @@ const YearlyView = () => {
                                             month: m,
                                             category: levelData.name,
                                             categoryLevel: levelData.level,
-                                            transactionCount: 1
+                                            transactionCount: levelData.monthlyTransactionCounts[m] || 0
                                         }}
                                         year={year}
                                         modalHandler={handleShow}
@@ -218,7 +218,7 @@ const YearlyView = () => {
                                             month: idx + 1,
                                             category: 'Wpływy',
                                             categoryLevel: 4,
-                                            transactionCount: 1
+                                            transactionCount: yearlyData.monthlyIncomeTransactionCounts[idx] || 0
                                         }}
                                         year={year}
                                         modalHandler={handleShow}

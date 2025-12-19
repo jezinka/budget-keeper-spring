@@ -357,10 +357,12 @@ public class ExpenseService {
                     Integer level = entry.getKey();
                     String name = entry.getValue();
 
-                    // Calculate monthly sums for this level
+                    // Calculate monthly sums and transaction counts for this level
                     Map<Integer, BigDecimal> monthlySums = new HashMap<>();
+                    Map<Integer, Long> monthlyTransactionCounts = new HashMap<>();
                     for (int month = 1; month <= 12; month++) {
                         monthlySums.put(month, BigDecimal.ZERO);
+                        monthlyTransactionCounts.put(month, 0L);
                     }
 
                     expenses.stream()
@@ -369,6 +371,8 @@ public class ExpenseService {
                                 int month = e.getTransactionMonth();
                                 BigDecimal currentSum = monthlySums.getOrDefault(month, BigDecimal.ZERO);
                                 monthlySums.put(month, currentSum.add(e.getAmount()));
+                                Long currentCount = monthlyTransactionCounts.getOrDefault(month, 0L);
+                                monthlyTransactionCounts.put(month, currentCount + 1);
                             });
 
                     // Calculate total for this level
@@ -379,14 +383,16 @@ public class ExpenseService {
                             .level(level)
                             .name(name)
                             .monthlySums(monthlySums)
+                            .monthlyTransactionCounts(monthlyTransactionCounts)
                             .totalSum(totalSum)
                             .build();
                 })
                 .filter(summary -> summary.getTotalSum().compareTo(BigDecimal.ZERO) != 0) // Filter out zero totals
                 .toList();
 
-        // Calculate monthly income sums (level 4)
+        // Calculate monthly income sums and transaction counts (level 4)
         List<BigDecimal> monthlyIncomeSums = new ArrayList<>();
+        List<Long> monthlyIncomeTransactionCounts = new ArrayList<>();
         for (int month = 1; month <= 12; month++) {
             final int m = month;
             BigDecimal monthSum = incomes.stream()
@@ -394,6 +400,11 @@ public class ExpenseService {
                     .map(Expense::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             monthlyIncomeSums.add(monthSum);
+            
+            long monthCount = incomes.stream()
+                    .filter(t -> t.getTransactionMonth() == m)
+                    .count();
+            monthlyIncomeTransactionCounts.add(monthCount);
         }
         BigDecimal totalIncomeYear = monthlyIncomeSums.stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -444,6 +455,7 @@ public class ExpenseService {
                 .year(year)
                 .categoryLevels(categoryLevelSummaries)
                 .monthlyIncomeSums(monthlyIncomeSums)
+                .monthlyIncomeTransactionCounts(monthlyIncomeTransactionCounts)
                 .totalIncomeYear(totalIncomeYear)
                 .expensePieData(expensePieData)
                 .topExpenses(topExpenses)
