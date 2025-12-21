@@ -78,8 +78,8 @@ const MonthlyView = () => {
     };
 
     // Separate expenses and incomes
-    const expenses = transactions.filter(t => t.amount < 0);
-    const incomes = transactions.filter(t => t.amount >= 0);
+    const expenses = transactions.filter(t => Number(t.categoryLevel) !== 4);
+    const incomes = transactions.filter(t => Number(t.categoryLevel) === 4);
 
     // Helper function to calculate daily sums (for summary table)
     const calculateDailySums = (transactions) => transactions
@@ -132,7 +132,7 @@ const MonthlyView = () => {
         .filter(t => t !== 4)
         .map(level => ({
             name: categoryLevelExpenseSums[level].levelName,
-            value: categoryLevelExpenseSums[level].sum,
+            value: Math.abs(categoryLevelExpenseSums[level].sum),
             level: level
         }));
 
