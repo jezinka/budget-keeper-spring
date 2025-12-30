@@ -34,28 +34,30 @@ public class BudgetFlowService {
         HashMap<String, BigDecimal> categorySums = new HashMap<>();
         HashMap<String, Set<String>> categoriesMap = new HashMap<>();
 
-        List<Expense> validExpenses = getValidExpenses(begin, end);
+        List<Expense> validTransactions = validTransactions(begin, end);
+        List<Expense> validIncomes = getValidIncomes(validTransactions);
 
-        validExpenses.stream()
-                .filter(expense -> expense.getCategory().getLevel() != 4)
-                .forEach(expense -> {
-                            String categoryLevel = categoryLevels.getOrDefault(expense.getCategory().getLevel(), "Inne");
-                            String categoryName = expense.getCategory().getName();
+        List<Expense> validExpenses = new ArrayList<>(validTransactions);
+        validExpenses.removeAll(validIncomes);
 
-                            categoriesMap.computeIfAbsent(INCOME, k -> new HashSet<>()).add(categoryLevel);
-                            categoriesMap.computeIfAbsent(categoryLevel, k -> new HashSet<>()).add(categoryName);
+        validExpenses.forEach(expense -> {
+                    String categoryLevel = categoryLevels.getOrDefault(expense.getCategory().getLevel(), "Inne");
+                    String categoryName = expense.getCategory().getName();
 
-                            categorySums.merge(categoryName, expense.getAmount(), BigDecimal::add);
-                            categorySums.merge(categoryLevel, expense.getAmount(), BigDecimal::add);
-                            categorySums.merge(INCOME, expense.getAmount(), BigDecimal::add);
-                        }
-                );
+                    categoriesMap.computeIfAbsent(INCOME, k -> new HashSet<>()).add(categoryLevel);
+                    categoriesMap.computeIfAbsent(categoryLevel, k -> new HashSet<>()).add(categoryName);
+
+                    categorySums.merge(categoryName, expense.getAmount(), BigDecimal::add);
+                    categorySums.merge(categoryLevel, expense.getAmount(), BigDecimal::add);
+                    categorySums.merge(INCOME, expense.getAmount(), BigDecimal::add);
+                }
+        );
 
         Set<SankeyDto.SankeyNode> nodes = new HashSet<>();
         List<SankeyDto.SankeyLink> links = new ArrayList<>();
 
-        if (validExpenses.stream().filter(expense -> expense.getCategory().getLevel() == 4 && expense.getAmount().compareTo(BigDecimal.ZERO) > 0).count() > 1) {
-            incomeSource(validExpenses, nodes, links);
+        if (validIncomes.size() > 1) {
+            incomeSource(validIncomes, nodes, links);
         }
 
         categoriesMap.forEach((sankeyName, sankeyLinks) -> {
@@ -75,7 +77,14 @@ public class BudgetFlowService {
         return sankeyDto;
     }
 
-    private List<Expense> getValidExpenses(LocalDate begin, LocalDate end) {
+    private List<Expense> getValidIncomes(List<Expense> validTransactions) {
+        return validTransactions.stream()
+                .filter(expense -> expense.getCategory().getLevel() == 4
+                        || (expense.getCategory().getLevel() == 2 && expense.getAmount().compareTo(BigDecimal.ZERO) > 0))
+                .toList();
+    }
+
+    private List<Expense> validTransactions(LocalDate begin, LocalDate end) {
         return expenseRepository.findAllByTransactionDateBetween(begin, end).stream()
                 .filter(expense -> expense.getCategory() != null)
                 .filter(expense -> expense.getCategory().getLevel() != null)
@@ -93,12 +102,11 @@ public class BudgetFlowService {
                 });
     }
 
-    private void incomeSource(List<Expense> allByTransactionDateBetween, Set<SankeyDto.SankeyNode> nodes, List<SankeyDto.SankeyLink> links) {
+    private void incomeSource(List<Expense> validIncomes, Set<SankeyDto.SankeyNode> nodes, List<SankeyDto.SankeyLink> links) {
         Set<SankeyDto.SankeyNode> incomeNodes = new HashSet<>();
         List<SankeyDto.SankeyLink> incomeLinks = new ArrayList<>();
 
-        allByTransactionDateBetween.stream()
-                .filter(expe -> expe.getCategory().getLevel() == 4)
+        validIncomes.stream()
                 .collect(groupingBy(Expense::getCategoryName,
                         reducing(BigDecimal.ZERO,
                                 Expense::getAmount, BigDecimal::add)))
