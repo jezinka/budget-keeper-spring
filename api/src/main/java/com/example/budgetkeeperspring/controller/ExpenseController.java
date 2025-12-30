@@ -18,10 +18,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfCurrentMonth;
-import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMonth;
-import static com.example.budgetkeeperspring.utils.DateUtils.getBeginOfSelectedMonth;
-import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfSelectedMonth;
+import static com.example.budgetkeeperspring.utils.DateUtils.*;
 
 @RequiredArgsConstructor
 @RestController
