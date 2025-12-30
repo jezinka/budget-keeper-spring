@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.dto.SankeyDto;
 import com.example.budgetkeeperspring.exception.NotFoundException;
+import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.example.budgetkeeperspring.utils.DateUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,6 +28,7 @@ public class ExpenseController {
 
     public static final String EXPENSES_PATH_ID = "/{id}";
     private final ExpenseService expenseService;
+    private final BudgetFlowService budgetFlowService;
 
     @PostMapping()
     List<ExpenseDTO> getAllExpenses(@RequestBody HashMap<String, Object> filters) {
@@ -115,10 +117,10 @@ public class ExpenseController {
         return expenseService.getLifestyleInflation();
     }
 
-    @GetMapping("/sankeyData")
-    public SankeyDto getSankeyData(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+    @GetMapping("/monthlyBudgetFlow")
+    public SankeyDto getMonthlyBudgetFlow(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
         LocalDate begin = getBeginOfSelectedMonth(year, month);
         LocalDate end = getEndOfSelectedMonth(year, month);
-        return expenseService.getSankeyData(begin, end);
+        return budgetFlowService.getMonthly(begin, end);
     }
 }

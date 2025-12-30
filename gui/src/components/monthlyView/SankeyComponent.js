@@ -8,7 +8,7 @@ const SankeyComponent = ({year, month}) => {
     useEffect(() => {
 
         async function loadData() {
-            const response = await fetch(`/budget/expenses/sankeyData?year=${year}&month=${month}`);
+            const response = await fetch(`/budget/expenses/monthlyBudgetFlow?year=${year}&month=${month}`);
             const data = await response.json();
             setData(data.nodes);
             setLinks(data.links);
