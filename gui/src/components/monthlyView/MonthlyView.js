@@ -18,6 +18,7 @@ import {
     YAxis
 } from "recharts";
 import MonthYearFilter from "./MonthYearFilter";
+import SankeyComponent from "./SankeyComponent";
 
 const MonthlyView = () => {
     const [transactions, setTransactions] = useState([]);
@@ -280,9 +281,13 @@ const MonthlyView = () => {
                 )}
             </Row>
 
+            <SankeyComponent
+                year={year}
+                month={month}/>
+
             <Row className="mt-4">
+                <h4>Wydatki</h4>
                 <Col sm={8}>
-                    <h4>Wydatki</h4>
                     <TransactionTableReadOnly transactions={expenses} showDate={true}
                                               getRowColor={getRowBackgroundColor}/>
                 </Col>

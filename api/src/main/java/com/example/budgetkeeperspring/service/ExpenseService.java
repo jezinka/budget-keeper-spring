@@ -1,13 +1,12 @@
 package com.example.budgetkeeperspring.service;
 
-import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
-import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.dto.GoalDTO;
-import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.dto.*;
 import com.example.budgetkeeperspring.entity.Category;
+import com.example.budgetkeeperspring.entity.CategoryLevel;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.repository.CategoryLevelRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -36,6 +35,7 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryLevelRepository categoryLevelRepository;
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
 
@@ -301,5 +301,49 @@ public class ExpenseService {
         ObjectNode data = mapper.createObjectNode();
         data.set("data", arrayNode);
         return data;
+    }
+
+    public SankeyDto getSankeyData(LocalDate begin, LocalDate end) {
+        SankeyDto sankeyDto = new SankeyDto();
+
+        List<Expense> expenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
+        List<CategoryLevel> categoryLevels = categoryLevelRepository.findAll();
+        HashMap<String, BigDecimal> categorySums = new HashMap<>();
+        HashMap<String, Set<String>> categoriesMap = new HashMap<>();
+
+        for (Expense expense : expenses) {
+            if (expense.getCategory() == null || expense.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY)
+                    || expense.getCategory().getLevel() == null || expense.getCategory().getLevel() == 4) {
+                continue;
+            }
+
+            String categoryLevel = categoryLevels.stream().filter(l -> l.getLevel().equals(expense.getCategory().getLevel()))
+                    .map(CategoryLevel::getName)
+                    .findFirst()
+                    .orElse("Inne");
+
+            String categoryName = expense.getCategory().getName();
+
+            categoriesMap.computeIfAbsent("Total", k -> new HashSet<>()).add(categoryLevel);
+            categoriesMap.computeIfAbsent(categoryLevel, k -> new HashSet<>()).add(categoryName);
+
+            categorySums.merge(categoryName, expense.getAmount(), BigDecimal::add);
+            categorySums.merge(categoryLevel, expense.getAmount(), BigDecimal::add);
+            categorySums.merge("Total", expense.getAmount(), BigDecimal::add);
+        }
+
+        Set<SankeyDto.SankeyNode> nodes = new HashSet<>();
+        List<SankeyDto.SankeyLink> links = new ArrayList<>();
+        categoriesMap.forEach((sankeyName, sankeyLinks) -> {
+            nodes.add(new SankeyDto.SankeyNode(sankeyName));
+            sankeyLinks.forEach(target -> {
+                nodes.add(new SankeyDto.SankeyNode(target));
+                links.add(new SankeyDto.SankeyLink(sankeyName, target, categorySums.getOrDefault(target, BigDecimal.ZERO).abs()));
+            });
+        });
+
+        sankeyDto.setNodes(nodes);
+        sankeyDto.setLinks(links);
+        return sankeyDto;
     }
 }

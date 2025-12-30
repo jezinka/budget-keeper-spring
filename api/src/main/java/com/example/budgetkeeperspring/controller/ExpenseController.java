@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.dto.SankeyDto;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -115,5 +116,12 @@ public class ExpenseController {
     @GetMapping("/lifestyleInflation")
     public ObjectNode getLifestyleInflation() {
         return expenseService.getLifestyleInflation();
+    }
+
+    @GetMapping("/sankeyData")
+    public SankeyDto getSankeyData(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+        LocalDate begin = getBeginOfSelectedMonth(year, month);
+        LocalDate end = getEndOfSelectedMonth(year, month);
+        return expenseService.getSankeyData(begin, end);
     }
 }
