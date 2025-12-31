@@ -123,4 +123,11 @@ public class ExpenseController {
         LocalDate end = getEndOfSelectedMonth(year, month);
         return budgetFlowService.getMonthly(begin, end);
     }
+
+    @GetMapping("/yearlyBudgetFlow")
+    public SankeyDto getYearlyBudgetFlow(@RequestParam("year") Integer year) {
+        LocalDate begin = getBeginOfSelectedYear(year);
+        LocalDate end = getEndOfSelectedYear(year);
+        return budgetFlowService.getYearly(begin, end);
+    }
 }

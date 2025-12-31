@@ -4,6 +4,7 @@ import {categoryLevelColors, formatNumber, getMonthName} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
+import SankeyComponent from "../monthlyView/SankeyComponent";
 
 const YearlyView = () => {
     const [transactions, setTransactions] = useState([]);
@@ -242,8 +243,7 @@ const YearlyView = () => {
                                     label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
-                                    dataKey="value"
-                                >
+                                    dataKey="value">
                                     {topExpenses.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
                                     ))}
@@ -257,6 +257,11 @@ const YearlyView = () => {
                     </Col>
                 )}
             </Row>
+
+            <SankeyComponent
+                year={year}
+                month={null}
+            />
 
             {/* incomes (level 4) in separate table */}
             {totalIncomeYear > 0 && (
