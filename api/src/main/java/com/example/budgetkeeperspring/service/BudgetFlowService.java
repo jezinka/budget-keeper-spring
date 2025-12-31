@@ -1,10 +1,8 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.SankeyDto;
-import com.example.budgetkeeperspring.entity.CategoryLevel;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
-import com.example.budgetkeeperspring.repository.CategoryLevelRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +22,12 @@ public class BudgetFlowService {
     private static final String INCOME = "Income";
 
     private final ExpenseRepository expenseRepository;
-    private final CategoryLevelRepository categoryLevelRepository;
+    private final CategoryLevelService categoryLevelService;
     private final ExpenseMapper expenseMapper;
 
     public SankeyDto getYearly(LocalDate begin, LocalDate end) {
 
-        Map<Integer, String> categoryLevels = getCategoryLevels();
+        Map<Integer, String> categoryLevels = categoryLevelService.getCategoryLevels();
         HashMap<String, BigDecimal> categorySums = new HashMap<>();
         HashMap<String, Set<String>> flow = new HashMap<>();
 
@@ -60,7 +58,7 @@ public class BudgetFlowService {
 
     public SankeyDto getMonthly(LocalDate begin, LocalDate end) {
 
-        Map<Integer, String> categoryLevels = getCategoryLevels();
+        Map<Integer, String> categoryLevels = categoryLevelService.getCategoryLevels();
         HashMap<String, BigDecimal> categorySums = new HashMap<>();
         HashMap<String, Set<String>> flow = new HashMap<>();
 
@@ -145,11 +143,5 @@ public class BudgetFlowService {
                     sankeyDto.getNodes().add(new SankeyDto.SankeyNode(name));
                     sankeyDto.getLinks().add(new SankeyDto.SankeyLink(name, INCOME, amount));
                 });
-    }
-
-    private Map<Integer, String> getCategoryLevels() {
-        return categoryLevelRepository.findAll()
-                .stream()
-                .collect(toMap(CategoryLevel::getLevel, CategoryLevel::getName));
     }
 }
