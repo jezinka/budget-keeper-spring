@@ -1,9 +1,6 @@
 package com.example.budgetkeeperspring.service;
 
-import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
-import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.dto.GoalDTO;
-import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.dto.*;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
@@ -212,7 +209,7 @@ public class ExpenseService {
         if (withInvestments) {
             yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
         } else {
-            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutInvestments(begin, end);
+            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(2));
         }
 
         yearlyExpenses
@@ -242,6 +239,24 @@ public class ExpenseService {
                 .sorted(getExpenseComparator())
                 .map(expenseMapper::mapToDto)
                 .toList();
+    }
+
+    public List<PieChartExpenseDto> getTop10ExpensesForTimePeriod(LocalDate begin, LocalDate end) {
+        Map<String, BigDecimal> sums = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(2, 4))
+                .stream()
+                .collect(groupingBy(Expense::getTitle,
+                        reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add)));
+
+        return sums.entrySet().stream()
+                .sorted(Comparator.comparing((Map.Entry<String, BigDecimal> e) -> e.getValue().abs()).reversed())
+                .limit(10)
+                .map(e -> new PieChartExpenseDto(e.getKey(), e.getValue()))
+                .toList();
+    }
+
+    public List<PieChartExpenseDto> getExpensesPerCategoryLeveBetweenDates(LocalDate begin, LocalDate end) {
+        return expenseRepository.findSumAmountGroupedByCategoryLevel(begin, end, List.of(4));
     }
 
     private Comparator<Expense> getExpenseComparator() {

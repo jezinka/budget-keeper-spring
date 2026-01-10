@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row, Table} from "react-bootstrap";
-import {categoryLevelColors, formatNumber, getMonthName} from "../../Utils";
+import {formatNumber, getMonthName} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
@@ -10,11 +10,15 @@ const YearlyView = () => {
     const [transactions, setTransactions] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
+    const [topExpenses, setTopExpenses] = useState([]);
+    const [expensePieData, setExpensePieData] = useState([]);
 
     useEffect(() => {
         // always load transactions and category levels for the selected year/month
         loadTransactions();
         loadCategoryLevels();
+        loadTopExpenses();
+        loadExpensePieData();
     }, [year]);
 
     async function loadTransactions() {
@@ -31,6 +35,18 @@ const YearlyView = () => {
         setCategoryLevels(data);
     }
 
+    async function loadTopExpenses() {
+        const response = await fetch("/budget/expenses/topExpensesForYear?year=" + year);
+        const data = await response.json();
+        setTopExpenses(data);
+    }
+
+    async function loadExpensePieData() {
+        const response = await fetch("/budget/expenses/categoryLevelExpensesForYear?year=" + year);
+        const data = await response.json();
+        setExpensePieData(data);
+    }
+
     // Helper function to get category level name
     const getCategoryLevelName = (level) => {
         if (level === null || level === undefined) return "Nieznane";
@@ -39,17 +55,10 @@ const YearlyView = () => {
     };
 
     // Helper function to get color for a category level
-    const getColorForLevel = (level, type = 'background') => {
-        const colors = categoryLevelColors[level];
-        if (colors) {
-            return colors[type];
-        }
 
-        return type === 'background' ? 'transparent' : '#6c757d'; // default: transparent bg or gray chart
-    };
 
     // Helper function to get chart color based on category level
-    const getChartColor = (level) => getColorForLevel(level, 'chart');
+
 
     // Separate expenses and incomes (use strict numeric comparisons)
     const expenses = transactions.filter(t => Number(t.categoryLevel) !== 4);
@@ -79,38 +88,9 @@ const YearlyView = () => {
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
 
     // Sort by level
-    const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
+    Object.keys(categoryLevelExpenseSums)
         .map(k => parseInt(k))
         .sort((a, b) => a - b);
-
-    // Prepare data for pie charts
-    // Pie uses a filtered view (exclude level 4) but table below must use `levelTotalsAll` (unfiltered)
-    const expensePieData = sortedExpenseLevels
-        .filter(t => t !== 4)
-        .map(level => ({
-            name: categoryLevelExpenseSums[level].levelName,
-            value: Math.abs(categoryLevelExpenseSums[level].sum),
-            level: level
-        }));
-
-    // Prepare data for top expenses pie chart (distinct by description)
-    // Aggregate expenses by description (exclude categoryLevel 2 and 4)
-    const expensesByDescription = expenses
-        .filter(t => t.categoryLevel !== 2 && t.categoryLevel !== 4)
-        .reduce((acc, t) => {
-            const desc = (t.description || '').trim() || '(brak opisu)';
-            acc[desc] = (acc[desc] || 0) + t.amount;
-            return acc;
-        }, {});
-
-    const topExpenses = Object.entries(expensesByDescription)
-        .map(([desc, sum]) => ({
-            name: desc.substring(0, 30) + (desc.length > 30 ? '...' : ''),
-            value: Math.abs(sum),
-            fullDescription: desc
-        }))
-        .sort((a, b) => b.value - a.value) // largest first
-        .slice(0, 10);
 
     // --- new: monthly sums per category level (expenses only) ---
     // build list of levels to display (use categoryLevels if available, otherwise derive from data)
@@ -220,9 +200,9 @@ const YearlyView = () => {
                                 label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                 outerRadius={80}
                                 fill="#8884d8"
-                                dataKey="value">
+                                dataKey="amount">
                                 {expensePieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={getChartColor(entry.level)}/>
+                                    <Cell key={`cell-${index}`} fill={`hsl(${index * 52}, 70%, 50%)`}/>
                                 ))}
                             </Pie>
                             <Tooltip formatter={(value) => formatNumber(value)}/>
@@ -243,14 +223,14 @@ const YearlyView = () => {
                                     label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
-                                    dataKey="value">
+                                    dataKey="amount">
                                     {topExpenses.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
                                     ))}
                                 </Pie>
                                 <Tooltip
                                     formatter={(value) => formatNumber(value)}
-                                    labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
+                                    labelFormatter={(label, payload) => payload[0]?.payload?.name || label}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

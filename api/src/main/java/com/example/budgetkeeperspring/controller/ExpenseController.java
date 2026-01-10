@@ -1,9 +1,6 @@
 package com.example.budgetkeeperspring.controller;
 
-import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
-import com.example.budgetkeeperspring.dto.ExpenseDTO;
-import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
-import com.example.budgetkeeperspring.dto.SankeyDto;
+import com.example.budgetkeeperspring.dto.*;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
@@ -129,5 +126,33 @@ public class ExpenseController {
         LocalDate begin = getBeginOfSelectedYear(year);
         LocalDate end = getEndOfSelectedYear(year);
         return budgetFlowService.getYearly(begin, end);
+    }
+
+    @GetMapping("/topExpensesForYear")
+    List<PieChartExpenseDto> getTopExpensesForYear(@RequestParam("year") Integer year) {
+        LocalDate begin = getBeginOfSelectedYear(year);
+        LocalDate end = getEndOfSelectedYear(year);
+        return expenseService.getTop10ExpensesForTimePeriod(begin, end);
+    }
+
+    @GetMapping("/categoryLevelExpensesForYear")
+    List<PieChartExpenseDto> categoryLevelExpensesForYear(@RequestParam("year") Integer year) {
+        LocalDate begin = getBeginOfSelectedYear(year);
+        LocalDate end = getEndOfSelectedYear(year);
+        return expenseService.getExpensesPerCategoryLeveBetweenDates(begin, end);
+    }
+
+    @GetMapping("/topExpensesForMonth")
+    List<PieChartExpenseDto> getTopExpensesForYear(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+        LocalDate begin = getBeginOfSelectedMonth(year, month);
+        LocalDate end = getEndOfSelectedMonth(year, month);
+        return expenseService.getTop10ExpensesForTimePeriod(begin, end);
+    }
+
+    @GetMapping("/categoryLevelExpensesForMonth")
+    List<PieChartExpenseDto> categoryLevelExpensesForYear(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+        LocalDate begin = getBeginOfSelectedMonth(year, month);
+        LocalDate end = getEndOfSelectedMonth(year, month);
+        return expenseService.getExpensesPerCategoryLeveBetweenDates(begin, end);
     }
 }

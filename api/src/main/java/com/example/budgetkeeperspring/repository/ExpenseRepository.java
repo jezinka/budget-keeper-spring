@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.repository;
 
+import com.example.budgetkeeperspring.dto.PieChartExpenseDto;
 import com.example.budgetkeeperspring.entity.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +19,14 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("select e from Expense e left join fetch e.category c order by e.transactionDate desc")
     List<Expense> findAllByOrderByTransactionDateDesc();
 
-    @Query("select e from Expense e left join fetch e.category c where e.transactionDate between :begin and :end and c.level <> 2")
-    List<Expense> findAllByTransactionDateBetweenWithoutInvestments(LocalDate begin, LocalDate end);
+    @Query("select e from Expense e left join fetch e.category c where e.transactionDate between :begin and :end and c.level not in (:excludedLevels) ")
+    List<Expense> findAllByTransactionDateBetweenWithoutLevels(LocalDate begin, LocalDate end, @Param("excludedLevels") List<Integer> excludedLevels);
 
+    @Query("select new com.example.budgetkeeperspring.dto.PieChartExpenseDto(cl.name, sum(e.amount)) from Expense e " +
+            "left join e.category c " +
+            "left join CategoryLevel cl on c.level = cl.level " +
+            "where e.transactionDate between :begin and :end " +
+            "and c.level not in (:excludedLevels) " +
+            "group by c.level, cl.name order by c.level")
+    List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevel(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("excludedLevels") List<Integer> excludedLevels);
 }

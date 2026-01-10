@@ -25,11 +25,15 @@ const MonthlyView = () => {
     const [categoryLevels, setCategoryLevels] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [topExpenses, setTopExpenses] = useState([]);
+    const [expensePieData, setExpensePieData] = useState([]);
 
     useEffect(() => {
         // always load transactions and category levels for the selected year/month
         loadTransactions();
         loadCategoryLevels();
+        loadTopExpenses();
+        loadExpensePieData();
     }, [year, month]);
 
     async function loadTransactions() {
@@ -44,6 +48,18 @@ const MonthlyView = () => {
         const response = await fetch("/budget/categories/levels");
         const data = await response.json();
         setCategoryLevels(data);
+    }
+
+    async function loadTopExpenses() {
+        const response = await fetch("/budget/expenses/topExpensesForMonth?year=" + year + "&month=" + month);
+        const data = await response.json();
+        setTopExpenses(data);
+    }
+
+    async function loadExpensePieData() {
+        const response = await fetch("/budget/expenses/categoryLevelExpensesForMonth?year=" + year + "&month=" + month);
+        const data = await response.json();
+        setExpensePieData(data);
     }
 
     // Helper function to get category level name
@@ -71,11 +87,6 @@ const MonthlyView = () => {
         }
 
         return getColorForLevel(level, 'background');
-    };
-
-    // Helper function to get chart color based on category level
-    const getChartColor = (level) => {
-        return getColorForLevel(level, 'chart');
     };
 
     // Separate expenses and incomes
@@ -120,33 +131,13 @@ const MonthlyView = () => {
     const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
 
     // Sort by level
-    const sortedExpenseLevels = Object.keys(categoryLevelExpenseSums)
+    Object.keys(categoryLevelExpenseSums)
         .map(k => parseInt(k))
         .sort((a, b) => a - b);
 
     // Calculate total sums
     const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
     const totalIncomes = incomes.reduce((sum, t) => sum + t.amount, 0);
-
-    // Prepare data for pie charts
-    const expensePieData = sortedExpenseLevels
-        .filter(t => t !== 4)
-        .map(level => ({
-            name: categoryLevelExpenseSums[level].levelName,
-            value: Math.abs(categoryLevelExpenseSums[level].sum),
-            level: level
-        }));
-
-    // Prepare data for top expenses pie chart (per transaction)
-    const topExpenses = [...expenses]
-        .filter(t => t.categoryLevel !== 2 && t.categoryLevel !== 4)
-        .sort((a, b) => a.amount - b.amount) // Most negative first
-        .slice(0, 10) // Top 10 expenses
-        .map(t => ({
-            name: t.description.substring(0, 30) + (t.description.length > 30 ? '...' : ''),
-            value: Math.abs(t.amount),
-            fullDescription: t.description
-        }));
 
     // Prepare data for daily expenses bar chart
     const getDayOfWeek = (dateString) => {
@@ -220,10 +211,9 @@ const MonthlyView = () => {
                                     label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
-                                    dataKey="value"
-                                >
+                                    dataKey="amount">
                                     {expensePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getChartColor(entry.level)}/>
+                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 52}, 70%, 50%)`}/>
                                     ))}
                                 </Pie>
                                 <Tooltip formatter={(value) => formatNumber(-value)}/>
@@ -245,8 +235,7 @@ const MonthlyView = () => {
                                     label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
-                                    dataKey="value"
-                                >
+                                    dataKey="amount">
                                     {topExpenses.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
                                     ))}
