@@ -40,13 +40,3 @@ export function getDaysOfWeek() {
 export const monthColors = [
     '#A6CEE3', '#1F78B4', '#b413b9', '#33A02C', '#FB9A99', '#E31A1C',
     '#FDBF6F', '#FF7F00', '#CAB2D6', '#6A3D9A', '#16AC1C', '#B15928']
-
-export const categoryLevelColors = {
-    "0": {background: "#d4edda", chart: "#28a745"},
-    "1": {background: "#fff3cd", chart: "#ffc107"},
-    "3": {background: "#ffe4cc", chart: "#fd7e14"},
-    "2": {background: "#e4d9f3", chart: "#9b59b6"},
-    "4": {background: "#ffeaa7", chart: "#f39c12"},
-    "5": {background: "#ffa7d6", chart: "#f312e0"},
-    "6": {background: "#a7fff5", chart: "#12ecf3"}
-};
