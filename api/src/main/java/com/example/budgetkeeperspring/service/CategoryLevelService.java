@@ -13,6 +13,10 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 public class CategoryLevelService {
 
+    public static final Integer INVESTMENT_CATEGORY_LEVEL = 2;
+    public static final Integer INCOME_CATEGORY_LEVEL = 4;
+    public static final Integer MORTGAGE_CATEGORY_LEVEL = 5;
+
     private final CategoryLevelRepository categoryLevelRepository;
 
     public Map<Integer, String> getCategoryLevels() {

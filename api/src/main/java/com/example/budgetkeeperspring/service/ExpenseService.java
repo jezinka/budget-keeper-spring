@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+import static com.example.budgetkeeperspring.service.CategoryLevelService.*;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
@@ -35,6 +36,7 @@ public class ExpenseService {
     private final CategoryRepository categoryRepository;
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
+    private final CategoryLevelService categoryLevelService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
@@ -59,7 +61,7 @@ public class ExpenseService {
     }
 
     public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
-        AtomicReference<Optional<ExpenseDTO>> atomicReference = new AtomicReference<>();
+        AtomicReference<Optional<ExpenseDTO>> expense = new AtomicReference<>();
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
@@ -77,16 +79,14 @@ public class ExpenseService {
                 );
             }
             expenseRepository.save(foundExpense);
-            atomicReference.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
-        }, () -> atomicReference.set(Optional.empty()));
+            expense.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
+        }, () -> expense.set(Optional.empty()));
 
-        return atomicReference.get();
+        return expense.get();
     }
 
     @Transactional
     public void splitExpense(Long id, List<ExpenseDTO> updateExpensesDTOs) {
-        log.debug("Expense (" + id + ") will be splitted and deleted");
-
         List<Expense> updateExpenses = updateExpensesDTOs.stream().map(expenseMapper::mapToEntity).toList();
         updateExpenses.forEach(expense -> {
             Category category = expense.getCategory();
@@ -95,11 +95,8 @@ public class ExpenseService {
                 expense.setCategory(savedCategory);
             }
         });
-        List<Expense> updated = expenseRepository.saveAll(updateExpenses);
+        expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
-
-        String newIds = updated.stream().map(e -> e.getId().toString()).collect(joining(","));
-        log.debug("Expense (" + id + ") deleted. Expenses " + newIds + " created");
     }
 
     public List<DailyExpensesDTO> getDailyExpenses(LocalDate begin, LocalDate end) {
@@ -209,7 +206,7 @@ public class ExpenseService {
         if (withInvestments) {
             yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end);
         } else {
-            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(2));
+            yearlyExpenses = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(INVESTMENT_CATEGORY_LEVEL));
         }
 
         yearlyExpenses
@@ -242,7 +239,7 @@ public class ExpenseService {
     }
 
     public List<PieChartExpenseDto> getTop10ExpensesForTimePeriod(LocalDate begin, LocalDate end) {
-        Map<String, BigDecimal> sums = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(2, 4))
+        Map<String, BigDecimal> sums = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(INVESTMENT_CATEGORY_LEVEL, INCOME_CATEGORY_LEVEL))
                 .stream()
                 .collect(groupingBy(Expense::getTitle,
                         reducing(BigDecimal.ZERO,
@@ -256,7 +253,7 @@ public class ExpenseService {
     }
 
     public List<PieChartExpenseDto> getExpensesPerCategoryLeveBetweenDates(LocalDate begin, LocalDate end) {
-        return expenseRepository.findSumAmountGroupedByCategoryLevel(begin, end, List.of(4));
+        return expenseRepository.findSumAmountGroupedByCategoryLevel(begin, end, List.of(INCOME_CATEGORY_LEVEL));
     }
 
     private Comparator<Expense> getExpenseComparator() {
@@ -286,7 +283,7 @@ public class ExpenseService {
         Map<String, Map<Integer, BigDecimal>> expensesSumForYear = expenseRepository.findAllByOrderByTransactionDateDesc()
                 .stream()
                 .filter(exp -> !exp.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY))
-                .filter(exp -> exp.getCategory().getLevel() != null && !List.of(2, 4, 5).contains(exp.getCategory().getLevel()))
+                .filter(exp -> exp.getCategory().getLevel() != null && !List.of(INVESTMENT_CATEGORY_LEVEL, INCOME_CATEGORY_LEVEL, MORTGAGE_CATEGORY_LEVEL).contains(exp.getCategory().getLevel()))
                 .collect(groupingBy(
                                 Expense::getCategoryName,
                                 groupingBy(Expense::getTransactionYear,

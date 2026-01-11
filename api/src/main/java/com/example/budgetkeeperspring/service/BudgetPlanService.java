@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
 import static com.example.budgetkeeperspring.service.CategoryService.UNKNOWN_CATEGORY;
 
 @Service
@@ -83,11 +84,12 @@ public class BudgetPlanService {
                        where e.category_id not in (select category_id from goal where date >= cast(:startDate as DATE)  and date <= cast(:endDate as DATE) ) \
                          and e.transaction_date >= cast(:startDate as DATE) \
                          and e.transaction_date <= cast(:endDate as DATE) AND !e.deleted \
-                         and c.level = 2""";
+                         and c.level = :level_investment""";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("startDate", startDate.toString());
         parameters.addValue("endDate", endDate.toString());
+        parameters.addValue("level_investment", INVESTMENT_CATEGORY_LEVEL);
 
         return namedParameterJdbcTemplate.queryForObject(sql, parameters, BigDecimal.class);
     }
