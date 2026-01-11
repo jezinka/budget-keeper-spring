@@ -255,7 +255,25 @@ public class ExpenseService {
     }
 
     public List<PieChartExpenseDto> getExpensesPerCategoryLeveBetweenDates(LocalDate begin, LocalDate end) {
-        return expenseRepository.findSumAmountGroupedByCategoryLevel(begin, end, List.of(INCOME_CATEGORY_LEVEL));
+        return expenseRepository.findSumAmountGroupedByCategoryLevelWithExclusion(begin, end, List.of(INCOME_CATEGORY_LEVEL));
+    }
+
+    public List<PieChartExpenseDto> getInvestmentGoalPieChartData(LocalDate begin, LocalDate end) {
+        List<PieChartExpenseDto> parts = new ArrayList<>();
+        Optional<GoalDTO> goal = goalService.findAllForYearAndCategoryLevel(begin.getYear(), List.of(INVESTMENT_CATEGORY_LEVEL)).stream().findFirst();
+        Optional<PieChartExpenseDto> investments = expenseRepository.findSumAmountGroupedByCategoryLevelForLevels(begin, end, List.of(INVESTMENT_CATEGORY_LEVEL)).stream().findFirst();
+        investments.ifPresent(pieChartExpenseDto -> parts.add(new PieChartExpenseDto("Inwestycje", pieChartExpenseDto.getAmount())));
+
+        if (goal.isPresent()) {
+            if (investments.isPresent()) {
+                if (investments.get().getAmount().compareTo(goal.get().getAmount()) < 0) {
+                    parts.add(new PieChartExpenseDto("Cel", goal.get().getAmount().subtract(investments.get().getAmount())));
+                }
+            } else {
+                parts.add(new PieChartExpenseDto("Cel", goal.get().getAmount()));
+            }
+        }
+        return parts;
     }
 
     private Comparator<Expense> getExpenseComparator() {

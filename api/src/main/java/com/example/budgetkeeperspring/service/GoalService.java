@@ -25,4 +25,12 @@ public class GoalService {
                 .map(goalMapper::mapToDto)
                 .collect(Collectors.toList());
     }
+
+    public List<GoalDTO> findAllForYearAndCategoryLevel(Integer year, List<Integer> categoryLevels) {
+        LocalDate begin = DateUtils.getBeginOfSelectedYear(year);
+        LocalDate end = DateUtils.getEndOfSelectedYear(year);
+        return goalRepository.findAllByDateBetweenAndCategory_LevelIsIn(begin, end, categoryLevels).stream()
+                .map(goalMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
 }

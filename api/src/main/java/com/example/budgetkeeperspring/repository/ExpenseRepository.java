@@ -28,5 +28,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "where e.transactionDate between :begin and :end " +
             "and c.level not in (:excludedLevels) " +
             "group by c.level, cl.name order by c.level")
-    List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevel(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("excludedLevels") List<Integer> excludedLevels);
+    List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevelWithExclusion(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("excludedLevels") List<Integer> excludedLevels);
+
+    @Query("select new com.example.budgetkeeperspring.dto.PieChartExpenseDto(cl.name, sum(e.amount)) from Expense e " +
+            "left join e.category c " +
+            "left join CategoryLevel cl on c.level = cl.level " +
+            "where e.transactionDate between :begin and :end " +
+            "and c.level in (:levels) " +
+            "group by c.level, cl.name order by c.level")
+    List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevelForLevels(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("levels") List<Integer> levels);
 }

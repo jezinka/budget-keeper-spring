@@ -15,5 +15,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     List<Goal> findAllByDateBetween(@Param("begin") LocalDate begin, @Param("end") LocalDate end);
 
+    List<Goal> findAllByDateBetweenAndCategory_LevelIsIn(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("level") List<Integer> levels);
+
     Optional<Goal> findGoalByCategoryAndDate(Category category, LocalDate date);
 }

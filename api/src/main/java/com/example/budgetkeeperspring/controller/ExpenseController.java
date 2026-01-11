@@ -157,6 +157,13 @@ public class ExpenseController {
         return expenseService.getExpensesPerCategoryLeveBetweenDates(begin, end);
     }
 
+    @GetMapping("/investmentGoalForYear")
+    List<PieChartExpenseDto> investmentGoalForYear(@RequestParam("year") Integer year) {
+        LocalDate begin = getBeginOfSelectedYear(year);
+        LocalDate end = getEndOfSelectedYear(year);
+        return expenseService.getInvestmentGoalPieChartData(begin, end);
+    }
+
     @GetMapping("/yearGroupedByLevel")
     Map<String, List<MonthCategoryAmountDTO>> yearGroupedByLevel(@RequestParam("year") Integer year) {
         LocalDate begin = getBeginOfSelectedYear(year);

@@ -14,11 +14,13 @@ const YearlyView = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [topExpenses, setTopExpenses] = useState([]);
     const [expensePieData, setExpensePieData] = useState([]);
+    const [investmentGoalPieData, setInvestmentGoalPieData] = useState([]);
 
     useEffect(() => {
         loadTransactions();
         loadTopExpenses();
         loadExpensePieData();
+        loadInvestmentGoalPieData();
     }, [year]);
 
     async function loadTransactions() {
@@ -40,6 +42,12 @@ const YearlyView = () => {
         const response = await fetch("/budget/expenses/categoryLevelExpensesForYear?year=" + year);
         const data = await response.json();
         setExpensePieData(data);
+    }
+
+    async function loadInvestmentGoalPieData() {
+        const response = await fetch("/budget/expenses/investmentGoalForYear?year=" + year);
+        const data = await response.json();
+        setInvestmentGoalPieData(data);
     }
 
     function ExpenseForMonthAndCategory(filteredTransactions, currMonth, currCategory) {
@@ -104,7 +112,7 @@ const YearlyView = () => {
             </Row>
 
             <Row className="mt-4">
-                <Col sm={6}>
+                <Col sm={4}>
                     <h4>Wydatki wg poziomów</h4>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
@@ -127,7 +135,7 @@ const YearlyView = () => {
                     </ResponsiveContainer>
                 </Col>
                 {topExpenses.length > 0 && (
-                    <Col sm={6}>
+                    <Col sm={4}>
                         <h4>Największe wydatki</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
@@ -152,6 +160,31 @@ const YearlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
+                {investmentGoalPieData.length > 0 && (
+                    <Col sm={4}>
+                        <h4>Cel inwestycyjny:</h4>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={investmentGoalPieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="amount">
+                                    {investmentGoalPieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={(value) => formatNumber(value)}
+                                    labelFormatter={(label, payload) => payload[0]?.payload?.name || label}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </Col>)}
             </Row>
 
             <SankeyComponent
