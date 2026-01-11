@@ -258,22 +258,21 @@ public class ExpenseService {
         return expenseRepository.findSumAmountGroupedByCategoryLevelWithExclusion(begin, end, List.of(INCOME_CATEGORY_LEVEL));
     }
 
-    public List<PieChartExpenseDto> getInvestmentGoalPieChartData(LocalDate begin, LocalDate end) {
-        List<PieChartExpenseDto> parts = new ArrayList<>();
-        Optional<GoalDTO> goal = goalService.findAllForYearAndCategoryLevel(begin.getYear(), List.of(INVESTMENT_CATEGORY_LEVEL)).stream().findFirst();
-        Optional<PieChartExpenseDto> investments = expenseRepository.findSumAmountGroupedByCategoryLevelForLevels(begin, end, List.of(INVESTMENT_CATEGORY_LEVEL)).stream().findFirst();
-        investments.ifPresent(pieChartExpenseDto -> parts.add(new PieChartExpenseDto("Inwestycje", pieChartExpenseDto.getAmount())));
+    public GoalChartDTO getInvestmentGoalPieChartData(LocalDate begin, LocalDate end) {
 
-        if (goal.isPresent()) {
-            if (investments.isPresent()) {
-                if (investments.get().getAmount().compareTo(goal.get().getAmount()) < 0) {
-                    parts.add(new PieChartExpenseDto("Cel", goal.get().getAmount().subtract(investments.get().getAmount())));
-                }
-            } else {
-                parts.add(new PieChartExpenseDto("Cel", goal.get().getAmount()));
-            }
-        }
-        return parts;
+        GoalChartDTO goalDto = new GoalChartDTO();
+
+        expenseRepository.findSumAmountGroupedByCategoryLevelForLevels(begin, end, List.of(INVESTMENT_CATEGORY_LEVEL))
+                .stream()
+                .findFirst()
+                .ifPresent(pieChartExpenseDto -> goalDto.setActual(pieChartExpenseDto.getAmount()));
+
+        goalService.findAllForYearAndCategoryLevel(begin.getYear(), List.of(INVESTMENT_CATEGORY_LEVEL))
+                .stream()
+                .findFirst()
+                .ifPresent(goalDTO -> goalDto.setTarget(goalDTO.getAmount()));
+
+        return goalDto;
     }
 
     private Comparator<Expense> getExpenseComparator() {

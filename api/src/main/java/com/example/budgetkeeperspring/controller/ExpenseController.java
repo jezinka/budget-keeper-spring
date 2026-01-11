@@ -158,7 +158,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/investmentGoalForYear")
-    List<PieChartExpenseDto> investmentGoalForYear(@RequestParam("year") Integer year) {
+    GoalChartDTO investmentGoalForYear(@RequestParam("year") Integer year) {
         LocalDate begin = getBeginOfSelectedYear(year);
         LocalDate end = getEndOfSelectedYear(year);
         return expenseService.getInvestmentGoalPieChartData(begin, end);
