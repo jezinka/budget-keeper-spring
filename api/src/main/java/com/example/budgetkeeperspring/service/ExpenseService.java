@@ -31,6 +31,8 @@ import static java.util.stream.Collectors.*;
 public class ExpenseService {
 
     private static final String CATEGORY = "category";
+    private static final String SUM_CATEGORY = "SUMA";
+    private static final Integer SUM_MONTH = 99;
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
@@ -314,4 +316,52 @@ public class ExpenseService {
         data.set("data", arrayNode);
         return data;
     }
+
+    public Map<String, List<MonthCategoryAmountDTO>> getYearlyExpensesGroupedByCategoryLevel(LocalDate begin, LocalDate end) {
+
+        List<MonthCategoryAmountDTO> expensesGroupedExpenses = new ArrayList<>();
+        List<MonthCategoryAmountDTO> incomesGroupedExpenses = new ArrayList<>();
+        List<MonthCategoryAmountDTO> investmentGroupedExpenses = new ArrayList<>();
+
+        Map<Integer, String> categoryLevels = categoryLevelService.getCategoryLevels();
+
+        expenseRepository.findAllByTransactionDateBetween(begin, end)
+                .stream()
+                .filter(p -> p.getCategory() != null && p.getCategory().getLevel() != null)
+                .collect(groupingBy(
+                        Expense::getTransactionMonth,
+                        groupingBy(expense -> expense.getCategory().getLevel(), reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add))))
+                .forEach((month, value) -> value.forEach((category, amount) -> {
+                    MonthCategoryAmountDTO monthCategoryAmountDTO = new MonthCategoryAmountDTO(month, categoryLevels.get(category), amount);
+                    if (category.equals(INCOME_CATEGORY_LEVEL)) {
+                        incomesGroupedExpenses.add(monthCategoryAmountDTO);
+                    } else if (category.equals(INVESTMENT_CATEGORY_LEVEL)) {
+                        investmentGroupedExpenses.add(monthCategoryAmountDTO);
+                    } else {
+                        expensesGroupedExpenses.add(monthCategoryAmountDTO);
+                    }
+                }));
+
+        addSumColumn(expensesGroupedExpenses);
+        addSumColumn(investmentGroupedExpenses);
+        addSumColumn(incomesGroupedExpenses);
+
+        expensesGroupedExpenses.stream()
+                .collect(groupingBy(
+                        MonthCategoryAmountDTO::getMonth, reducing(BigDecimal.ZERO,
+                                MonthCategoryAmountDTO::getAmount, BigDecimal::add)))
+                .forEach((month, amount) -> expensesGroupedExpenses.add(new MonthCategoryAmountDTO(month, SUM_CATEGORY, amount)));
+
+        return Map.of("incomes", incomesGroupedExpenses, "expenses", expensesGroupedExpenses, "investments", investmentGroupedExpenses);
+    }
+
+    private void addSumColumn(List<MonthCategoryAmountDTO> expenses) {
+        expenses.stream()
+                .collect(groupingBy(
+                        MonthCategoryAmountDTO::getCategory, reducing(BigDecimal.ZERO,
+                                MonthCategoryAmountDTO::getAmount, BigDecimal::add)))
+                .forEach((category, amount) -> expenses.add(new MonthCategoryAmountDTO(SUM_MONTH, category, amount)));
+    }
+
 }

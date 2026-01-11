@@ -1,38 +1,33 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row, Table} from "react-bootstrap";
-import {formatNumber, getMonthName} from "../../Utils";
+import {formatNumber, getMonthName, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
 import SankeyComponent from "../monthlyView/SankeyComponent";
 
 const YearlyView = () => {
-    const [transactions, setTransactions] = useState([]);
+    const [expenses, setExpenses] = useState([]);
+    const [investments, setInvestments] = useState([]);
+    const [incomes, setIncomes] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
     const [topExpenses, setTopExpenses] = useState([]);
     const [expensePieData, setExpensePieData] = useState([]);
 
     useEffect(() => {
-        // always load transactions and category levels for the selected year/month
         loadTransactions();
-        loadCategoryLevels();
         loadTopExpenses();
         loadExpensePieData();
     }, [year]);
 
     async function loadTransactions() {
-        const response = await fetch(`/budget/expenses/selectedYear?year=${year}`);
+        const response = await fetch(`/budget/expenses/yearGroupedByLevel?year=${year}`);
         const data = await response.json();
-        // Sort by date (oldest first) - create copy to avoid mutation
-        const sorted = [...data].sort((a, b) => a.transactionDate.localeCompare(b.transactionDate));
-        setTransactions(sorted);
-    }
-
-    async function loadCategoryLevels() {
-        const response = await fetch("/budget/categories/levels");
-        const data = await response.json();
-        setCategoryLevels(data);
+        setExpenses(data['expenses']);
+        setIncomes(data['incomes']);
+        setInvestments(data['investments']);
+        setCategoryLevels([...new Set(data['expenses'].map(d => d.category))])
     }
 
     async function loadTopExpenses() {
@@ -47,86 +42,26 @@ const YearlyView = () => {
         setExpensePieData(data);
     }
 
-    // Helper function to get category level name
-    const getCategoryLevelName = (level) => {
-        if (level === null || level === undefined) return "Nieznane";
-        const levelInfo = categoryLevels.find(cl => parseInt(cl.level) === level);
-        return levelInfo ? levelInfo.name : "Nieznane";
-    };
+    function ExpenseForMonthAndCategory(filteredTransactions, currMonth, currCategory) {
 
-    // Helper function to get color for a category level
+        let expenseAmount = 0;
 
+        if (!(Object.keys(filteredTransactions).length === 0)) {
+            let foundExpense = filteredTransactions.find(e => e.month === currMonth && e.category === currCategory);
 
-    // Helper function to get chart color based on category level
-
-
-    // Separate expenses and incomes (use strict numeric comparisons)
-    const expenses = transactions.filter(t => Number(t.categoryLevel) !== 4);
-    const incomes = transactions.filter(t => Number(t.categoryLevel) === 4);
-
-    // Helper function to calculate sums by category level (for pie chart)
-    const calculateCategoryLevelSums = (transactions) => {
-        return transactions
-            .reduce((acc, transaction) => {
-                const level = transaction.categoryLevel !== null && transaction.categoryLevel !== undefined
-                    ? transaction.categoryLevel
-                    : -1;
-                const levelName = getCategoryLevelName(level);
-
-                if (!acc[level]) {
-                    acc[level] = {
-                        sum: 0,
-                        levelName: levelName
-                    };
-                }
-                acc[level].sum += transaction.amount;
-                return acc;
-            }, {});
-    };
-
-    // totals per level computed from the raw expenses (all negative transactions)
-    const categoryLevelExpenseSums = calculateCategoryLevelSums(expenses);
-
-    // Sort by level
-    Object.keys(categoryLevelExpenseSums)
-        .map(k => parseInt(k))
-        .sort((a, b) => a - b);
-
-    // --- new: monthly sums per category level (expenses only) ---
-    // build list of levels to display (use categoryLevels if available, otherwise derive from data)
-    const levelsListRaw = (categoryLevels && categoryLevels.length > 0)
-        ? categoryLevels.map(cl => ({level: parseInt(cl.level), name: cl.name})).sort((a, b) => a.level - b.level)
-        : Object.keys(calculateCategoryLevelSums(expenses)).map(k => ({
-            level: parseInt(k),
-            name: (calculateCategoryLevelSums(expenses))[k].levelName
-        })).sort((a, b) => a.level - b.level);
-
-    // main table should not include category level 4 (wpływy) — extract levels for main table
-    const levelsForMain = levelsListRaw.filter(l => l.level !== 4);
-
-    // initialize monthly-level sums 1..12 for all levels (we'll use levelsForMain when rendering main table)
-    const monthlyLevelSums = {};
-    for (let m = 1; m <= 12; m++) {
-        monthlyLevelSums[m] = {};
-        levelsListRaw.forEach(l => monthlyLevelSums[m][l.level] = 0);
+            if (foundExpense !== undefined) {
+                expenseAmount = foundExpense.amount;
+            }
+        }
+        return <td style={{textAlign: 'right'}}>{formatNumber(expenseAmount)}</td>;
     }
 
-    // aggregate expenses per month and per level (use absolute values so table shows positive sums)
-    expenses.forEach(e => {
-        const d = new Date(e.transactionDate);
-        const m = d.getMonth() + 1;
-        const lvl = e.categoryLevel !== null && e.categoryLevel !== undefined ? e.categoryLevel : -1;
-        if (!monthlyLevelSums[m]) monthlyLevelSums[m] = {};
-        monthlyLevelSums[m][lvl] = (monthlyLevelSums[m][lvl] || 0) + e.amount;
-    });
-
-    // --- new: monthly sums for incomes (category level 4) computed from positive transactions ---
-    const monthlyIncomeSums = Array.from({length: 12}, () => 0);
-    incomes.forEach(t => {
-        const m = new Date(t.transactionDate).getMonth(); // 0..11
-        monthlyIncomeSums[m] = (monthlyIncomeSums[m] || 0) + t.amount;
-    });
-    const totalIncomeYear = monthlyIncomeSums.reduce((a, b) => a + b, 0);
+    function getTableRows(transactions, currentCategory) {
+        return <>
+            {MONTHS_ARRAY.map(currentMonth => ExpenseForMonthAndCategory(transactions, currentMonth, currentCategory))}
+            {ExpenseForMonthAndCategory(transactions, SUM_MONTH, currentCategory)}
+        </>;
+    }
 
     let body = <>
         <Col sm={12}>
@@ -140,49 +75,30 @@ const YearlyView = () => {
             <Row className="mt-3">
                 <Col sm={12}>
                     <h4>Sumy miesięczne per poziom kategorii</h4>
-                    {/* Precompute column totals */}
                     {(() => {
-                        const months = Array.from({length: 12}, (_, i) => i + 1);
-                        // monthTotals for main table (exclude incomes level 4)
-                        const monthTotals = months.map(m => levelsForMain.reduce((acc, l) => acc + (monthlyLevelSums[m][l.level] || 0), 0));
-                        const grandTotal = monthTotals.reduce((a, b) => a + b, 0);
-
-                        return (
-                            <Table responsive='sm' striped bordered size="sm">
-                                <thead>
-                                <tr className='table-info'>
-                                    <th>Kategoria</th>
-                                    {months.map(m => <th key={m}
-                                                         style={{textAlign: 'right'}}>{getMonthName(m, 'long')}</th>)}
-                                    <th style={{textAlign: 'right'}}>Razem</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {levelsForMain.map(l => {
-                                    const rowTotal = months.reduce((acc, m) => acc + (monthlyLevelSums[m][l.level] || 0), 0);
-                                    if (rowTotal === 0) return null; // skip levels with zero total
-                                    return (
-                                        <tr key={l.level}>
-                                            <td>{l.name}</td>
-                                            {months.map(m => (
-                                                <td key={m}
-                                                    style={{textAlign: 'right'}}>{formatNumber(monthlyLevelSums[m][l.level] || 0)}</td>
-                                            ))}
-                                            <td style={{textAlign: 'right'}}>{formatNumber(rowTotal)}</td>
-                                        </tr>
-                                    );
-                                })}
-                                </tbody>
-                                <tfoot>
-                                <tr style={{fontWeight: 'bold', backgroundColor: '#e9ecef'}}>
-                                    <td>Razem</td>
-                                    {monthTotals.map((t, idx) => <td key={idx}
-                                                                     style={{textAlign: 'right'}}>{formatNumber(t)}</td>)}
-                                    <td style={{textAlign: 'right'}}>{formatNumber(grandTotal)}</td>
-                                </tr>
-                                </tfoot>
-                            </Table>
-                        );
+                        return (<Table id="yearly" responsive='sm' striped bordered size="sm">
+                            <thead>
+                            <tr className='table-info'>
+                                <th></th>
+                                {
+                                    MONTHS_ARRAY.map(month => {
+                                        let monthName = getMonthName(month, 'long');
+                                        return <th key={month}
+                                                   style={{textAlign: "center"}}>{monthName}</th>
+                                    })
+                                }
+                                <th className="summary">{SUM_CATEGORY}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {categoryLevels.map(currentCategory =>
+                                <tr key={currentCategory}>
+                                    <td>{currentCategory}</td>
+                                    {getTableRows(expenses, currentCategory)}
+                                </tr>)
+                            }
+                            </tbody>
+                        </Table>);
                     })()}
                 </Col>
             </Row>
@@ -243,32 +159,31 @@ const YearlyView = () => {
                 month={null}
             />
 
-            {/* incomes (level 4) in separate table */}
-            {totalIncomeYear > 0 && (
-                <Row className="mt-3">
-                    <Col sm={12}>
-                        <h4>Wpływy</h4>
-                        <Table responsive='sm' striped bordered size="sm">
-                            <thead>
-                            <tr className='table-info'>
-                                <th>Pozycja</th>
-                                {Array.from({length: 12}, (_, i) => i + 1).map(m => <th key={m}
-                                                                                        style={{textAlign: 'right'}}>{getMonthName(m, 'short')}</th>)}
-                                <th style={{textAlign: 'right'}}>Razem</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>Wpływy</td>
-                                {monthlyIncomeSums.map((val, idx) => <td key={idx}
-                                                                         style={{textAlign: 'right'}}>{formatNumber(val)}</td>)}
-                                <td style={{textAlign: 'right'}}>{formatNumber(totalIncomeYear)}</td>
-                            </tr>
-                            </tbody>
-                        </Table>
-                    </Col>
-                </Row>
-            )}
+            <Table responsive='sm' striped bordered size="sm">
+                <thead>
+                <tr className='table-info'>
+                    <th></th>
+                    {
+                        MONTHS_ARRAY.map(month => {
+                            let monthName = getMonthName(month, 'long');
+                            return <th key={month}
+                                       style={{textAlign: "center"}}>{monthName}</th>
+                        })
+                    }
+                    <th className="summary">{SUM_CATEGORY}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Wpływy</td>
+                    {getTableRows(incomes, "Wpływy")}
+                </tr>
+                <tr>
+                    <td>Inwestycje</td>
+                    {getTableRows(investments, "Inwestycje")}
+                </tr>
+                </tbody>
+            </Table>
         </Col>
     </>;
 

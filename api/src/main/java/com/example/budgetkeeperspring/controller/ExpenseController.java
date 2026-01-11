@@ -15,6 +15,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.budgetkeeperspring.utils.DateUtils.*;
 
@@ -154,5 +155,12 @@ public class ExpenseController {
         LocalDate begin = getBeginOfSelectedMonth(year, month);
         LocalDate end = getEndOfSelectedMonth(year, month);
         return expenseService.getExpensesPerCategoryLeveBetweenDates(begin, end);
+    }
+
+    @GetMapping("/yearGroupedByLevel")
+    Map<String, List<MonthCategoryAmountDTO>> yearGroupedByLevel(@RequestParam("year") Integer year) {
+        LocalDate begin = getBeginOfSelectedYear(year);
+        LocalDate end = getEndOfSelectedYear(year);
+        return expenseService.getYearlyExpensesGroupedByCategoryLevel(begin, end);
     }
 }
