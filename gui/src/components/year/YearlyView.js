@@ -162,7 +162,7 @@ const YearlyView = () => {
                 )}
                 {investmentGoalPieData.length > 0 && (
                     <Col sm={4}>
-                        <h4>Cel inwestycyjny:</h4>
+                        <h4>Cel inwestycyjny</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
