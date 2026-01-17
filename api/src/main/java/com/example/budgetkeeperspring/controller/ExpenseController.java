@@ -5,7 +5,6 @@ import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.example.budgetkeeperspring.utils.DateUtils;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -108,11 +107,6 @@ public class ExpenseController {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
         return expenseService.getDailyExpenses(begin, end);
-    }
-
-    @GetMapping("/lifestyleInflation")
-    public ObjectNode getLifestyleInflation() {
-        return expenseService.getLifestyleInflation();
     }
 
     @GetMapping("/monthlyBudgetFlow")

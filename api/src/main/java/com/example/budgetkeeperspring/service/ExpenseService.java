@@ -8,9 +8,6 @@ import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +19,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import static com.example.budgetkeeperspring.service.CategoryLevelService.*;
-import static java.util.stream.Collectors.*;
+import static com.example.budgetkeeperspring.service.CategoryLevelService.INCOME_CATEGORY_LEVEL;
+import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -296,42 +295,6 @@ public class ExpenseService {
             return true;
         }
         return false;
-    }
-
-    public ObjectNode getLifestyleInflation() {
-        Map<String, Map<Integer, BigDecimal>> expensesSumForYear = expenseRepository.findAllByOrderByTransactionDateDesc()
-                .stream()
-                .filter(exp -> !exp.getCategory().getId().equals(CategoryService.UNKNOWN_CATEGORY))
-                .filter(exp -> exp.getCategory().getLevel() != null && !List.of(INVESTMENT_CATEGORY_LEVEL, INCOME_CATEGORY_LEVEL, MORTGAGE_CATEGORY_LEVEL).contains(exp.getCategory().getLevel()))
-                .collect(groupingBy(
-                                Expense::getCategoryName,
-                                groupingBy(Expense::getTransactionYear,
-                                        reducing(BigDecimal.ZERO,
-                                                Expense::getAmount, BigDecimal::add))
-                        )
-                );
-
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode arrayNode = mapper.createArrayNode();
-
-        expensesSumForYear.forEach((k, v) -> {
-            if (v.values().stream().allMatch(amount -> amount.compareTo(BigDecimal.ZERO) == 0)) {
-                return;
-            }
-
-            if (v.containsKey(LocalDate.now().getYear() - 1) || v.containsKey(LocalDate.now().getYear())) {
-                ObjectNode node = mapper.createObjectNode();
-                if (v.size() > 1) {
-                    node.put("category", k);
-                    v.forEach((year, amount) -> node.put(year.toString(), amount.abs()));
-                    arrayNode.add(node);
-                }
-            }
-        });
-
-        ObjectNode data = mapper.createObjectNode();
-        data.set("data", arrayNode);
-        return data;
     }
 
     public Map<String, List<MonthCategoryAmountDTO>> getYearlyExpensesGroupedByCategoryLevel(LocalDate begin, LocalDate end) {
