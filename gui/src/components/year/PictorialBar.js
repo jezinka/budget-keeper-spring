@@ -44,7 +44,7 @@ const PictorialBar = ({year}) => {
             top: 'center',
             height: 50,
             left: 10,
-            right: 50
+            right: 70
         },
         series: [
             {
@@ -81,24 +81,24 @@ const PictorialBar = ({year}) => {
                 // full data
                 type: 'pictorialBar',
                 itemStyle: {
-                    opacity: 0.2
+                    opacity: 0.4
                 },
                 label: {
                     show: true,
-                    formatter: function (params) {
-                        return ((params.value / maxData) * 100).toFixed(1) + ' %';
+                    formatter: function () {
+                        return ((currentData / maxData) * 100).toFixed(1) + ' %';
                     },
                     position: 'right',
-                    offset: [10, 0],
-                    color: 'green',
-                    fontSize: 18
+                    offset: [1, 0],
+                    color: 'black',
+                    fontSize: 15
                 },
                 symbolRepeat: 'fixed',
                 symbolMargin: '5%',
                 symbol: treeDataURI,
                 symbolSize: 20,
                 symbolBoundingData: maxData,
-                data: [currentData],
+                data: [maxData],
                 z: 5
             }
         ]
