@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Service
@@ -78,7 +79,14 @@ public class CategoryService {
                 .stream()
                 .filter(fc -> {
                     Circ c = fc.getCirc();
-                    return (c.getTitle() != null && title.contains(c.getTitle())) || (c.getPayee() != null && payee.contains(c.getPayee()));
+                    if (c.getTitle() == null) {
+                        return payee.contains(c.getPayee().toLowerCase());
+                    }
+                    if (c.getPayee() == null) {
+                        return title.contains(c.getTitle().toLowerCase());
+                    }
+
+                    return title.contains(c.getTitle().toLowerCase()) && payee.contains(c.getPayee().toLowerCase());
                 })
                 .map(CategoryCondition::getCategory)
                 .findFirst()
