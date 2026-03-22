@@ -15,6 +15,8 @@ const Navigation = () => {
                 <hr/>
                 <Nav.Link href="/budget/gui/allTransactions">Wszystkie transakcje</Nav.Link>
                 <Nav.Link href="/budget/gui/logs">Logi</Nav.Link>
+                <hr/>
+                <Nav.Link href="/budget/gui/investments">Inwestycje</Nav.Link>
             </Container>
         </Nav>
     )

@@ -50,3 +50,5 @@ gui/package-lock.json
 
 ### Static resources ###
 api/src/main/resources/static/
+application-local.properties
+*.env
