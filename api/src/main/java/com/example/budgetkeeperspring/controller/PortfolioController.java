@@ -12,19 +12,18 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/portfolio")
 public class PortfolioController {
-
-    public static final String PATH = "/portfolio";
 
     private final PortfolioSnapshotService portfolioSnapshotService;
     private final FireStageService fireStageService;
 
-    @GetMapping(PATH + "/snapshots")
+    @GetMapping("/snapshots")
     List<PortfolioSnapshotDTO> getSnapshots() {
         return portfolioSnapshotService.findAll();
     }
 
-    @PostMapping(PATH + "/snapshots")
+    @PostMapping("/snapshots")
     ResponseEntity<PortfolioSnapshotDTO> addSnapshot(@RequestBody PortfolioSnapshotDTO dto) {
         PortfolioSnapshotDTO saved = portfolioSnapshotService.save(dto.getDate(), dto.getValue(), dto.getInvestedCapital());
         if (saved == null) {
@@ -33,13 +32,13 @@ public class PortfolioController {
         return ResponseEntity.status(201).body(saved);
     }
 
-    @PostMapping(PATH + "/snapshots/fetch")
+    @PostMapping("/snapshots/fetch")
     ResponseEntity<Void> fetchNow() {
         portfolioSnapshotService.fetchFromMyFundAndSave();
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(PATH + "/fire-stages")
+    @GetMapping("/fire-stages")
     List<FireStageDTO> getFireStages() {
         return fireStageService.findAll();
     }
