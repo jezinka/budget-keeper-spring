@@ -3,6 +3,8 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.BudgetPlanDTO;
 import com.example.budgetkeeperspring.dto.BudgetPlanSummaryDTO;
 import com.example.budgetkeeperspring.service.BudgetPlanService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +26,7 @@ import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMont
 
 @RestController
 @RequestMapping("/budgetPlan")
+@Tag(name = "Budget Plan", description = "Operations for managing budget plans")
 public class BudgetPlanController {
 
     private final BudgetPlanService budgetPlanService;
@@ -33,6 +36,7 @@ public class BudgetPlanController {
         this.budgetPlanService = budgetPlanService;
     }
 
+    @Operation(summary = "Get budget plan for the current month")
     @GetMapping
     public List<BudgetPlanDTO> getBudgetPlan() {
         LocalDate startDate = getBeginOfCurrentMonth();
@@ -40,6 +44,7 @@ public class BudgetPlanController {
         return budgetPlanService.getBudgetPlan(startDate, endDate);
     }
 
+    @Operation(summary = "Get budget plan summary for the current month")
     @GetMapping("/summary")
     public BudgetPlanSummaryDTO getBudgetPlanSummary() {
         LocalDate startDate = getBeginOfCurrentMonth();
@@ -47,6 +52,7 @@ public class BudgetPlanController {
         return budgetPlanService.getBudgetPlanSummary(startDate, endDate);
     }
 
+    @Operation(summary = "Upload a CSV file to create budget plan goals")
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
@@ -60,6 +66,7 @@ public class BudgetPlanController {
         return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully: " + file.getOriginalFilename());
     }
 
+    @Operation(summary = "Export budget plan as a CSV file")
     @GetMapping("/export")
     public ResponseEntity<InputStreamResource> exportFile() {
         String data = budgetPlanService.writeDataToCsv();
@@ -74,12 +81,14 @@ public class BudgetPlanController {
                 .body(new InputStreamResource(byteArrayInputStream));
     }
 
+    @Operation(summary = "Auto-fill budget goals based on average of past months")
     @PostMapping("/autoFill")
     public ResponseEntity<String> autoFillGoals(@RequestParam(value = "months", required = false, defaultValue = "3") int months) {
         String result = budgetPlanService.autoFillGoalsFromAverage(months);
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Delete a budget plan goal by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteGoal(@PathVariable("id") Long id) {
         try {
@@ -90,6 +99,7 @@ public class BudgetPlanController {
         }
     }
 
+    @Operation(summary = "Update a budget plan goal amount by ID")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateGoal(@PathVariable("id") Long id, @RequestBody Map<String, Object> body) {
         try {
