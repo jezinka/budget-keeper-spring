@@ -3,6 +3,8 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.CurrentMonthMoneyAmountDTO;
 import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.service.MoneyAmountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -19,12 +21,14 @@ import static com.example.budgetkeeperspring.utils.DateUtils.getEndOfCurrentMont
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@Tag(name = "Money Amount", description = "Operations for tracking account money amounts")
 public class MoneyAmountController {
 
     public static final String MONEY_AMOUNT_PATH = "/moneyAmount";
 
     private final MoneyAmountService moneyAmountService;
 
+    @Operation(summary = "Get money amount for the current month")
     @GetMapping(MONEY_AMOUNT_PATH)
     CurrentMonthMoneyAmountDTO getCurrentMonth() {
         LocalDate startDate = getBeginOfCurrentMonth();
@@ -32,12 +36,14 @@ public class MoneyAmountController {
         return moneyAmountService.getForPeriod(startDate, endDate);
     }
 
+    @Operation(summary = "Get money amount for a specified period")
     //get for period from request params
     @GetMapping(MONEY_AMOUNT_PATH + "/period")
     CurrentMonthMoneyAmountDTO getForPeriod(@RequestParam("startDate") LocalDate startDate, @RequestParam("endDate") LocalDate endDate) {
         return moneyAmountService.getForPeriod(startDate, endDate);
     }
 
+    @Operation(summary = "Add a money amount entry for the current month")
     @PostMapping(MONEY_AMOUNT_PATH)
     ResponseEntity<MoneyAmountDTO> addMoneyAmountForCurrentMonth(@Validated @RequestBody MoneyAmountDTO newAmount) {
         MoneyAmountDTO savedMoneyAmount = moneyAmountService.addMoneyAmountForCurrentMonth(newAmount);

@@ -48,6 +48,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
     implementation 'org.quartz-scheduler:quartz:2.3.2'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 
     runtimeOnly 'mysql:mysql-connector-java:8.0.32'
 
