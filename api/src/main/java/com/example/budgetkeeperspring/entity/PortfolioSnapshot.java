@@ -29,6 +29,8 @@ public class PortfolioSnapshot {
     @NotNull
     private BigDecimal value;
 
+    private BigDecimal investedCapital;
+
     @CreationTimestamp
     private LocalDate createdAt;
 }

@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -33,6 +35,13 @@ public class PortfolioSnapshotService {
     @Value("${myfund.api.key}")
     private String apiKey;
 
+    private HttpClient httpClient;
+
+    @PostConstruct
+    void init() {
+        httpClient = HttpClient.newHttpClient();
+    }
+
     public List<PortfolioSnapshotDTO> findAll() {
         return portfolioSnapshotRepository.findAllByOrderByDateAsc()
                 .stream()
@@ -40,49 +49,70 @@ public class PortfolioSnapshotService {
                         .id(e.getId())
                         .date(e.getDate())
                         .value(e.getValue())
+                        .investedCapital(e.getInvestedCapital())
                         .build())
                 .toList();
     }
 
     public PortfolioSnapshotDTO save(LocalDate date, BigDecimal value) {
-        if (portfolioSnapshotRepository.findByDate(date).isPresent()) {
-            log.info("Portfolio snapshot for {} already exists, skipping", date);
-            return null;
+        return save(date, value, null);
+    }
+
+    @Transactional
+    public PortfolioSnapshotDTO save(LocalDate date, BigDecimal value, BigDecimal investedCapital) {
+        PortfolioSnapshot snapshot = portfolioSnapshotRepository.findByDate(date)
+                .orElseGet(() -> PortfolioSnapshot.builder().date(date).build());
+
+        snapshot.setValue(value);
+        if (investedCapital != null) {
+            snapshot.setInvestedCapital(investedCapital);
         }
-        PortfolioSnapshot saved = portfolioSnapshotRepository.save(
-                PortfolioSnapshot.builder()
-                        .date(date)
-                        .value(value)
-                        .build()
-        );
+
+        PortfolioSnapshot saved = portfolioSnapshotRepository.save(snapshot);
         fireStageService.checkAndMarkCrossedStages(date, value);
         return PortfolioSnapshotDTO.builder()
                 .id(saved.getId())
                 .date(saved.getDate())
                 .value(saved.getValue())
+                .investedCapital(saved.getInvestedCapital())
                 .build();
     }
 
     public void fetchFromMyFundAndSave() {
         String url = String.format(apiUrl, apiKey);
-        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 log.error("myFund API returned status {}", response.statusCode());
                 return;
             }
             JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
-            BigDecimal value = root.getAsJsonObject("portfel").get("wartosc").getAsBigDecimal();
-            save(LocalDate.now(), value);
-            log.info("Fetched portfolio value {} for {}", value, LocalDate.now());
+            LocalDate today = LocalDate.now();
+
+            JsonObject portfel = root.getAsJsonObject("portfel");
+            if (portfel == null || portfel.get("wartosc") == null) {
+                log.error("Unexpected myFund API response — missing portfel.wartosc. Body: {}", response.body());
+                return;
+            }
+            BigDecimal value = portfel.get("wartosc").getAsBigDecimal();
+
+            BigDecimal investedCapital = null;
+            JsonObject wkladWCzasie = root.getAsJsonObject("wkladWCzasie");
+            if (wkladWCzasie != null && wkladWCzasie.has(today.toString())) {
+                investedCapital = wkladWCzasie.get(today.toString()).getAsBigDecimal();
+            }
+
+            save(today, value, investedCapital);
+            log.info("Fetched portfolio value={} investedCapital={} for {}", value, investedCapital, today);
         } catch (IOException | InterruptedException e) {
             log.error("Failed to fetch portfolio snapshot from myFund", e);
             Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            log.error("Unexpected error while parsing myFund API response", e);
         }
     }
 }

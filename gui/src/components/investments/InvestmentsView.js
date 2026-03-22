@@ -2,11 +2,12 @@ import React, {useEffect, useState} from 'react';
 import Main from '../main/Main';
 import PortfolioChart from './PortfolioChart';
 import FireProgressBar from './FireProgressBar';
+import PortfolioStats from './PortfolioStats';
 import {Col, Row} from 'react-bootstrap';
 
 const InvestmentsView = () => {
     const [fireStages, setFireStages] = useState([]);
-    const [currentValue, setCurrentValue] = useState(null);
+    const [snapshots, setSnapshots] = useState([]);
 
     useEffect(() => {
         fetch('/budget/portfolio/fire-stages')
@@ -16,23 +17,24 @@ const InvestmentsView = () => {
 
         fetch('/budget/portfolio/snapshots')
             .then(res => res.json())
-            .then(data => {
-                if (data.length) setCurrentValue(data[data.length - 1].value);
-            })
+            .then(setSnapshots)
             .catch(() => {});
     }, []);
+
+    const currentValue = snapshots.length ? snapshots[snapshots.length - 1].value : null;
 
     return (
         <Main body={
             <Col>
                 <Row className="mt-3">
                     <Col>
-                        <h5>Wartość portfela w czasie</h5>
+                        <PortfolioStats snapshots={snapshots}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col>
-                        <PortfolioChart fireStages={fireStages}/>
+                        <h6 className="text-muted">Wartość portfela w czasie</h6>
+                        <PortfolioChart fireStages={fireStages} snapshots={snapshots}/>
                     </Col>
                 </Row>
                 <Row>

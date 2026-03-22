@@ -39,7 +39,11 @@ const aggregate = (snapshots, granularity) => {
     const map = new Map();
     for (const s of snapshots) {
         const key = getGroupKey(s.date, granularity);
-        map.set(key, {date: key, value: Number(s.value)});
+        map.set(key, {
+            date: key,
+            value: Number(s.value),
+            investedCapital: s.investedCapital != null ? Number(s.investedCapital) : null,
+        });
     }
     return Array.from(map.values());
 };
@@ -127,12 +131,17 @@ const FireVerticalLines = ({xAxisMap, yAxisMap, crossingPoints}) => {
     );
 };
 
-const PortfolioChart = ({fireStages = []}) => {
-    const [snapshots, setSnapshots] = useState([]);
-    const [loading, setLoading] = useState(true);
+const PortfolioChart = ({fireStages = [], snapshots: snapshotsProp = null}) => {
+    const [snapshots, setSnapshots] = useState(snapshotsProp || []);
+    const [loading, setLoading] = useState(!snapshotsProp);
     const [granularity, setGranularity] = useState('monthly');
 
     useEffect(() => {
+        if (snapshotsProp !== null) {
+            setSnapshots(snapshotsProp);
+            setLoading(false);
+            return;
+        }
         fetch('/budget/portfolio/snapshots')
             .then(res => res.json())
             .then(data => {
@@ -140,7 +149,7 @@ const PortfolioChart = ({fireStages = []}) => {
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-    }, []);
+    }, [snapshotsProp]);
 
     if (loading) return <p>Ładowanie...</p>;
     if (snapshots.length === 0) return <p>Brak danych. Uruchom import snapshotów.</p>;
@@ -189,7 +198,7 @@ const PortfolioChart = ({fireStages = []}) => {
                 ))}
             </ButtonGroup>
 
-            <ResponsiveContainer width="100%" height={600}>
+            <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={data} margin={{top: 20, right: 30, left: 10, bottom: 10}}>
                     <CartesianGrid strokeDasharray="3 3"/>
                     <XAxis
@@ -209,11 +218,23 @@ const PortfolioChart = ({fireStages = []}) => {
                     )}/>
                     <Line
                         type="monotone"
+                        dataKey="investedCapital"
+                        stroke="#adb5bd"
+                        strokeWidth={1.5}
+                        strokeDasharray="5 3"
+                        dot={false}
+                        connectNulls={false}
+                        name="Wkład własny"
+                    />
+                    <Line
+                        type="monotone"
                         dataKey="value"
                         stroke="#4e79a7"
                         strokeWidth={2}
                         dot={renderDot}
                         activeDot={{r: 5}}
+                        connectNulls={false}
+                        name="Wartość portfela"
                     />
                 </LineChart>
             </ResponsiveContainer>

@@ -17,4 +17,5 @@ public class PortfolioSnapshotDTO {
     private Long id;
     private LocalDate date;
     private BigDecimal value;
+    private BigDecimal investedCapital;
 }

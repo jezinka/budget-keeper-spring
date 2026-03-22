@@ -26,7 +26,7 @@ public class PortfolioController {
 
     @PostMapping(PATH + "/snapshots")
     ResponseEntity<PortfolioSnapshotDTO> addSnapshot(@RequestBody PortfolioSnapshotDTO dto) {
-        PortfolioSnapshotDTO saved = portfolioSnapshotService.save(dto.getDate(), dto.getValue());
+        PortfolioSnapshotDTO saved = portfolioSnapshotService.save(dto.getDate(), dto.getValue(), dto.getInvestedCapital());
         if (saved == null) {
             return ResponseEntity.status(409).build();
         }
