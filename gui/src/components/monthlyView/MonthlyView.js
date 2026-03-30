@@ -30,7 +30,7 @@ const MonthlyView = () => {
     }
 
     let body = <>
-        <Col sm={12}>
+        <Col sm={11}>
             <h2>{`Wydatki i wpływy za ${getMonthName(month, 'long')} ${year}`}</h2>
 
             <MonthYearFilter
