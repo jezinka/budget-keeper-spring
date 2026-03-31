@@ -68,11 +68,13 @@ const formatThreshold = (value) => {
 };
 
 const CustomTooltip = ({active, payload, label, granularity}) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && payload[0].payload) {
+        let values = payload[0].payload;
         return (
             <div style={{background: '#fff', border: '1px solid #ccc', padding: '8px 12px', borderRadius: 4}}>
                 <p style={{margin: 0, fontWeight: 'bold'}}>{formatLabel(label, granularity)}</p>
-                <p style={{margin: 0, color: '#4e79a7'}}>{formatNumber(payload[0].value)} PLN</p>
+                <p style={{margin: 0, color: '#224c78'}}>{formatNumber(values.value)} PLN</p>
+                <p style={{margin: 0, color: '#4e79a7'}}>{formatNumber(values.investedCapital)} PLN</p>
             </div>
         );
     }
