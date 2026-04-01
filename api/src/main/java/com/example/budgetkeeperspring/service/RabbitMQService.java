@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.LogDTO;
+import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.mapper.LogMapper;
 import com.example.budgetkeeperspring.repository.LogRepository;
@@ -43,7 +44,7 @@ public class RabbitMQService {
         return connectionFactory;
     }
 
-    @RabbitListener(queues = "expense")
+    //    @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -53,12 +54,20 @@ public class RabbitMQService {
         log.info("Saved expense: " + savedExpense);
     }
 
-    @RabbitListener(queues = "log")
+    //    @RabbitListener(queues = "log")
     public void listenLogs(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
         LogDTO logDto = g.fromJson(in, LogDTO.class);
         logRepository.save(logMapper.mapToEntity(logDto));
         log.info("Saved log: " + logDto);
+    }
+
+    @RabbitListener(queues = "purchase_info")
+    public void listenPurchaseInfo(String in) {
+        log.info("Received purchase_info: " + in);
+        Gson g = new Gson();
+        PurchaseInfoDTO purchaseInfo = g.fromJson(in, PurchaseInfoDTO.class);
+        expenseService.matchPurchaseInfo(purchaseInfo);
     }
 }

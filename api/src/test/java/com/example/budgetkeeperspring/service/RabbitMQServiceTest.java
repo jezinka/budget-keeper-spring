@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.LogDTO;
+import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Log;
 import com.example.budgetkeeperspring.mapper.LogMapper;
@@ -69,15 +70,12 @@ class RabbitMQServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle null category when expense message is received")
-    void handlesNullCategory() {
-        String messageJson = "{\"title\":\"Test Expense\",\"payee\":\"Test Payee\"}";
-        ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
-        when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(null);
-        when(expenseService.createExpense(any(ExpenseDTO.class), isNull())).thenReturn(expenseDTO);
+    @DisplayName("Should match purchase info to expense when valid purchase_info message is received")
+    void listenPurchaseInfo_matchesExpense() {
+        String messageJson = "{\"price\":\"45.0\",\"name\":\"KARMA DLA PTAKÓW 10kg\",\"orderDate\":\"9.02.2026, 09:02\",\"sendDate\":\"2026-03-31 17:48:36\"}";
 
-        rabbitMQService.listenExpenses(messageJson);
+        rabbitMQService.listenPurchaseInfo(messageJson);
 
-        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), isNull());
+        verify(expenseService, times(1)).matchPurchaseInfo(any(PurchaseInfoDTO.class));
     }
 }

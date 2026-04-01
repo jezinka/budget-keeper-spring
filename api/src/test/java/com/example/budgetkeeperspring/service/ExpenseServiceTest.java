@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
@@ -18,10 +19,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExpenseServiceTest {
@@ -302,5 +302,38 @@ class ExpenseServiceTest {
                 "amount", "-120"));
 
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void matchPurchaseInfo_updatesNoteOnMatchingExpense() {
+        Expense expense = new Expense();
+        expense.setAmount(BigDecimal.valueOf(-45.0));
+        expense.setTransactionDate(LocalDate.of(2026, 2, 9));
+        expense.setCategory(new Category("Test"));
+
+        when(expenseRepository.findAllByAmountAndTransactionDateBetween(
+                any(BigDecimal.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(expense));
+        when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
+
+        PurchaseInfoDTO dto = new PurchaseInfoDTO("45.0", "KARMA DLA PTAKÓW 10kg", "9.02.2026, 09:02", "2026-03-31 17:48:36");
+        boolean result = expenseService.matchPurchaseInfo(dto);
+
+        assertTrue(result);
+        assertEquals("KARMA DLA PTAKÓW 10kg", expense.getNote());
+        verify(expenseRepository).save(expense);
+    }
+
+    @Test
+    void matchPurchaseInfo_returnsFalseWhenNoMatchFound() {
+        when(expenseRepository.findAllByAmountAndTransactionDateBetween(
+                any(BigDecimal.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+
+        PurchaseInfoDTO dto = new PurchaseInfoDTO("45.0", "KARMA DLA PTAKÓW 10kg", "9.02.2026, 09:02", "2026-03-31 17:48:36");
+        boolean result = expenseService.matchPurchaseInfo(dto);
+
+        assertFalse(result);
+        verify(expenseRepository, never()).save(any());
     }
 }

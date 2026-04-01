@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,6 +22,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e from Expense e left join fetch e.category c where e.transactionDate between :begin and :end and c.level not in (:excludedLevels) ")
     List<Expense> findAllByTransactionDateBetweenWithoutLevels(LocalDate begin, LocalDate end, @Param("excludedLevels") List<Integer> excludedLevels);
+
+    List<Expense> findAllByAmountAndTransactionDateBetween(BigDecimal amount, LocalDate begin, LocalDate end);
 
     @Query("select new com.example.budgetkeeperspring.dto.PieChartExpenseDto(cl.name, sum(e.amount)) from Expense e " +
             "left join e.category c " +

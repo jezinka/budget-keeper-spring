@@ -16,9 +16,11 @@ services:
     networks:
       - budget
   api:
-    restart: always
     container_name: api
-    build: '.'
+    restart: unless-stopped
+    build: "."
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
     expose:
       - 8080
     ports:

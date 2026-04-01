@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -295,6 +296,25 @@ public class ExpenseService {
             return true;
         }
         return false;
+    }
+
+    public boolean matchPurchaseInfo(PurchaseInfoDTO purchaseInfo) {
+        BigDecimal price = new BigDecimal(purchaseInfo.getPrice()).negate();
+        LocalDate orderDate = LocalDate.parse(purchaseInfo.getOrderDate(),
+                DateTimeFormatter.ofPattern("d.MM.yyyy, HH:mm"));
+        LocalDate begin = orderDate.minusDays(3);
+        LocalDate end = orderDate.plusDays(3);
+
+        List<Expense> candidates = expenseRepository.findAllByAmountAndTransactionDateBetween(price, begin, end);
+        if (candidates.isEmpty()) {
+            log.warn("No matching expense found for purchase: name={}, price={}, orderDate={}", purchaseInfo.getName(), purchaseInfo.getPrice(), purchaseInfo.getOrderDate());
+            return false;
+        }
+        Expense matched = candidates.stream().findFirst().get();
+        matched.setNote(purchaseInfo.getName());
+        expenseRepository.save(matched);
+        log.info("Matched purchase '{}' to expense id={}", purchaseInfo.getName(), matched.getId());
+        return true;
     }
 
     public Map<String, List<MonthCategoryAmountDTO>> getYearlyExpensesGroupedByCategoryLevel(LocalDate begin, LocalDate end) {
