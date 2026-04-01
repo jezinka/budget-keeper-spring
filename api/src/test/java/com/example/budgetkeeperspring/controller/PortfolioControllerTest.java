@@ -64,7 +64,7 @@ class PortfolioControllerTest {
         mockMvc.perform(get(PATH + "/snapshots").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].value", is(100000)));
+                .andExpect(jsonPath("$[0].value", is(100000.0)));
     }
 
     @Test
@@ -73,7 +73,7 @@ class PortfolioControllerTest {
                 .date(LocalDate.of(2024, 3, 1)).value(new BigDecimal("150000")).build();
         PortfolioSnapshotDTO saved = PortfolioSnapshotDTO.builder().id(5L).date(dto.getDate()).value(dto.getValue()).build();
 
-        given(portfolioSnapshotService.save(any(), any())).willReturn(saved);
+        given(portfolioSnapshotService.save(any(), any(), any())).willReturn(saved);
 
         mockMvc.perform(post(PATH + "/snapshots")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ class PortfolioControllerTest {
         PortfolioSnapshotDTO dto = PortfolioSnapshotDTO.builder()
                 .date(LocalDate.of(2024, 3, 1)).value(new BigDecimal("150000")).build();
 
-        given(portfolioSnapshotService.save(any(), any())).willReturn(null);
+        given(portfolioSnapshotService.save(any(), any(), any())).willReturn(null);
 
         mockMvc.perform(post(PATH + "/snapshots")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +115,7 @@ class PortfolioControllerTest {
         mockMvc.perform(get(PATH + "/fire-stages").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].threshold", is(75000)))
+                .andExpect(jsonPath("$[0].threshold", is(75000.0)))
                 .andExpect(jsonPath("$[0].firstCrossedAt", is("2022-01-15")))
                 .andExpect(jsonPath("$[1].firstCrossedAt").doesNotExist());
     }

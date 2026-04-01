@@ -44,7 +44,7 @@ public class RabbitMQService {
         return connectionFactory;
     }
 
-    //    @RabbitListener(queues = "expense")
+    @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -54,7 +54,7 @@ public class RabbitMQService {
         log.info("Saved expense: " + savedExpense);
     }
 
-    //    @RabbitListener(queues = "log")
+    @RabbitListener(queues = "log")
     public void listenLogs(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();

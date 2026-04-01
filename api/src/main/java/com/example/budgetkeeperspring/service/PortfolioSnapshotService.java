@@ -60,9 +60,11 @@ public class PortfolioSnapshotService {
 
     @Transactional
     public PortfolioSnapshotDTO save(LocalDate date, BigDecimal value, BigDecimal investedCapital) {
-        PortfolioSnapshot snapshot = portfolioSnapshotRepository.findByDate(date)
-                .orElseGet(() -> PortfolioSnapshot.builder().date(date).build());
+        if (portfolioSnapshotRepository.findByDate(date).isPresent()) {
+            return null;
+        }
 
+        PortfolioSnapshot snapshot = PortfolioSnapshot.builder().date(date).build();
         snapshot.setValue(value);
         if (investedCapital != null) {
             snapshot.setInvestedCapital(investedCapital);
