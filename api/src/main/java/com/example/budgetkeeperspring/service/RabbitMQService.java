@@ -63,11 +63,16 @@ public class RabbitMQService {
         log.info("Saved log: " + logDto);
     }
 
-    @RabbitListener(queues = "purchase_info")
+    @RabbitListener(queues = "purchase_info", containerFactory = "purchaseInfoListenerFactory")
     public void listenPurchaseInfo(String in) {
         log.info("Received purchase_info: " + in);
         Gson g = new Gson();
         PurchaseInfoDTO purchaseInfo = g.fromJson(in, PurchaseInfoDTO.class);
-        expenseService.matchPurchaseInfo(purchaseInfo);
+        boolean matched = expenseService.matchPurchaseInfo(purchaseInfo);
+        if (!matched) {
+            throw new RuntimeException("No matching expense yet for purchase: " + purchaseInfo.getName()
+                    + ", price=" + purchaseInfo.getPrice()
+                    + ", orderDate=" + purchaseInfo.getOrderDate());
+        }
     }
 }
