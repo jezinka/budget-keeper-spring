@@ -299,7 +299,7 @@ public class ExpenseService {
     }
 
     public boolean matchPurchaseInfo(PurchaseInfoDTO purchaseInfo) {
-        BigDecimal price = new BigDecimal(purchaseInfo.getPrice()).negate();
+        BigDecimal price = new BigDecimal(purchaseInfo.getPrice().replace(',', '.')).negate();
         LocalDate orderDate = LocalDate.parse(purchaseInfo.getOrderDate(),
                 DateTimeFormatter.ofPattern("d.MM.yyyy, HH:mm"));
         LocalDate begin = orderDate.minusDays(3);
