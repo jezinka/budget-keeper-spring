@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -25,6 +28,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ExpenseController.class)
@@ -93,5 +97,30 @@ class ExpenseControllerTest {
         verify(expenseService).deleteById(captor.capture());
 
         assertThat(expenseId).isEqualTo(captor.getValue());
+    }
+
+    @Test
+    void getLivingExpensesComparison_returnsGroupedData() throws Exception {
+        MonthCategoryAmountDTO march = new MonthCategoryAmountDTO(3, "2024", BigDecimal.valueOf(350));
+        given(expenseService.getLivingExpensesComparison(any())).willReturn(Map.of(2024, List.of(march)));
+
+        mockMvc.perform(post("/expenses/livingExpensesComparison")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[\"Biedronka\",\"Rachunki\"]"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.2024[0].month", is(3)))
+                .andExpect(jsonPath("$.2024[0].amount", is(350)));
+    }
+
+    @Test
+    void getLivingExpensesComparison_emptyBody_returnsEmptyMap() throws Exception {
+        given(expenseService.getLivingExpensesComparison(any())).willReturn(Map.of());
+
+        mockMvc.perform(post("/expenses/livingExpensesComparison")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{}"));
     }
 }

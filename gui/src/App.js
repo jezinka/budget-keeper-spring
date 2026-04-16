@@ -13,6 +13,7 @@ import Budget from "./components/plan/Budget";
 import MonthlyView from "./components/monthlyView/MonthlyView";
 import YearlyView from "./components/year/YearlyView";
 import InvestmentsView from "./components/investments/InvestmentsView";
+import LivingExpensesView from "./components/livingExpenses/LivingExpensesView";
 
 const App = () => {
     return (
@@ -27,6 +28,7 @@ const App = () => {
                     <Route path="/gui/plan" element={<Budget/>}/>
                     <Route path="/gui/logs" element={<LogsView/>}/>
                     <Route path="/gui/investments" element={<InvestmentsView/>}/>
+                    <Route path="/gui/livingExpenses" element={<LivingExpensesView/>}/>
                 </Routes>
             </Router>
         </>

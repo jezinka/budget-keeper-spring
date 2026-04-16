@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
+import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
@@ -335,5 +336,109 @@ class ExpenseServiceTest {
 
         assertFalse(result);
         verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    void getLivingExpensesComparison_groupsByYearAndMonth() {
+        Category biedronka = new Category("Biedronka");
+        Category rachunki = new Category("Rachunki");
+
+        Expense e1 = new Expense();
+        e1.setCategory(biedronka);
+        e1.setAmount(BigDecimal.valueOf(-200));
+        e1.setTransactionDate(LocalDate.of(2023, 3, 5));
+
+        Expense e2 = new Expense();
+        e2.setCategory(rachunki);
+        e2.setAmount(BigDecimal.valueOf(-150));
+        e2.setTransactionDate(LocalDate.of(2023, 3, 15));
+
+        Expense e3 = new Expense();
+        e3.setCategory(biedronka);
+        e3.setAmount(BigDecimal.valueOf(-300));
+        e3.setTransactionDate(LocalDate.of(2024, 3, 10));
+
+        when(expenseRepository.findAllByCategoryNameIn(List.of("Biedronka", "Rachunki")))
+                .thenReturn(List.of(e1, e2, e3));
+
+        Map<Integer, List<MonthCategoryAmountDTO>> result =
+                expenseService.getLivingExpensesComparison(List.of("Biedronka", "Rachunki"));
+
+        assertEquals(2, result.size());
+
+        List<MonthCategoryAmountDTO> month2023 = result.get(2023);
+        assertNotNull(month2023);
+        assertEquals(1, month2023.size());
+        assertEquals(3, month2023.get(0).getMonth());
+        assertEquals(0, month2023.get(0).getAmount().compareTo(BigDecimal.valueOf(350)));
+
+        List<MonthCategoryAmountDTO> month2024 = result.get(2024);
+        assertNotNull(month2024);
+        assertEquals(1, month2024.size());
+        assertEquals(0, month2024.get(0).getAmount().compareTo(BigDecimal.valueOf(300)));
+    }
+
+    @Test
+    void getLivingExpensesComparison_emptyCategories_returnsEmptyMap() {
+        Map<Integer, List<MonthCategoryAmountDTO>> result =
+                expenseService.getLivingExpensesComparison(Collections.emptyList());
+
+        assertTrue(result.isEmpty());
+        verify(expenseRepository, never()).findAllByCategoryNameIn(any());
+    }
+
+    @Test
+    void getLivingExpensesComparison_ignoresPositiveAmounts() {
+        Category cat = new Category("Biedronka");
+
+        Expense expense = new Expense();
+        expense.setCategory(cat);
+        expense.setAmount(BigDecimal.valueOf(-100));
+        expense.setTransactionDate(LocalDate.of(2024, 1, 10));
+
+        Expense income = new Expense();
+        income.setCategory(cat);
+        income.setAmount(BigDecimal.valueOf(500));
+        income.setTransactionDate(LocalDate.of(2024, 1, 20));
+
+        when(expenseRepository.findAllByCategoryNameIn(List.of("Biedronka")))
+                .thenReturn(List.of(expense, income));
+
+        Map<Integer, List<MonthCategoryAmountDTO>> result =
+                expenseService.getLivingExpensesComparison(List.of("Biedronka"));
+
+        List<MonthCategoryAmountDTO> months = result.get(2024);
+        assertNotNull(months);
+        assertEquals(1, months.size());
+        assertEquals(0, months.get(0).getAmount().compareTo(BigDecimal.valueOf(100)));
+    }
+
+    @Test
+    void getLivingExpensesComparison_resultIsOrderedByYear() {
+        Category cat = new Category("Biedronka");
+
+        Expense e2024 = new Expense();
+        e2024.setCategory(cat);
+        e2024.setAmount(BigDecimal.valueOf(-100));
+        e2024.setTransactionDate(LocalDate.of(2024, 5, 1));
+
+        Expense e2022 = new Expense();
+        e2022.setCategory(cat);
+        e2022.setAmount(BigDecimal.valueOf(-200));
+        e2022.setTransactionDate(LocalDate.of(2022, 5, 1));
+
+        Expense e2023 = new Expense();
+        e2023.setCategory(cat);
+        e2023.setAmount(BigDecimal.valueOf(-150));
+        e2023.setTransactionDate(LocalDate.of(2023, 5, 1));
+
+        when(expenseRepository.findAllByCategoryNameIn(List.of("Biedronka")))
+                .thenReturn(List.of(e2024, e2022, e2023));
+
+        Map<Integer, List<MonthCategoryAmountDTO>> result =
+                expenseService.getLivingExpensesComparison(List.of("Biedronka"));
+
+        List<Integer> years = new ArrayList<>(result.keySet());
+        assertEquals(List.of(2022, 2023, 2024), years);
     }
 }

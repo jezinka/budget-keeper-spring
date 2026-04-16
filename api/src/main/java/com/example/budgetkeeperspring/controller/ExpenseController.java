@@ -187,4 +187,10 @@ public class ExpenseController {
         LocalDate end = getEndOfSelectedYear(year);
         return expenseService.getYearlyExpensesGroupedByCategoryLevel(begin, end);
     }
+
+    @Operation(summary = "Get living expenses comparison across all years for given category names")
+    @PostMapping("/livingExpensesComparison")
+    Map<Integer, List<MonthCategoryAmountDTO>> getLivingExpensesComparison(@RequestBody List<String> categoryNames) {
+        return expenseService.getLivingExpensesComparison(categoryNames);
+    }
 }

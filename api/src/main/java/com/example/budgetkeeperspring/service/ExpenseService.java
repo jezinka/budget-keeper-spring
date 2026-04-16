@@ -356,6 +356,30 @@ public class ExpenseService {
         return Map.of("incomes", incomesGroupedExpenses, "expenses", expensesGroupedExpenses, "investments", investmentGroupedExpenses);
     }
 
+    public Map<Integer, List<MonthCategoryAmountDTO>> getLivingExpensesComparison(List<String> categoryNames) {
+        Map<Integer, List<MonthCategoryAmountDTO>> result = new TreeMap<>();
+
+        if (categoryNames == null || categoryNames.isEmpty()) {
+            return result;
+        }
+
+        expenseRepository.findAllByCategoryNameIn(categoryNames)
+                .stream()
+                .filter(e -> e.getAmount().compareTo(BigDecimal.ZERO) < 0)
+                .collect(groupingBy(
+                        Expense::getTransactionYear,
+                        groupingBy(Expense::getTransactionMonth,
+                                reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add))))
+                .forEach((year, monthMap) -> {
+                    List<MonthCategoryAmountDTO> monthlyAmounts = new ArrayList<>();
+                    monthMap.forEach((month, amount) ->
+                            monthlyAmounts.add(new MonthCategoryAmountDTO(month, String.valueOf(year), amount.abs())));
+                    result.put(year, monthlyAmounts);
+                });
+
+        return result;
+    }
+
     private void addSumColumn(List<MonthCategoryAmountDTO> expenses) {
         expenses.stream()
                 .collect(groupingBy(

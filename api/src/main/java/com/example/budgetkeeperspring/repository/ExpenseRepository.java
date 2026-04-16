@@ -40,4 +40,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "and c.level in (:levels) " +
             "group by c.level, cl.name order by c.level")
     List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevelForLevels(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("levels") List<Integer> levels);
+
+    @Query("select e from Expense e left join fetch e.category c where c.level = :level")
+    List<Expense> findAllByCategoryLevel(@Param("level") Integer level);
+
+    @Query("select e from Expense e left join fetch e.category c where c.name in (:categoryNames)")
+    List<Expense> findAllByCategoryNameIn(@Param("categoryNames") List<String> categoryNames);
 }
