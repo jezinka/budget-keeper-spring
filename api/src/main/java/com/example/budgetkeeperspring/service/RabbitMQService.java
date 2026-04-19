@@ -22,7 +22,7 @@ public class RabbitMQService {
     private final LogRepository logRepository;
     private final LogMapper logMapper;
 
-//    @RabbitListener(queues = "expense")
+    @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -32,7 +32,7 @@ public class RabbitMQService {
         log.info("Saved expense: " + savedExpense);
     }
 
-//    @RabbitListener(queues = "log")
+    @RabbitListener(queues = "log")
     public void listenLogs(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
@@ -41,7 +41,7 @@ public class RabbitMQService {
         log.info("Saved log: " + logDto);
     }
 
-//    @RabbitListener(queues = "purchase_info", containerFactory = "purchaseInfoListenerFactory")
+    @RabbitListener(queues = "purchase_info", containerFactory = "purchaseInfoListenerFactory")
     public void listenPurchaseInfo(String in) {
         log.info("Received purchase_info: " + in);
         Gson g = new Gson();
