@@ -46,7 +46,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {from: 'public/favicon.ico', to: 'favicon.ico'},
+                {from: 'public/favicon.ico', to: '../favicon.ico'},
             ],
         }),
         new MiniCssExtractPlugin({
