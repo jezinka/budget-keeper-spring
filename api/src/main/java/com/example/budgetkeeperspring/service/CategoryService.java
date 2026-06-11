@@ -71,6 +71,19 @@ public class CategoryService {
                 .orElse(null)));
     }
 
+    public CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO) {
+        Category existing = categoryRepository.findById(id).orElseThrow(NotFoundException::new);
+        existing.setName(categoryDTO.getName());
+        existing.setUseInYearlyCharts(categoryDTO.isUseInYearlyCharts());
+        existing.setLevel(categoryDTO.getLevel());
+        return categoryMapper.mapToDto(categoryRepository.save(existing));
+    }
+
+    public void deleteCategory(Long id) {
+        categoryRepository.findById(id).orElseThrow(NotFoundException::new);
+        categoryRepository.deleteById(id);
+    }
+
     public Category findCategoryByConditions(ExpenseDTO expenseDTO) {
         String title = expenseDTO.getTitle().toLowerCase();
         String payee = expenseDTO.getPayee().toLowerCase();

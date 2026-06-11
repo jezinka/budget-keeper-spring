@@ -58,6 +58,19 @@ public class CategoryController {
         return categoryService.findById(id).orElseThrow(NotFoundException::new);
     }
 
+    @Operation(summary = "Update a category")
+    @PutMapping("/{id}")
+    ResponseEntity<CategoryDTO> update(@PathVariable Long id, @Validated @RequestBody CategoryDTO categoryDTO) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, categoryDTO));
+    }
+
+    @Operation(summary = "Delete a category")
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Get all category levels")
     @GetMapping("/levels")
     List<CategoryLevelDTO> getLevels() {

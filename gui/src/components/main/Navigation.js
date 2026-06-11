@@ -18,6 +18,8 @@ const Navigation = () => {
                 <hr/>
                 <Nav.Link href="/budget/gui/investments">Inwestycje</Nav.Link>
                 <Nav.Link href="/budget/gui/livingExpenses">Wydatki na życie</Nav.Link>
+                <hr/>
+                <Nav.Link href="/budget/gui/admin/categories">Kategorie (admin)</Nav.Link>
             </Container>
         </Nav>
     )
