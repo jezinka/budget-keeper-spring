@@ -112,4 +112,8 @@ public class CategoryService {
                 .map(categoryLevelMapper::mapToDto)
                 .toList();
     }
+
+    public CategoryLevelDTO saveLevel(CategoryLevelDTO categoryLevelDTO) {
+        return categoryLevelMapper.mapToDto(categoryLevelRepository.save(categoryLevelMapper.mapToEntity(categoryLevelDTO)));
+    }
 }

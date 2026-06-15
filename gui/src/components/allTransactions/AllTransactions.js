@@ -5,7 +5,7 @@ import TransactionCounter from "./TransactionCounter";
 import {ArrowClockwise} from "react-bootstrap-icons";
 import TransactionTable from "../transactionTable/TransactionTable";
 
-const AllTransactions = () => {
+export const AllTransactionsContent = () => {
     const [showSpinner, setShowSpinner] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
@@ -110,7 +110,9 @@ const AllTransactions = () => {
         </Row>
     </>;
 
-    return <Main body={body}/>;
+    return <>{body}</>;
 }
+
+const AllTransactions = () => <Main body={<AllTransactionsContent/>}/>;
 
 export default AllTransactions;

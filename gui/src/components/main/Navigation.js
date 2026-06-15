@@ -13,13 +13,10 @@ const Navigation = () => {
                 <Nav.Link href="/budget/gui/plan">Plan</Nav.Link>
                 <Nav.Link href="/budget/gui/yearlyView">Roczne podsumowanie</Nav.Link>
                 <hr/>
-                <Nav.Link href="/budget/gui/allTransactions">Wszystkie transakcje</Nav.Link>
-                <Nav.Link href="/budget/gui/logs">Logi</Nav.Link>
-                <hr/>
                 <Nav.Link href="/budget/gui/investments">Inwestycje</Nav.Link>
                 <Nav.Link href="/budget/gui/livingExpenses">Wydatki na życie</Nav.Link>
                 <hr/>
-                <Nav.Link href="/budget/gui/admin/categories">Kategorie (admin)</Nav.Link>
+                <Nav.Link href="/budget/gui/admin">Admin</Nav.Link>
             </Container>
         </Nav>
     )

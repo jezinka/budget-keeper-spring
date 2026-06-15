@@ -76,4 +76,13 @@ public class CategoryController {
     List<CategoryLevelDTO> getLevels() {
         return categoryService.getAllLevels();
     }
+
+    @Operation(summary = "Create a new category level")
+    @PostMapping("/levels")
+    ResponseEntity<Void> addLevel(@Validated @RequestBody CategoryLevelDTO categoryLevelDTO) {
+        CategoryLevelDTO saved = categoryService.saveLevel(categoryLevelDTO);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", "categories/levels/" + saved.getId().toString());
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+    }
 }

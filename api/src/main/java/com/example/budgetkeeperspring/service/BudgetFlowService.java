@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.*;
 @Service
 public class BudgetFlowService {
 
-    private static final String INCOME = "Wpływy";
+    private static final String INCOME = "Dochody";
 
     private final ExpenseRepository expenseRepository;
     private final CategoryLevelService categoryLevelService;
