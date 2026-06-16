@@ -3,6 +3,7 @@ import Main from '../main/Main';
 import PortfolioChart from './PortfolioChart';
 import FireProgressBar from './FireProgressBar';
 import PortfolioStats from './PortfolioStats';
+import PortfolioCompositionChart from './PortfolioCompositionChart';
 import {Col, Row} from 'react-bootstrap';
 
 const InvestmentsView = () => {
@@ -35,6 +36,11 @@ const InvestmentsView = () => {
                     <Col>
                         <h6 className="text-muted">Wartość portfela w czasie</h6>
                         <PortfolioChart fireStages={fireStages} snapshots={snapshots}/>
+                    </Col>
+                </Row>
+                <Row className="mt-3">
+                    <Col>
+                        <PortfolioCompositionChart snapshots={snapshots}/>
                     </Col>
                 </Row>
                 <Row>
