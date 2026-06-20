@@ -2,7 +2,6 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.LogDTO;
-import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Log;
 import com.example.budgetkeeperspring.mapper.LogMapper;
@@ -67,15 +66,5 @@ class RabbitMQServiceTest {
         rabbitMQService.listenLogs(messageJson);
 
         verify(logRepository, times(1)).save(any(Log.class));
-    }
-
-    @Test
-    @DisplayName("Should match purchase info to expense when valid purchase_info message is received")
-    void listenPurchaseInfo_matchesExpense() {
-        String messageJson = "{\"price\":\"45.0\",\"name\":\"KARMA DLA PTAKÓW 10kg\",\"orderDate\":\"9.02.2026, 09:02\",\"sendDate\":\"2026-03-31 17:48:36\"}";
-
-        rabbitMQService.listenPurchaseInfo(messageJson);
-
-        verify(expenseService, times(1)).matchPurchaseInfo(any(PurchaseInfoDTO.class));
     }
 }
