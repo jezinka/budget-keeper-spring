@@ -32,6 +32,9 @@ public class ExpenseDTO {
 
     private Boolean manually;
 
+    private Long sourceAccountId;
+    private Long destinationAccountId;
+
     public String getDescription() {
         if (note != null) {
             return note;

@@ -9,7 +9,8 @@ const TransactionForm = ({
                              splitFlow,
                              getCategoriesMap,
                              setShowCategoryForm,
-                             editable = false
+                             editable = false,
+                             getAccountsMap
                          }) => {
     return (
         <Form>
@@ -62,6 +63,20 @@ const TransactionForm = ({
                                  name="categoryId" value={formState.categoryId}
                                  autoFocus>
                         {getCategoriesMap()}
+                    </Form.Select>
+                </Col>
+                <Col sm={6}>
+                    <Form.Label column={"sm"} className="text-muted small mb-0">Z konta:</Form.Label>
+                    <Form.Select className="m-2" placeholder="Z konta:" onChange={handleChange}
+                                 name="sourceAccountId" value={formState.sourceAccountId}>
+                        {getAccountsMap()}
+                    </Form.Select>
+                </Col>
+                <Col sm={6}>
+                    <Form.Label column={"sm"} className="text-muted small mb-0">Na konto:</Form.Label>
+                    <Form.Select className="m-2" placeholder="Na konto:" onChange={handleChange}
+                                 name="destinationAccountId" value={formState.destinationAccountId}>
+                        {getAccountsMap()}
                     </Form.Select>
                 </Col>
                 <Col sm={1}>

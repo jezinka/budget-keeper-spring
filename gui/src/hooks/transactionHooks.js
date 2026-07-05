@@ -24,6 +24,8 @@ export function useTransactionForm(initialState) {
                     amount: data.amount,
                     baseSplitAmount: data.amount,
                     categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION,
+                    sourceAccountId: data.sourceAccountId ? data.sourceAccountId : EMPTY_OPTION,
+                    destinationAccountId: data.destinationAccountId ? data.destinationAccountId : EMPTY_OPTION,
                     manually: data.manually
                 });
             }
@@ -46,4 +48,16 @@ export function getCategoriesMap(categories) {
     });
 
     return categoriesOptions;
+}
+export function getAccountsMap(accounts) {
+    let accountsOptions = [];
+    accountsOptions.push(<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>);
+
+    accounts.forEach(account => {
+        accountsOptions.push(
+            <option key={account.id} value={account.id}>{account.name}</option>
+        );
+    });
+
+    return accountsOptions;
 }

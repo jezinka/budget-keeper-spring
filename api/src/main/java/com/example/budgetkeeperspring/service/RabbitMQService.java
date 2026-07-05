@@ -3,8 +3,10 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.LogDTO;
 import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
+import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.mapper.LogMapper;
+import com.example.budgetkeeperspring.repository.AccountRepository;
 import com.example.budgetkeeperspring.repository.LogRepository;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class RabbitMQService {
     private final CategoryService categoryService;
     private final LogRepository logRepository;
     private final LogMapper logMapper;
+    private final AccountRepository accountRepository;
 
     @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {

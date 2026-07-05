@@ -1,10 +1,12 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.*;
+import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.repository.AccountRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -36,13 +38,20 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
     private final CategoryLevelService categoryLevelService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
+        return createExpense(expenseDTO, category, null, null);
+    }
+
+    public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
         expense.setCategory(category);
+        expense.setSourceAccount(sourceAccount);
+        expense.setDestinationAccount(destinationAccount);
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }
 
@@ -58,8 +67,10 @@ public class ExpenseService {
             expenseDTO.setCategoryId(CategoryService.UNKNOWN_CATEGORY);
         }
         category = categoryRepository.findById(expenseDTO.getCategoryId()).orElseThrow(NotFoundException::new);
+        Account sourceAccount = accountRepository.getReferenceById(expenseDTO.getSourceAccountId());
+        Account destinationAccount = accountRepository.getReferenceById(expenseDTO.getDestinationAccountId());
 
-        return createExpense(expenseDTO, category);
+        return createExpense(expenseDTO, category, sourceAccount, destinationAccount);
     }
 
     public Optional<ExpenseDTO> updateExpense(Long id, ExpenseDTO updateExpenseDTO) {
@@ -67,6 +78,20 @@ public class ExpenseService {
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
+            if (updateExpenseDTO.getSourceAccountId() != null && updateExpenseDTO.getSourceAccountId() != -1) {
+                Account sourceAccount = accountRepository.getReferenceById(updateExpenseDTO.getSourceAccountId());
+                foundExpense.setSourceAccount(sourceAccount);
+            } else {
+                foundExpense.setSourceAccount(null);
+            }
+
+            if (updateExpenseDTO.getDestinationAccountId() != null && updateExpenseDTO.getDestinationAccountId() != -1) {
+                Account destinationAccount = accountRepository.getReferenceById(updateExpenseDTO.getDestinationAccountId());
+                foundExpense.setDestinationAccount(destinationAccount);
+            } else {
+                foundExpense.setDestinationAccount(null);
+            }
+
             if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
                 foundExpense.setNote(updateExpenseDTO.getNote());
             }

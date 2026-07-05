@@ -16,12 +16,16 @@ public interface ExpenseMapper {
     @Mapping(source = "categoryId", target = "category.id")
     @Mapping(source = "categoryName", target = "category.name")
     @Mapping(source = "transactionDate", target = "transactionDate")
+    @Mapping(source = "sourceAccountId", target = "sourceAccount.id")
+    @Mapping(source = "destinationAccountId", target = "destinationAccount.id")
     Expense mapToEntity(ExpenseDTO expenseDTO);
 
     @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
     @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "category.name", target = "categoryName")
     @Mapping(source = "category.level", target = "categoryLevel")
+    @Mapping(source = "sourceAccount.id", target = "sourceAccountId")
+    @Mapping(source = "destinationAccount.id", target = "destinationAccountId")
     ExpenseDTO mapToDto(Expense expense);
 
     default LocalDate stringToLocalDate(String date) {

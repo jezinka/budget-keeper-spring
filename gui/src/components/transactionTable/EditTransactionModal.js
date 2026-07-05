@@ -1,7 +1,7 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import {getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {getAccountsMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
 import {EMPTY_OPTION, handleError} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
@@ -9,17 +9,37 @@ import {CategoryContext} from "../../context/CategoryContext";
 export default function EditTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
     const {categories, fetchCategories} = useContext(CategoryContext);
+    const [accounts, setAccounts] = useState([]);
+
     const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
         id: null,
-        transactionDate: new Date().toISOString().slice(0,10),
+        transactionDate: new Date().toISOString().slice(0, 10),
         title: "",
         payee: "",
         note: null,
         baseSplitAmount: 0,
         amount: 0,
         categoryId: EMPTY_OPTION,
+        sourceAccountId: EMPTY_OPTION,
+        destinationAccountId: EMPTY_OPTION,
         manually: false
     });
+
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
+
+    async function fetchAccounts() {
+        const response = await fetch('/budget/accounts/all');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setAccounts(data);
+            }
+        } else {
+            handleError();
+        }
+    }
 
     async function submitForm() {
         // jeśli istnieje id -> edycja, inaczej tworzenie
@@ -45,7 +65,9 @@ export default function EditTransactionModal(props) {
                 payee: formState.payee,
                 note: formState.note,
                 manually: formState.manually,
-                categoryId: formState.categoryId === EMPTY_OPTION ? null : formState.categoryId
+                categoryId: formState.categoryId === EMPTY_OPTION ? null : formState.categoryId,
+                sourceAccountId: formState.sourceAccountId === EMPTY_OPTION ? null : formState.sourceAccountId,
+                destinationAccountId: formState.destinationAccountId === EMPTY_OPTION ? null : formState.destinationAccountId
             };
 
             const response = await fetch('/budget/expenses/create', {
@@ -66,14 +88,16 @@ export default function EditTransactionModal(props) {
     function prepareForCreate() {
         setFormState({
             id: null,
-            transactionDate: new Date().toISOString().slice(0,10),
+            transactionDate: new Date().toISOString().slice(0, 10),
             title: "",
             payee: "",
             note: null,
             baseSplitAmount: 0,
             amount: 0,
             categoryId: EMPTY_OPTION,
-            manually: true
+            manually: true,
+            sourceAccountId: EMPTY_OPTION,
+            destinationAccountId: EMPTY_OPTION
         });
     }
 
@@ -105,11 +129,13 @@ export default function EditTransactionModal(props) {
                         getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
                         editable={formState.manually === true || formState.id === null}
+                        getAccountsMap={() => getAccountsMap(accounts)}
                     />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={props.closeHandler}> Zamknij </Button>
-                    <Button variant="primary" onClick={submitForm}> {formState && formState.id ? 'Zapisz' : 'Dodaj'} </Button>
+                    <Button variant="primary"
+                            onClick={submitForm}> {formState && formState.id ? 'Zapisz' : 'Dodaj'} </Button>
                 </Modal.Footer>
             </Modal>
         </>
