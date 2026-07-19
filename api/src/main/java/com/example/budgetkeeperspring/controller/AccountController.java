@@ -19,9 +19,10 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping("/all")
-    List<AccountDTO> getAllExpenses() {
+    List<AccountDTO> getAllAccounts() {
         return accountService.getAllAccounts();
-  }
+    }
+
     @GetMapping("/sinking-funds")
     List<AccountDTO> getSinkingFunds() {
         return accountService.getSinkingFunds();
