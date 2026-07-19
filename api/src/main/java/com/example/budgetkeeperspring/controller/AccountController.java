@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/accounts")
@@ -22,5 +21,9 @@ public class AccountController {
     @GetMapping("/all")
     List<AccountDTO> getAllExpenses() {
         return accountService.getAllAccounts();
+  }
+    @GetMapping("/sinking-funds")
+    List<AccountDTO> getSinkingFunds() {
+        return accountService.getSinkingFunds();
     }
 }

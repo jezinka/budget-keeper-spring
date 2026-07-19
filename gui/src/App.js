@@ -16,6 +16,7 @@ import InvestmentsView from "./components/investments/InvestmentsView";
 import LivingExpensesView from "./components/livingExpenses/LivingExpensesView";
 import CategoryAdmin from "./components/admin/CategoryAdmin";
 import AdminPanel from "./components/admin/AdminPanel";
+import SinkingFundsView from "./components/sinkingFunds/SinkingFundsView";
 
 const App = () => {
     return (
@@ -33,6 +34,7 @@ const App = () => {
                     <Route path="/gui/livingExpenses" element={<LivingExpensesView/>}/>
                     <Route path="/gui/admin/categories" element={<CategoryAdmin/>}/>
                     <Route path="/gui/admin" element={<AdminPanel/>}/>
+                    <Route path="/gui/sinkingFunds" element={<SinkingFundsView/>}/>
                 </Routes>
             </Router>
         </>

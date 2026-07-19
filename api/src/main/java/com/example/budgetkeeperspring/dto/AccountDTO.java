@@ -19,4 +19,5 @@ public class AccountDTO {
     private BigDecimal currentAmount;
     private Boolean sinkingFund;
     private Boolean defaultAccount;
+    private BigDecimal balance;
 }
