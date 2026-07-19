@@ -4,13 +4,18 @@ import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
 import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
+import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.repository.AccountRepository;
+import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -29,6 +34,18 @@ class ExpenseServiceTest {
 
     @Mock
     ExpenseRepository expenseRepository;
+
+    @Mock
+    AccountRepository accountRepository;
+
+    @Mock
+    CategoryRepository categoryRepository;
+
+    @Mock
+    GoalService goalService;
+
+    @Mock
+    CategoryLevelService categoryLevelService;
 
     @InjectMocks
     ExpenseService expenseService;
@@ -440,5 +457,167 @@ class ExpenseServiceTest {
 
         List<Integer> years = new ArrayList<>(result.keySet());
         assertEquals(List.of(2022, 2023, 2024), years);
+    }
+
+    // ─── createExpense tests ────────────────────────────────────────────────────
+
+    @Test
+    void createExpense_withCategoryAndPositiveAmount_setsDestinationAccount() {
+        Account defaultAccount = Account.builder().id(1L).name("Default").defaultAccount(true).build();
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+
+        Category category = new Category("Salary");
+        ExpenseDTO dto = ExpenseDTO.builder().amount(BigDecimal.valueOf(500)).transactionDate("2026-07-19").build();
+
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(BigDecimal.valueOf(500));
+        savedExpense.setCategory(category);
+        savedExpense.setDestinationAccount(defaultAccount);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        ExpenseDTO result = expenseService.createExpense(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense captured = captor.getValue();
+
+        assertNull(captured.getSourceAccount());
+        assertEquals(defaultAccount, captured.getDestinationAccount());
+        assertEquals(category, captured.getCategory());
+        assertNotNull(result);
+    }
+
+    @Test
+    void createExpense_withCategoryAndNegativeAmount_setsSourceAccount() {
+        Account defaultAccount = Account.builder().id(1L).name("Default").defaultAccount(true).build();
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+
+        Category category = new Category("Food");
+        ExpenseDTO dto = ExpenseDTO.builder().amount(BigDecimal.valueOf(-100)).transactionDate("2026-07-19").build();
+
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(BigDecimal.valueOf(-100));
+        savedExpense.setCategory(category);
+        savedExpense.setSourceAccount(defaultAccount);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        ExpenseDTO result = expenseService.createExpense(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense captured = captor.getValue();
+
+        assertEquals(defaultAccount, captured.getSourceAccount());
+        assertNull(captured.getDestinationAccount());
+        assertNotNull(result);
+    }
+
+    @Test
+    void createExpense_withCategoryAndAccounts_savesAndReturnsMappedDto() {
+        Category category = new Category("Transport");
+        Account source = Account.builder().id(2L).name("Wallet").build();
+        Account destination = Account.builder().id(3L).name("Savings").build();
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-50))
+                .transactionDate("2026-07-19")
+                .title("Bus ticket")
+                .build();
+
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(BigDecimal.valueOf(-50));
+        savedExpense.setTitle("Bus ticket");
+        savedExpense.setCategory(category);
+        savedExpense.setSourceAccount(source);
+        savedExpense.setDestinationAccount(destination);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        ExpenseDTO result = expenseService.createExpense(dto, category, source, destination);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense captured = captor.getValue();
+
+        assertEquals(category, captured.getCategory());
+        assertEquals(source, captured.getSourceAccount());
+        assertEquals(destination, captured.getDestinationAccount());
+        assertEquals(0, BigDecimal.valueOf(-50).compareTo(result.getAmount()));
+    }
+
+    @Test
+    void createExpense_withNullCategoryId_usesUnknownCategory() {
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-30))
+                .transactionDate("2026-07-19")
+                .categoryId(null)
+                .sourceAccountId(1L)
+                .destinationAccountId(2L)
+                .build();
+
+        Category unknownCategory = Category.builder().id(CategoryService.UNKNOWN_CATEGORY).name("Unknown").build();
+        when(categoryRepository.findById(CategoryService.UNKNOWN_CATEGORY)).thenReturn(Optional.of(unknownCategory));
+
+        Account source = Account.builder().id(1L).build();
+        Account destination = Account.builder().id(2L).build();
+        when(accountRepository.getReferenceById(1L)).thenReturn(source);
+        when(accountRepository.getReferenceById(2L)).thenReturn(destination);
+
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(BigDecimal.valueOf(-30));
+        savedExpense.setCategory(unknownCategory);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        ExpenseDTO result = expenseService.createExpense(dto);
+
+        assertEquals(CategoryService.UNKNOWN_CATEGORY, dto.getCategoryId());
+        verify(categoryRepository).findById(CategoryService.UNKNOWN_CATEGORY);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createExpense_withValidCategoryId_loadsCategoryById() {
+        long categoryId = 10L;
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-80))
+                .transactionDate("2026-07-19")
+                .categoryId(categoryId)
+                .sourceAccountId(1L)
+                .destinationAccountId(2L)
+                .build();
+
+        Category category = Category.builder().id(categoryId).name("Groceries").build();
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        Account source = Account.builder().id(1L).build();
+        Account destination = Account.builder().id(2L).build();
+        when(accountRepository.getReferenceById(1L)).thenReturn(source);
+        when(accountRepository.getReferenceById(2L)).thenReturn(destination);
+
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(BigDecimal.valueOf(-80));
+        savedExpense.setCategory(category);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        expenseService.createExpense(dto);
+
+        verify(categoryRepository).findById(categoryId);
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        assertEquals(category, captor.getValue().getCategory());
+    }
+
+    @Test
+    void createExpense_withUnknownCategoryId_throwsNotFoundException() {
+        long missingCategoryId = 999L;
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-20))
+                .categoryId(missingCategoryId)
+                .sourceAccountId(1L)
+                .destinationAccountId(2L)
+                .build();
+
+        when(categoryRepository.findById(missingCategoryId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> expenseService.createExpense(dto));
+        verify(expenseRepository, never()).save(any());
     }
 }

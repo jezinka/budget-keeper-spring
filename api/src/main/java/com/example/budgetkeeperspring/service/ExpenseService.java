@@ -44,7 +44,11 @@ public class ExpenseService {
     private final CategoryLevelService categoryLevelService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
-        return createExpense(expenseDTO, category, null, null);
+        Account defaultAccount = accountRepository.findByDefaultAccountTrue();
+        if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+            return createExpense(expenseDTO, category, null, defaultAccount);
+        }
+        return createExpense(expenseDTO, category, defaultAccount, null);
     }
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount) {
