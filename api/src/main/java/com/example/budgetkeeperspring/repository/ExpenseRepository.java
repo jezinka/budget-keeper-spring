@@ -46,4 +46,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e from Expense e left join fetch e.category c where c.name in (:categoryNames)")
     List<Expense> findAllByCategoryNameIn(@Param("categoryNames") List<String> categoryNames);
+
+    @Query("select e.destinationAccount.id, sum(e.amount) from Expense e where e.destinationAccount is not null group by e.destinationAccount.id")
+    List<Object[]> sumAmountByDestinationAccount();
+
+    @Query("select e.sourceAccount.id, sum(e.amount) from Expense e where e.sourceAccount is not null group by e.sourceAccount.id")
+    List<Object[]> sumAmountBySourceAccount();
 }
