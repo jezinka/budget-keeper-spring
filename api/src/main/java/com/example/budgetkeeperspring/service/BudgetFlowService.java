@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.*;
 public class BudgetFlowService {
 
     private static final String INCOME = "Dochody";
+    public static final String INCOME_SUFIX = " (in)";
 
     private final ExpenseRepository expenseRepository;
     private final CategoryLevelService categoryLevelService;
@@ -99,6 +100,17 @@ public class BudgetFlowService {
         return sankeyDto;
     }
 
+    private void incomeSource(List<Expense> validIncomes, SankeyDto sankeyDto) {
+        validIncomes.stream()
+                .collect(groupingBy(Expense::getCategoryName,
+                        reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add)))
+                .forEach((name, amount) -> {
+                    sankeyDto.getNodes().add(new SankeyDto.SankeyNode(name + INCOME_SUFIX));
+                    sankeyDto.getLinks().add(new SankeyDto.SankeyLink(name + INCOME_SUFIX, INCOME, amount));
+                });
+    }
+
     private Result getSortedExpenses(LocalDate begin, LocalDate end) {
         List<Expense> validTransactions = validTransactions(begin, end);
         List<Expense> validIncomes = getValidIncomes(validTransactions);
@@ -133,17 +145,6 @@ public class BudgetFlowService {
                     String description = expenseMapper.mapToDto(expense).getDescription();
                     sankeyDto.getLinks().add(new SankeyDto.SankeyLink(sankeyName, description, expense.getAmount().abs()));
                     sankeyDto.getNodes().add(new SankeyDto.SankeyNode(description));
-                });
-    }
-
-    private void incomeSource(List<Expense> validIncomes, SankeyDto sankeyDto) {
-        validIncomes.stream()
-                .collect(groupingBy(Expense::getCategoryName,
-                        reducing(BigDecimal.ZERO,
-                                Expense::getAmount, BigDecimal::add)))
-                .forEach((name, amount) -> {
-                    sankeyDto.getNodes().add(new SankeyDto.SankeyNode(name));
-                    sankeyDto.getLinks().add(new SankeyDto.SankeyLink(name, INCOME, amount));
                 });
     }
 }
