@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 
 import static com.example.budgetkeeperspring.service.CategoryLevelService.INCOME_CATEGORY_LEVEL;
 import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
@@ -82,19 +83,8 @@ public class ExpenseService {
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
-            if (updateExpenseDTO.getSourceAccountId() != null && updateExpenseDTO.getSourceAccountId() != -1) {
-                Account sourceAccount = accountRepository.getReferenceById(updateExpenseDTO.getSourceAccountId());
-                foundExpense.setSourceAccount(sourceAccount);
-            } else {
-                foundExpense.setSourceAccount(null);
-            }
-
-            if (updateExpenseDTO.getDestinationAccountId() != null && updateExpenseDTO.getDestinationAccountId() != -1) {
-                Account destinationAccount = accountRepository.getReferenceById(updateExpenseDTO.getDestinationAccountId());
-                foundExpense.setDestinationAccount(destinationAccount);
-            } else {
-                foundExpense.setDestinationAccount(null);
-            }
+            foundExpense.setSourceAccount(resolveAccount(updateExpenseDTO.getSourceAccountId()));
+            foundExpense.setDestinationAccount(resolveAccount(updateExpenseDTO.getDestinationAccountId()));
 
             if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
                 foundExpense.setNote(updateExpenseDTO.getNote());
@@ -205,10 +195,7 @@ public class ExpenseService {
                 .toList();
 
         yearlyExpenses.stream()
-                .collect(groupingBy(
-                        Expense::getTransactionMonth,
-                        groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO,
-                                Expense::getAmount, BigDecimal::add))))
+                .collect(byMonthAndCategory())
                 .forEach((month, value) -> value.forEach((category, amount) -> {
                     long transactionCount = yearlyExpenses.stream().filter(y -> y.getCategory().getName().equals(category) && y.getTransactionMonth() == month).count();
                     groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount, transactionCount));
@@ -242,10 +229,7 @@ public class ExpenseService {
 
         yearlyExpenses
                 .stream()
-                .collect(groupingBy(Expense::getTransactionMonth,
-                        groupingBy(Expense::getCategoryName,
-                                reducing(BigDecimal.ZERO,
-                                        Expense::getAmount, BigDecimal::add))))
+                .collect(byMonthAndCategory())
                 .forEach((month, value) ->
                         value.forEach((category, amount) -> {
                                     if (amount.compareTo(BigDecimal.ZERO) < 0)
@@ -277,7 +261,7 @@ public class ExpenseService {
                                 Expense::getAmount, BigDecimal::add)));
 
         return sums.entrySet().stream()
-                .sorted(Comparator.comparing((Map.Entry<String, BigDecimal> e) -> e.getValue().abs()).reversed())
+                .sorted(BY_ABS_DESC)
                 .limit(10)
                 .map(e -> new PieChartExpenseDto(e.getKey(), e.getValue()))
                 .toList();
@@ -427,7 +411,7 @@ public class ExpenseService {
                                 Expense::getAmount, BigDecimal::add)));
 
         return sums.entrySet().stream()
-                .sorted(Comparator.comparing((Map.Entry<String, BigDecimal> e) -> e.getValue().abs()).reversed())
+                .sorted(BY_ABS_DESC)
                 .map(e -> new PieChartExpenseDto(e.getKey(), e.getValue()))
                 .toList();
     }
@@ -454,5 +438,17 @@ public class ExpenseService {
                     return new TreeMapExpenseDto(levelName, categoryChildren);
                 })
                 .toList();
+    }
+
+    private Account resolveAccount(Long id) {
+        return (id != null && id != -1) ? accountRepository.getReferenceById(id) : null;
+    }
+
+    private static final Comparator<Map.Entry<String, BigDecimal>> BY_ABS_DESC =
+            Comparator.comparing((Map.Entry<String, BigDecimal> e) -> e.getValue().abs()).reversed();
+
+    private static Collector<Expense, ?, Map<Integer, Map<String, BigDecimal>>> byMonthAndCategory() {
+        return groupingBy(Expense::getTransactionMonth,
+                groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
     }
 }
