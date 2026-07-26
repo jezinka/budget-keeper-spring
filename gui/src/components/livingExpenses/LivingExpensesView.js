@@ -1,14 +1,30 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row, Table} from "react-bootstrap";
 import {formatNumber, getMonthName, monthColors, MONTHS_ARRAY} from "../../Utils";
-import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from "recharts";
 import Main from "../main/Main";
 import CategoryCheckboxRow from "../year/CategoryCheckboxRow";
+import MonthYearFilter from "../monthlyView/MonthYearFilter";
 
 const LivingExpensesView = () => {
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [topExpenses, setTopExpenses] = useState([]);
     const [data, setData] = useState({});
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
@@ -17,9 +33,18 @@ const LivingExpensesView = () => {
             .then(cats => {
                 const expenseCats = cats.filter(c => c.level !== null && c.level >= 0);
                 setCategories(expenseCats);
-                setSelectedCategories(expenseCats.map(c => c.name));
             });
     }, []);
+
+    useEffect(() => {
+        loadTopExpenses();
+    }, [year, month, selectedCategories]);
+
+    async function loadTopExpenses() {
+        const response = await fetch("/budget/expenses/topExpensesForMonthAndCategory?year=" + year + "&month=" + month + "&categories=" + selectedCategories);
+        const data = await response.json();
+        setTopExpenses(data);
+    }
 
     useEffect(() => {
         if (selectedCategories.length === 0) {
@@ -64,6 +89,13 @@ const LivingExpensesView = () => {
         <Col sm={12}>
             <h2>Wydatki na życie – porównanie rok do roku</h2>
 
+            <MonthYearFilter
+                year={year}
+                month={month}
+                onYearChange={setYear}
+                onMonthChange={setMonth}
+            />
+
             <CategoryCheckboxRow
                 categories={categories}
                 selectedCategories={selectedCategories}
@@ -75,7 +107,7 @@ const LivingExpensesView = () => {
                     <Row className="mt-3 mb-4">
                         <Col sm={12}>
                             <h5>Miesięczne wydatki rok do roku</h5>
-                            <ResponsiveContainer width="100%" height={350}>
+                            <ResponsiveContainer width="100%" height={150}>
                                 <BarChart data={chartData} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
                                     <CartesianGrid strokeDasharray="3 3"/>
                                     <XAxis dataKey="monthName"/>
@@ -90,7 +122,34 @@ const LivingExpensesView = () => {
                             </ResponsiveContainer>
                         </Col>
                     </Row>
-
+                    <Row>
+                        {topExpenses.length > 0 && (
+                            <Col sm={4}>
+                                <h4>Największe wydatki</h4>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie
+                                            data={topExpenses}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="amount">
+                                            {topExpenses.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            formatter={(value) => formatNumber(-value)}
+                                            labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </Col>
+                        )}
+                    </Row>
                     <Row>
                         <Col sm={12}>
                             <h5>Zestawienie miesiąc do miesiąca</h5>

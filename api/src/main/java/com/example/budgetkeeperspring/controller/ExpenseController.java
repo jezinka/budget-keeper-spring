@@ -163,6 +163,13 @@ public class ExpenseController {
         LocalDate end = getEndOfSelectedMonth(year, month);
         return expenseService.getTop10ExpensesForTimePeriod(begin, end);
     }
+    @Operation(summary = "Get top expenses for a selected month and category")
+    @GetMapping("/topExpensesForMonthAndCategory")
+    List<PieChartExpenseDto> getExpensesForMonthCategory(@RequestParam("year") Integer year, @RequestParam("month") Integer month, @RequestParam("categories") String categories) {
+        LocalDate begin = getBeginOfSelectedMonth(year, month);
+        LocalDate end = getEndOfSelectedMonth(year, month);
+        return expenseService.getExpensesForTimePeriodCategory(begin, end, categories);
+    }
 
     @Operation(summary = "Get category level expenses for a selected month")
     @GetMapping("/categoryLevelExpensesForMonth")

@@ -417,4 +417,18 @@ public class ExpenseService {
                 .forEach((category, amount) -> expenses.add(new MonthCategoryAmountDTO(SUM_MONTH, category, amount)));
     }
 
+    public List<PieChartExpenseDto> getExpensesForTimePeriodCategory(LocalDate begin, LocalDate end, String categories) {
+        List<String> categoryList = Arrays.asList(categories.split(","));
+        Map<String, BigDecimal> sums = expenseRepository.findAllByTransactionDateBetween(begin, end)
+                .stream()
+                .filter(e -> e.getCategoryName() != null && categoryList.contains(e.getCategoryName()))
+                .collect(groupingBy(expense -> expense.getTitle().toLowerCase(),
+                        reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add)));
+
+        return sums.entrySet().stream()
+                .sorted(Comparator.comparing((Map.Entry<String, BigDecimal> e) -> e.getValue().abs()).reversed())
+                .map(e -> new PieChartExpenseDto(e.getKey(), e.getValue()))
+                .toList();
+    }
 }
