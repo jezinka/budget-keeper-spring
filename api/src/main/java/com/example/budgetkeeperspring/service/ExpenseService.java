@@ -420,7 +420,7 @@ public class ExpenseService {
         var sums = expenseRepository.findAllByTransactionDateBetween(begin, end)
                 .stream()
                 .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
-                .collect(groupingBy(e -> e.getCategory().getLevel(), groupingBy(Expense::getCategoryName, groupingBy(expense -> expense.getTitle().toLowerCase() + expense.getCategory().getLevel(),
+                .collect(groupingBy(e -> e.getCategory().getLevel(), groupingBy(Expense::getCategoryName, groupingBy(expense -> expense.getTitle().toLowerCase(),
                         reducing(BigDecimal.ZERO,
                                 Expense::getAmount, BigDecimal::add)))));
 
@@ -430,7 +430,7 @@ public class ExpenseService {
                     List<TreeMapExpenseDto> categoryChildren = levelEntry.getValue().entrySet().stream()
                             .map(categoryEntry -> {
                                 List<TreeMapExpenseDto> titleChildren = categoryEntry.getValue().keySet().stream()
-                                        .map(s -> new TreeMapExpenseDto(s+categoryEntry.getKey()+levelName, categoryEntry.getValue().get(s)))
+                                        .map(s -> new TreeMapExpenseDto(s + "\n" + categoryEntry.getKey() + "\n" + levelName, categoryEntry.getValue().get(s)))
                                         .toList();
                                 return new TreeMapExpenseDto(categoryEntry.getKey(), titleChildren);
                             })
