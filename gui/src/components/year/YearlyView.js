@@ -6,6 +6,7 @@ import Main from "../main/Main";
 import YearFilter from "./YearFilter";
 import SankeyComponent from "../monthlyView/SankeyComponent";
 import PictorialBar from "./PictorialBar";
+import ExpenseTreeMap from "../monthlyView/ExpenseTreeMap";
 
 const YearlyView = () => {
     const [expenses, setExpenses] = useState([]);
@@ -20,6 +21,7 @@ const YearlyView = () => {
         loadTransactions();
         loadTopExpenses();
         loadExpensePieData();
+        loadExpenses();
     }, [year]);
 
     async function loadTransactions() {
@@ -41,6 +43,12 @@ const YearlyView = () => {
         const response = await fetch("/budget/expenses/categoryLevelExpensesForYear?year=" + year);
         const data = await response.json();
         setExpensePieData(data);
+    }
+
+    async function loadExpenses() {
+        const response = await fetch("/budget/expenses/getExpensesForYear?year=" + year);
+        const data = await response.json();
+        setExpenses(data);
     }
 
     function ExpenseForMonthAndCategory(filteredTransactions, currMonth, currCategory) {
@@ -159,6 +167,9 @@ const YearlyView = () => {
                         <PictorialBar year={year}/>
                     </ResponsiveContainer>
                 </Col>
+            </Row>
+            <Row>
+                <ExpenseTreeMap expenses={expenses}/>
             </Row>
 
             <SankeyComponent

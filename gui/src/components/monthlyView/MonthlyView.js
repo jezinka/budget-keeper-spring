@@ -5,22 +5,31 @@ import {formatNumber, getMonthName} from "../../Utils";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import MonthYearFilter from "./MonthYearFilter";
 import SankeyComponent from "./SankeyComponent";
+import ExpenseTreeMap from "./ExpenseTreeMap";
 
 const MonthlyView = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [topExpenses, setTopExpenses] = useState([]);
+    const [expenses, setExpenses] = useState([]);
     const [expensePieData, setExpensePieData] = useState([]);
 
     useEffect(() => {
         loadTopExpenses();
         loadExpensePieData();
+        loadExpenses();
     }, [year, month]);
 
     async function loadTopExpenses() {
         const response = await fetch("/budget/expenses/topExpensesForMonth?year=" + year + "&month=" + month);
         const data = await response.json();
         setTopExpenses(data);
+    }
+
+    async function loadExpenses() {
+        const response = await fetch("/budget/expenses/getExpensesForMonth?year=" + year + "&month=" + month);
+        const data = await response.json();
+        setExpenses(data);
     }
 
     async function loadExpensePieData() {
@@ -91,6 +100,9 @@ const MonthlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
+            </Row>
+            <Row>
+                <ExpenseTreeMap expenses={expenses}/>
             </Row>
 
             <SankeyComponent

@@ -431,4 +431,28 @@ public class ExpenseService {
                 .map(e -> new PieChartExpenseDto(e.getKey(), e.getValue()))
                 .toList();
     }
+
+    public List<TreeMapExpenseDto> getExpensesForTimePeriod(LocalDate begin, LocalDate end) {
+        var sums = expenseRepository.findAllByTransactionDateBetween(begin, end)
+                .stream()
+                .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
+                .collect(groupingBy(e -> e.getCategory().getLevel(), groupingBy(Expense::getCategoryName, groupingBy(expense -> expense.getTitle().toLowerCase() + expense.getCategory().getLevel(),
+                        reducing(BigDecimal.ZERO,
+                                Expense::getAmount, BigDecimal::add)))));
+
+        return sums.entrySet().stream()
+                .map(levelEntry -> {
+                    String levelName = categoryLevelService.getCategoryLevels().get(levelEntry.getKey());
+                    List<TreeMapExpenseDto> categoryChildren = levelEntry.getValue().entrySet().stream()
+                            .map(categoryEntry -> {
+                                List<TreeMapExpenseDto> titleChildren = categoryEntry.getValue().keySet().stream()
+                                        .map(s -> new TreeMapExpenseDto(s+categoryEntry.getKey()+levelName, categoryEntry.getValue().get(s)))
+                                        .toList();
+                                return new TreeMapExpenseDto(categoryEntry.getKey(), titleChildren);
+                            })
+                            .toList();
+                    return new TreeMapExpenseDto(levelName, categoryChildren);
+                })
+                .toList();
+    }
 }
