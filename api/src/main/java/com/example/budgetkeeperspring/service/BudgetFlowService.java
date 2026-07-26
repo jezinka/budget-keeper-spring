@@ -12,9 +12,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.example.budgetkeeperspring.service.CategoryLevelService.INCOME_CATEGORY_LEVEL;
-import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -125,8 +124,7 @@ public class BudgetFlowService {
 
     private List<Expense> getValidIncomes(List<Expense> validTransactions) {
         return validTransactions.stream()
-                .filter(expense -> (INCOME_CATEGORY_LEVEL.equals(expense.getCategory().getLevel()) && expense.getAmount().compareTo(BigDecimal.ZERO) > 0)
-                        || (INVESTMENT_CATEGORY_LEVEL.equals(expense.getCategory().getLevel()) && expense.getAmount().compareTo(BigDecimal.ZERO) > 0))
+                .filter(expense -> expense.getAmount().compareTo(BigDecimal.ZERO) > 0)
                 .toList();
     }
 
