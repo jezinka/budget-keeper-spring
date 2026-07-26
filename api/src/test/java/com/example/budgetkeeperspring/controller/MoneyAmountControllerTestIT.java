@@ -3,10 +3,12 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.MoneyAmountDTO;
 import com.example.budgetkeeperspring.entity.MoneyAmount;
 import com.example.budgetkeeperspring.repository.MoneyAmountRepository;
+import com.example.budgetkeeperspring.config.TestRabbitMQConfig;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
@@ -18,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
+@Import(TestRabbitMQConfig.class)
 class MoneyAmountControllerTestIT {
 
     @Autowired
