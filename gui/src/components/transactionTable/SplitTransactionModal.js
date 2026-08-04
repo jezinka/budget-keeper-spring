@@ -1,7 +1,7 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import {getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {getAccountsMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
 import {EMPTY_OPTION, handleError} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
@@ -9,6 +9,8 @@ import {CategoryContext} from "../../context/CategoryContext";
 export default function SplitTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
     const {categories, fetchCategories} = useContext(CategoryContext);
+    const [accounts, setAccounts] = useState([]);
+
     const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
         id: 0,
         transactionDate: Date.now(),
@@ -18,14 +20,32 @@ export default function SplitTransactionModal(props) {
         amount: 0,
         categoryId: EMPTY_OPTION,
         splitAmount: 0,
-        splitCategoryId: EMPTY_OPTION
+        splitCategoryId: EMPTY_OPTION,
+        sourceAccountId: EMPTY_OPTION,
+        destinationAccountId: EMPTY_OPTION
     });
+
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
 
     const handleSplit = (event) => {
         let value = Number(event.target.value);
         let newValue = Number((formState.baseSplitAmount - value).toFixed(2));
         setFormState({...formState, [event.target.name]: value, amount: newValue});
     };
+
+    async function fetchAccounts() {
+        const response = await fetch('/budget/accounts/all');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setAccounts(data);
+            }
+        } else {
+            handleError();
+        }
+    }
 
     async function submitForm() {
         const splittedTransactions = [
@@ -75,6 +95,7 @@ export default function SplitTransactionModal(props) {
                         splitFlow={true}
                         getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
+                        getAccountsMap={() => getAccountsMap(accounts)}
                     />
                 </Modal.Body>
                 <Modal.Footer>

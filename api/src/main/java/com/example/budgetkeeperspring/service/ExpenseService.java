@@ -115,6 +115,9 @@ public class ExpenseService {
                 Category savedCategory = categoryRepository.findById(category.getId()).orElseThrow(NotFoundException::new);
                 expense.setCategory(savedCategory);
             }
+            expense.setSourceAccount(resolveAccount(expense.getSourceAccount().getId()));
+            expense.setDestinationAccount(resolveAccount(expense.getDestinationAccount().getId()));
+
         });
         expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);

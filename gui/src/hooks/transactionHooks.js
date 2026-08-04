@@ -23,6 +23,8 @@ export function useTransactionForm(initialState) {
                     note: data.note,
                     amount: data.amount,
                     baseSplitAmount: data.amount,
+                    splitAmount: 0,
+                    splitCategoryId: EMPTY_OPTION,
                     categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION,
                     sourceAccountId: data.sourceAccountId ? data.sourceAccountId : EMPTY_OPTION,
                     destinationAccountId: data.destinationAccountId ? data.destinationAccountId : EMPTY_OPTION,
@@ -49,6 +51,7 @@ export function getCategoriesMap(categories) {
 
     return categoriesOptions;
 }
+
 export function getAccountsMap(accounts) {
     let accountsOptions = [];
     accountsOptions.push(<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>);
