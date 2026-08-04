@@ -10,6 +10,7 @@ import ExpenseTreeMap from "../monthlyView/ExpenseTreeMap";
 
 const YearlyView = () => {
     const [expenses, setExpenses] = useState([]);
+    const [treeMapExpenses, setTreeMapExpenses] = useState([]);
     const [investments, setInvestments] = useState([]);
     const [incomes, setIncomes] = useState([]);
     const [categoryLevels, setCategoryLevels] = useState([]);
@@ -48,7 +49,7 @@ const YearlyView = () => {
     async function loadExpenses() {
         const response = await fetch("/budget/expenses/getExpensesForYear?year=" + year);
         const data = await response.json();
-        setExpenses(data);
+        setTreeMapExpenses(data);
     }
 
     function ExpenseForMonthAndCategory(filteredTransactions, currMonth, currCategory) {
@@ -169,7 +170,7 @@ const YearlyView = () => {
                 </Col>
             </Row>
             <Row>
-                <ExpenseTreeMap expenses={expenses}/>
+                <ExpenseTreeMap expenses={treeMapExpenses}/>
             </Row>
 
             <SankeyComponent
