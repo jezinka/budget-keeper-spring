@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import {getAccountsMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {getAccountsMap, getBeneficiariesMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
 import {EMPTY_OPTION, handleError} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
@@ -10,6 +10,7 @@ export default function SplitTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
     const {categories, fetchCategories} = useContext(CategoryContext);
     const [accounts, setAccounts] = useState([]);
+    const [beneficiaries, setBeneficiaries] = useState([]);
 
     const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
         id: 0,
@@ -22,11 +23,13 @@ export default function SplitTransactionModal(props) {
         splitAmount: 0,
         splitCategoryId: EMPTY_OPTION,
         sourceAccountId: EMPTY_OPTION,
-        destinationAccountId: EMPTY_OPTION
+        destinationAccountId: EMPTY_OPTION,
+        beneficiaryId: EMPTY_OPTION
     });
 
     useEffect(() => {
         fetchAccounts();
+        fetchBeneficiaries();
     }, []);
 
     const handleSplit = (event) => {
@@ -41,6 +44,17 @@ export default function SplitTransactionModal(props) {
             const data = await response.json();
             if (data) {
                 setAccounts(data);
+            }
+        } else {
+            handleError();
+        }
+    }
+    async function fetchBeneficiaries() {
+        const response = await fetch('/budget/beneficiaries/all');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setBeneficiaries(data);
             }
         } else {
             handleError();
@@ -96,6 +110,7 @@ export default function SplitTransactionModal(props) {
                         getCategoriesMap={() => getCategoriesMap(categories)}
                         setShowCategoryForm={setShowCategoryForm}
                         getAccountsMap={() => getAccountsMap(accounts)}
+                        getBeneficiariesMap={() => getBeneficiariesMap(beneficiaries)}
                     />
                 </Modal.Body>
                 <Modal.Footer>

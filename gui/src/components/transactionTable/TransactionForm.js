@@ -10,7 +10,8 @@ const TransactionForm = ({
                              getCategoriesMap,
                              setShowCategoryForm,
                              editable = false,
-                             getAccountsMap
+                             getAccountsMap,
+                             getBeneficiariesMap
                          }) => {
     return (
         <Form>
@@ -52,11 +53,21 @@ const TransactionForm = ({
                 </Col>
             </Row>
             <Row>
+                <Col sm={2}>
+                    <Form.Label column={"sm"} className="text-muted small mb-0">Dla kogo:</Form.Label>
+                    <Form.Select className="m-2" placeholder="Dla kogo:" onChange={handleChange}
+                                 name="beneficiaryId"
+                                 value={formState.beneficiaryId}
+                                 disabled={splitFlow}>
+                        {getBeneficiariesMap()}
+                    </Form.Select>
+                </Col>
                 <Col sm={4}>
                     <Form.Label column={"sm"} className="text-muted small mb-0">Z konta:</Form.Label>
                     <Form.Select className="m-2" placeholder="Z konta:" onChange={handleChange}
                                  name="sourceAccountId"
-                                 value={formState.sourceAccountId}>
+                                 value={formState.sourceAccountId}
+                                 disabled={splitFlow}>
                         {getAccountsMap()}
                     </Form.Select>
                 </Col>
@@ -64,7 +75,8 @@ const TransactionForm = ({
                     <Form.Label column={"sm"} className="text-muted small mb-0">Na konto:</Form.Label>
                     <Form.Select className="m-2" placeholder="Na konto:" onChange={handleChange}
                                  name="destinationAccountId"
-                                 value={formState.destinationAccountId}>
+                                 value={formState.destinationAccountId}
+                                 disabled={splitFlow}>
                         {getAccountsMap()}
                     </Form.Select>
                 </Col>

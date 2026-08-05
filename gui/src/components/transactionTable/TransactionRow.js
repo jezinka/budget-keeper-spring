@@ -10,6 +10,7 @@ const TransactionRow = ({transaction, editTransaction, splitTransaction, deleteT
             <td>{transaction.transactionDate}</td>
             <td>{transaction.description.substring(0, 80)}</td>
             <td style={{textAlign: 'right'}}>{formatNumber(transaction.amount)}</td>
+            <td>{transaction.beneficiaryName}</td>
             <td style={{color: (transaction.categoryId === UNKNOWN_CATEGORY ? "lightgray" : "black")}}>{transaction.categoryName}</td>
             <td style={{textAlign: "center"}}>
                 <Button variant="outline-primary" size="sm"

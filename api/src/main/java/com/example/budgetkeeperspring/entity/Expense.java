@@ -65,6 +65,10 @@ public class Expense implements Serializable {
     @JoinColumn
     private Account destinationAccount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private Beneficiary beneficiary;
+
 
     public String getCategoryName() {
         if (category != null) {

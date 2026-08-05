@@ -2,11 +2,13 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.*;
 import com.example.budgetkeeperspring.entity.Account;
+import com.example.budgetkeeperspring.entity.Beneficiary;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.AccountRepository;
+import com.example.budgetkeeperspring.repository.BeneficiaryRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -43,6 +45,7 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
     private final GoalService goalService;
     private final CategoryLevelService categoryLevelService;
+    private final BeneficiaryRepository beneficiaryRepository;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
@@ -85,7 +88,7 @@ public class ExpenseService {
             foundExpense.setAmount(updateExpenseDTO.getAmount());
             foundExpense.setSourceAccount(resolveAccount(updateExpenseDTO.getSourceAccountId()));
             foundExpense.setDestinationAccount(resolveAccount(updateExpenseDTO.getDestinationAccountId()));
-
+            foundExpense.setBeneficiary(resolveBeneficiary(updateExpenseDTO.getBeneficiaryId()));
             if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
                 foundExpense.setNote(updateExpenseDTO.getNote());
             }
@@ -445,6 +448,10 @@ public class ExpenseService {
 
     private Account resolveAccount(Long id) {
         return (id != null && id != -1) ? accountRepository.getReferenceById(id) : null;
+    }
+
+    private Beneficiary resolveBeneficiary(Long id) {
+        return (id != null && id != -1) ? beneficiaryRepository.getReferenceById(id) : null;
     }
 
     private static final Comparator<Map.Entry<String, BigDecimal>> BY_ABS_DESC =

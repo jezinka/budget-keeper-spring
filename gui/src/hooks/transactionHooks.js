@@ -28,6 +28,7 @@ export function useTransactionForm(initialState) {
                     categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION,
                     sourceAccountId: data.sourceAccountId ? data.sourceAccountId : EMPTY_OPTION,
                     destinationAccountId: data.destinationAccountId ? data.destinationAccountId : EMPTY_OPTION,
+                    beneficiaryId: data.beneficiaryId ? data.beneficiaryId: EMPTY_OPTION,
                     manually: data.manually
                 });
             }
@@ -63,4 +64,17 @@ export function getAccountsMap(accounts) {
     });
 
     return accountsOptions;
+}
+
+export function getBeneficiariesMap(beneficiaries) {
+    let beneficiariesOptions = [];
+    beneficiariesOptions.push(<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>);
+
+    beneficiaries.forEach(beneficiary => {
+        beneficiariesOptions.push(
+            <option key={beneficiary.id} value={beneficiary.id}>{beneficiary.name}</option>
+        );
+    });
+
+    return beneficiariesOptions;
 }

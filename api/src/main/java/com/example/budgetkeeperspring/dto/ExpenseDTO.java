@@ -35,6 +35,9 @@ public class ExpenseDTO {
     private Long sourceAccountId;
     private Long destinationAccountId;
 
+    private Long beneficiaryId;
+    private String beneficiaryName;
+
     public String getDescription() {
         if (note != null) {
             return note;

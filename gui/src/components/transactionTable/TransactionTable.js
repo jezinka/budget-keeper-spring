@@ -89,6 +89,7 @@ export default function TransactionTable(props) {
                     <th>KIEDY</th>
                     <th>OPIS</th>
                     <th>ILE</th>
+                    <th>DLA KOGO</th>
                     <th>KATEGORIA</th>
                     <th style={{textAlign: "center"}}>*</th>
                 </tr>

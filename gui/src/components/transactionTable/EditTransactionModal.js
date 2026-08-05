@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
-import {getAccountsMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
+import {getAccountsMap, getBeneficiariesMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
 import {EMPTY_OPTION, handleError} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
@@ -10,6 +10,7 @@ export default function EditTransactionModal(props) {
     const [showCategoryForm, setShowCategoryForm] = useState(false);
     const {categories, fetchCategories} = useContext(CategoryContext);
     const [accounts, setAccounts] = useState([]);
+    const [beneficiaries, setBeneficiaries] = useState([]);
 
     const {formState, setFormState, handleChange, loadExpense} = useTransactionForm({
         id: null,
@@ -22,11 +23,13 @@ export default function EditTransactionModal(props) {
         categoryId: EMPTY_OPTION,
         sourceAccountId: EMPTY_OPTION,
         destinationAccountId: EMPTY_OPTION,
+        beneficiaryId: EMPTY_OPTION,
         manually: false
     });
 
     useEffect(() => {
         fetchAccounts();
+        fetchBeneficiaries();
     }, []);
 
     async function fetchAccounts() {
@@ -35,6 +38,17 @@ export default function EditTransactionModal(props) {
             const data = await response.json();
             if (data) {
                 setAccounts(data);
+            }
+        } else {
+            handleError();
+        }
+    }
+    async function fetchBeneficiaries() {
+        const response = await fetch('/budget/beneficiaries/all');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setBeneficiaries(data);
             }
         } else {
             handleError();
@@ -67,7 +81,8 @@ export default function EditTransactionModal(props) {
                 manually: formState.manually,
                 categoryId: formState.categoryId === EMPTY_OPTION ? null : formState.categoryId,
                 sourceAccountId: formState.sourceAccountId === EMPTY_OPTION ? null : formState.sourceAccountId,
-                destinationAccountId: formState.destinationAccountId === EMPTY_OPTION ? null : formState.destinationAccountId
+                destinationAccountId: formState.destinationAccountId === EMPTY_OPTION ? null : formState.destinationAccountId,
+                beneficiaryId: formState.beneficiaryId === EMPTY_OPTION ? null : formState.beneficiaryId
             };
 
             const response = await fetch('/budget/expenses/create', {
@@ -97,7 +112,8 @@ export default function EditTransactionModal(props) {
             categoryId: EMPTY_OPTION,
             manually: true,
             sourceAccountId: EMPTY_OPTION,
-            destinationAccountId: EMPTY_OPTION
+            destinationAccountId: EMPTY_OPTION,
+            beneficiaryId: EMPTY_OPTION
         });
     }
 
@@ -130,6 +146,7 @@ export default function EditTransactionModal(props) {
                         setShowCategoryForm={setShowCategoryForm}
                         editable={formState.manually === true || formState.id === null}
                         getAccountsMap={() => getAccountsMap(accounts)}
+                        getBeneficiariesMap={() => getBeneficiariesMap(beneficiaries)}
                     />
                 </Modal.Body>
                 <Modal.Footer>
