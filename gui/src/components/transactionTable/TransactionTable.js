@@ -11,7 +11,8 @@ export default function TransactionTable(props) {
     const [id, setId] = useState(0);
     const [filters, setFilters] = useState({
         description: '',
-        category: ''
+        category: '',
+        beneficiary: ''
     });
 
     function updateFilter(name, value) {
@@ -47,6 +48,7 @@ export default function TransactionTable(props) {
         return props.transactions.filter(tx => {
             const txDesc = (tx.description || tx.title || tx.note || '').toString().toLowerCase();
             const txCategory = (tx.category || tx.categoryName || '').toString().toLowerCase();
+            const txBeneficiary = (tx.beneficiary || tx.beneficiaryName || '').toString().toLowerCase();
 
             if (filters.description) {
                 if (!txDesc || !txDesc.includes(filters.description.toLowerCase())) return false;
@@ -54,6 +56,9 @@ export default function TransactionTable(props) {
 
             if (filters.category) {
                 if (!txCategory || !txCategory.includes(filters.category.toLowerCase())) return false;
+            }
+            if (filters.beneficiary) {
+                if (!txBeneficiary || !txBeneficiary.includes(filters.beneficiary.toLowerCase())) return false;
             }
 
             return true;
@@ -105,12 +110,16 @@ export default function TransactionTable(props) {
                                value={formatNumber(sumFilteredExpenses)}/>
                     </th>
                     <th>
+                        <input type="text" className="form-control form-control-sm" value={filters.beneficiary}
+                               onChange={e => updateFilter('beneficiary', e.target.value)} placeholder="dla kogo"/>
+                    </th>
+                    <th>
                         <input type="text" className="form-control form-control-sm" value={filters.category}
                                onChange={e => updateFilter('category', e.target.value)} placeholder="kategoria"/>
                     </th>
                     <th style={{textAlign: "center"}}>
                         <button className="btn btn-sm btn-secondary me-1"
-                                onClick={() => setFilters({description: '', category: ''})}>Wyczyść
+                                onClick={() => setFilters({description: '', category: '', beneficiary: ''})}>Wyczyść
                         </button>
                     </th>
                 </tr>
