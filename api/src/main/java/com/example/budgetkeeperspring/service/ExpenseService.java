@@ -60,6 +60,7 @@ public class ExpenseService {
         expense.setCategory(category);
         expense.setSourceAccount(sourceAccount);
         expense.setDestinationAccount(destinationAccount);
+        expense.setBeneficiary(null);
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }
 
