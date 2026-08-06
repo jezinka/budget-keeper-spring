@@ -93,9 +93,9 @@ export default function TransactionTable(props) {
                 <tr className='table-info'>
                     <th>KIEDY</th>
                     <th>OPIS</th>
-                    <th>ILE</th>
-                    <th>DLA KOGO</th>
-                    <th>KATEGORIA</th>
+                    <th style={{width: "10%"}}>ILE</th>
+                    <th style={{width: "10%"}}>DLA KOGO</th>
+                    <th style={{width: "15%"}}>KATEGORIA</th>
                     <th style={{textAlign: "center"}}>*</th>
                 </tr>
                 <tr>
