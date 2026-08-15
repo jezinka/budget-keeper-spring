@@ -74,7 +74,7 @@ const YearlyView = () => {
     }
 
     let body = <>
-        <Col sm={12}>
+        <Col sm={11}>
             <h2>{`Wydatki i wpływy za ${year}`}</h2>
 
             <YearFilter
@@ -83,7 +83,7 @@ const YearlyView = () => {
             />
 
             <Row className="mt-3">
-                <Col sm={12}>
+                <Col>
                     <h4>Sumy miesięczne per poziom kategorii</h4>
                     {(() => {
                         return (<Table id="yearly" responsive='sm' striped bordered size="sm">
