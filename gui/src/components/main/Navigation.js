@@ -15,7 +15,6 @@ const Navigation = () => {
                 <hr/>
                 <Nav.Link href="/budget/gui/investments">Inwestycje</Nav.Link>
                 <Nav.Link href="/budget/gui/livingExpenses">Wydatki na życie</Nav.Link>
-                <Nav.Link href="/budget/gui/sinkingFunds">Sinking funds</Nav.Link>
                 <hr/>
                 <Nav.Link href="/budget/gui/admin">Admin</Nav.Link>
             </Container>

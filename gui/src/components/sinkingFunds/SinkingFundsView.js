@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Main from '../main/Main';
 import Table from 'react-bootstrap/Table';
 import {formatNumber} from '../../Utils';
-import {Modal} from "react-bootstrap";
+import {Col, Modal} from "react-bootstrap";
 
 const SinkingFundsView = () => {
     const [accounts, setAccounts] = useState([]);
@@ -33,7 +33,7 @@ const SinkingFundsView = () => {
             {data.map((row) => {
                 return <tr key={row.title + row.transactionDate}>
                     <td style={{minWidth: '80px'}}>{row.transactionDate}</td>
-                    <td>{row.description.substring(0,80)}</td>
+                    <td>{row.description.substring(0, 80)}</td>
                     <td style={{textAlign: 'right'}}>{formatNumber(row.amount)}</td>
                 </tr>
             })}
@@ -44,11 +44,7 @@ const SinkingFundsView = () => {
 
     return (
         <>
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton> <Modal.Title>Transakcje</Modal.Title> </Modal.Header>
-                <Modal.Body>{transactionsDetails}</Modal.Body>
-            </Modal>
-            <Main body={
+            <Col sm={3}>
                 <Table responsive='sm' striped bordered size='sm' className='mt-3'>
                     <thead>
                     <tr>
@@ -61,13 +57,23 @@ const SinkingFundsView = () => {
                     {accounts.map(a => (
                         <tr key={a.id}>
                             <td>{a.name}</td>
-                            <td className={a.balance < 0 ? 'text-danger' : ''} onClick={() => renderTooltip(a)}>{formatNumber(a.balance)}</td>
+                            <td className={a.balance < 0 ? 'text-danger' : ''}
+                                onClick={() => renderTooltip(a)}>{formatNumber(a.balance)}</td>
                             <td>{a.note}</td>
                         </tr>
                     ))}
+                    <tr>
+                        <td><b>SUMA:</b></td>
+                        <td><b>{formatNumber(accounts.map(a => a.balance).reduce((sum, num) => sum + num, 0))}</b></td>
+                        <td/>
+                    </tr>
                     </tbody>
                 </Table>
-            }/>
+            </Col>
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton> <Modal.Title>Transakcje</Modal.Title> </Modal.Header>
+                <Modal.Body>{transactionsDetails}</Modal.Body>
+            </Modal>
         </>
     );
 };

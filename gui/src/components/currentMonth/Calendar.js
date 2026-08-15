@@ -76,10 +76,8 @@ export const Calendar = () => {
     }
 
     return (
-        <Container>
-            <Col sm={7} className={"ms-5"}>
-                <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
-                {daysRows()}
-            </Col>
-        </Container>)
+        <Col sm={6} className={"ms-3"}>
+            <Row>{getDaysOfWeek().map(d => <Col className="text-sm-center">{d}</Col>)}</Row>
+            {daysRows()}
+        </Col>);
 }
