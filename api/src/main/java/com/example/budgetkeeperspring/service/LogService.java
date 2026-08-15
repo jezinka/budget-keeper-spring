@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -35,7 +36,7 @@ public class LogService {
         if (log == null) {
             log = logRepository.findFirstByDeletedIsFalseAndLevelOrderByDateDesc("INFO");
         }
-        return logMapper.mapToDto(log);
+        return logMapper.mapToDto(Objects.requireNonNullElseGet(log, Log::new));
     }
 
     public List<LogDTO> getAllActive() {
