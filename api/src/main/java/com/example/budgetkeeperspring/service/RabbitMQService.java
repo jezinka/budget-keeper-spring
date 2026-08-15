@@ -3,7 +3,6 @@ package com.example.budgetkeeperspring.service;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.LogDTO;
 import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
-import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.mapper.LogMapper;
 import com.example.budgetkeeperspring.repository.AccountRepository;

@@ -216,4 +216,9 @@ public class ExpenseController {
     Map<Integer, List<MonthCategoryAmountDTO>> getLivingExpensesComparison(@RequestBody List<String> categoryNames) {
         return expenseService.getLivingExpensesComparison(categoryNames);
     }
+
+    @GetMapping("/sinkingFunds/{accountName}")
+    List<ExpenseDTO> getSinkingFundsExpenses(@PathVariable("accountName") String accountName ) {
+        return expenseService.getSinkingFundsExpenses(accountName);
+    }
 }

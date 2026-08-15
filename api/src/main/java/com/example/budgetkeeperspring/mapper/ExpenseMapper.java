@@ -33,6 +33,8 @@ public interface ExpenseMapper {
     ExpenseDTO mapToDto(Expense expense);
 
     default LocalDate stringToLocalDate(String date) {
+        if(date == null) return null;
+
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return LocalDate.parse(date, formatter);

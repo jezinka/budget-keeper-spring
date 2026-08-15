@@ -15,6 +15,7 @@ import com.example.budgetkeeperspring.utils.DateUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -49,10 +50,20 @@ public class ExpenseService {
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
+        Account account = sinkingFundAccount(expenseDTO);
         if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-            return createExpense(expenseDTO, category, null, defaultAccount);
+            return createExpense(expenseDTO, category, account, defaultAccount);
         }
-        return createExpense(expenseDTO, category, defaultAccount, null);
+        return createExpense(expenseDTO, category, defaultAccount, account);
+    }
+
+    @Nullable
+    private Account sinkingFundAccount(ExpenseDTO expenseDTO) {
+        return accountRepository.findBySinkingFundTrue()
+                .stream()
+                .filter(a -> expenseDTO.getTitle().contains(a.getAccountNumber()))
+                .findFirst()
+                .orElse(null);
     }
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount) {
@@ -461,5 +472,15 @@ public class ExpenseService {
     private static Collector<Expense, ?, Map<Integer, Map<String, BigDecimal>>> byMonthAndCategory() {
         return groupingBy(Expense::getTransactionMonth,
                 groupingBy(Expense::getCategoryName, reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
+    }
+
+    public List<ExpenseDTO> getSinkingFundsExpenses(String accountName) {
+
+        Account account = accountRepository.findByName(accountName);
+
+        return expenseRepository.findAllByAccount(account)
+                .stream()
+                .map(expenseMapper::mapToDto)
+                .toList();
     }
 }

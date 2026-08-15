@@ -11,4 +11,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findBySinkingFundTrue();
 
     Account findByDefaultAccountTrue();
+
+    Account findByName(String accountName);
 }

@@ -605,6 +605,124 @@ class ExpenseServiceTest {
         assertEquals(category, captor.getValue().getCategory());
     }
 
+    // ---- getSinkingFundsExpenses ----
+
+    @Test
+    void getSinkingFundsExpenses_returnsExpensesForAccount() {
+        Account sinkingAccount = Account.builder().id(10L).name("Wakacje").build();
+
+        Expense e1 = new Expense();
+        e1.setAmount(BigDecimal.valueOf(-200));
+        e1.setCategory(new Category("TestA"));
+
+        Expense e2 = new Expense();
+        e2.setAmount(BigDecimal.valueOf(-100));
+        e2.setCategory(new Category("TestA"));
+
+        when(accountRepository.findByName("Wakacje")).thenReturn(sinkingAccount);
+        when(expenseRepository.findAllByAccount(sinkingAccount)).thenReturn(List.of(e1, e2));
+
+        List<ExpenseDTO> result = expenseService.getSinkingFundsExpenses("Wakacje");
+
+        assertEquals(2, result.size());
+        verify(accountRepository).findByName("Wakacje");
+        verify(expenseRepository).findAllByAccount(sinkingAccount);
+    }
+
+    @Test
+    void getSinkingFundsExpenses_returnsEmptyListWhenNoExpenses() {
+        Account sinkingAccount = Account.builder().id(11L).name("Remont").build();
+
+        when(accountRepository.findByName("Remont")).thenReturn(sinkingAccount);
+        when(expenseRepository.findAllByAccount(sinkingAccount)).thenReturn(Collections.emptyList());
+
+        List<ExpenseDTO> result = expenseService.getSinkingFundsExpenses("Remont");
+
+        assertTrue(result.isEmpty());
+    }
+
+    // ---- sinkingFundAccount (via createExpense with Category) ----
+
+    @Test
+    void createExpense_withCategory_matchesSinkingFundAccountByAccountNumber() {
+        String accountNumber = "12345678901234567890123456";
+        Account sinkingAccount = Account.builder().id(20L).name("Auto").accountNumber(accountNumber).sinkingFund(true).build();
+        Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
+        Category category = new Category("Transport");
+
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-500))
+                .title("Przelew na " + accountNumber + " rata")
+                .build();
+
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(accountRepository.findBySinkingFundTrue()).thenReturn(List.of(sinkingAccount));
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        expenseService.createExpense(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense saved = captor.getValue();
+
+        // kwota ujemna -> source = defaultAccount, destination = sinkingAccount
+        assertEquals(defaultAccount, saved.getSourceAccount());
+        assertEquals(sinkingAccount, saved.getDestinationAccount());
+    }
+
+    @Test
+    void createExpense_withCategory_positiveAmount_matchesSinkingFundAsSource() {
+        String accountNumber = "12345678901234567890123456";
+        Account sinkingAccount = Account.builder().id(20L).name("Auto").accountNumber(accountNumber).sinkingFund(true).build();
+        Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
+        Category category = new Category("Zwrot");
+
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(300))
+                .title("Zwrot z " + accountNumber)
+                .build();
+
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(accountRepository.findBySinkingFundTrue()).thenReturn(List.of(sinkingAccount));
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        expenseService.createExpense(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense saved = captor.getValue();
+
+        // kwota dodatnia -> source = sinkingAccount, destination = defaultAccount
+        assertEquals(sinkingAccount, saved.getSourceAccount());
+        assertEquals(defaultAccount, saved.getDestinationAccount());
+    }
+
+    @Test
+    void createExpense_withCategory_noMatchingAccountNumber_usesNull() {
+        Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
+        Account otherAccount = Account.builder().id(2L).name("Inne").accountNumber("99999999999999999999999999").build();
+        Category category = new Category("Jedzenie");
+
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-50))
+                .title("Biedronka zakupy")
+                .build();
+
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(accountRepository.findBySinkingFundTrue()).thenReturn(List.of(otherAccount));
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        expenseService.createExpense(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        Expense saved = captor.getValue();
+
+        // brak dopasowania -> destination = null
+        assertEquals(defaultAccount, saved.getSourceAccount());
+        assertNull(saved.getDestinationAccount());
+    }
+
     @Test
     void createExpense_withUnknownCategoryId_throwsNotFoundException() {
         long missingCategoryId = 999L;

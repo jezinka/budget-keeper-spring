@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.repository;
 
 import com.example.budgetkeeperspring.dto.PieChartExpenseDto;
+import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +53,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e.sourceAccount.id, sum(abs(e.amount)) from Expense e where e.sourceAccount is not null group by e.sourceAccount.id")
     List<Object[]> sumAmountBySourceAccount();
+
+    @Query("select e from Expense e where e.sourceAccount = :account or e.destinationAccount = :account")
+    List<Expense> findAllByAccount(@Param("account") Account account);
 }
