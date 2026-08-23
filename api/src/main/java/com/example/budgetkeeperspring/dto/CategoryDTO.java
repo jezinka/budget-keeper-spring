@@ -24,4 +24,6 @@ public class CategoryDTO {
     private boolean useInYearlyCharts = Boolean.TRUE;
 
     private Integer level;
+
+    private Integer count;
 }

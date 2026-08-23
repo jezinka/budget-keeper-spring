@@ -170,6 +170,9 @@ public class ExpenseService {
         if (filters.get(CATEGORY) != null) {
             allPredicates.add(p -> p.getCategoryName().equals(filters.get(CATEGORY).toString()));
         }
+        if (filters.get("categoryId") != null && !filters.get("categoryId").toString().isEmpty()) {
+            allPredicates.add(p -> p.getCategory().getId().equals(Long.parseLong(filters.get("categoryId").toString())));
+        }
         if (!filters.getOrDefault("description", "").equals("")) {
             String searchTerm = filters.get("description").toString().toLowerCase();
             allPredicates.add(p -> {

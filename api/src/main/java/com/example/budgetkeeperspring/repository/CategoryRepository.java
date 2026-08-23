@@ -15,4 +15,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findActiveForYear(@Param("year") int year);
 
     Category findCategoryByName(String s);
+
+    @Query("select c.id, count(e) from Category c join Expense e on c = e.category where e.deleted = false group by c.id")
+    List<Object[]> countExpensesInCategory();
 }

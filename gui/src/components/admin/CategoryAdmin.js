@@ -124,6 +124,7 @@ export const CategoryAdminContent = () => {
                             <th>Nazwa</th>
                             <th>Poziom</th>
                             <th>Wykresy roczne</th>
+                            <th>Ile</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -133,6 +134,7 @@ export const CategoryAdminContent = () => {
                                 <td>{cat.name}</td>
                                 <td>{levelName(cat.level)}</td>
                                 <td>{cat.useInYearlyCharts ? "✓" : "✗"}</td>
+                                <td>{cat.count}</td>
                                 <td className="text-end">
                                     <Button size="sm" variant="outline-secondary" className="me-1"
                                             onClick={() => openEdit(cat)}>

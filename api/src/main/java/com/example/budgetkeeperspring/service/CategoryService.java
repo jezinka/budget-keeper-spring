@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.CategoryDTO;
 import com.example.budgetkeeperspring.dto.CategoryLevelDTO;
+import com.example.budgetkeeperspring.dto.CounterDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.CategoryCondition;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Service
@@ -33,11 +33,23 @@ public class CategoryService {
     private final CategoryLevelMapper categoryLevelMapper;
 
     public List<CategoryDTO> getAll() {
-        return categoryRepository
+
+        List<CategoryDTO> categoryDTOList = categoryRepository
                 .findAll(Sort.by(Sort.Direction.ASC, "name"))
                 .stream()
                 .map(categoryMapper::mapToDto)
                 .toList();
+
+        categoryRepository.countExpensesInCategory()
+                .stream()
+                .map(e -> new CounterDTO(Long.parseLong(e[0].toString()), Integer.valueOf(e[1].toString())))
+                .forEach(entry ->
+                        categoryDTOList.stream()
+                                .filter(c -> c.getId().equals(entry.getId()))
+                                .findFirst()
+                                .ifPresent(c -> c.setCount(entry.getCount())));
+
+        return categoryDTOList;
     }
 
     public List<CategoryDTO> getOnlyExpenses() {

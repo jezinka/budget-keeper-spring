@@ -4,13 +4,17 @@ import React, {useEffect, useState} from "react";
 import TransactionCounter from "./TransactionCounter";
 import {ArrowClockwise} from "react-bootstrap-icons";
 import TransactionTable from "../transactionTable/TransactionTable";
+import {getCategoriesMap} from "../../hooks/transactionHooks";
+import {handleError} from "../../Utils";
 
 export const AllTransactionsContent = () => {
     const [showSpinner, setShowSpinner] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
+    const [categories, setCategories] = useState([]);
     const [filterFormState, setFilterFormState] = useState({
-        onlyEmptyCategories: false, onlyExpenses: false, description: "", amount: "", dateFrom: "", dateTo: ""
+        onlyEmptyCategories: false, onlyExpenses: false, description: "", amount: "", dateFrom: "", dateTo: "",
+        categoryId: ""
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,7 +22,20 @@ export const AllTransactionsContent = () => {
 
     useEffect(() => {
         loadTransactions();
+        fetchCategories();
     }, []);
+
+    async function fetchCategories() {
+        const response = await fetch('/budget/categories/all');
+        if (response.ok) {
+            const data = await response.json();
+            if (data) {
+                setCategories(data);
+            }
+        } else {
+            handleError();
+        }
+    }
 
     const handleFilterChange = (event) => {
         setFilterFormState({...filterFormState, [event.target.name]: event.target.value});
@@ -52,49 +69,61 @@ export const AllTransactionsContent = () => {
         <Col sm={1}>
             <TransactionCounter transactionCounter={transactionCounter}/>
         </Col>
-        <Col sm={10}>
-            <Form className="px-4">
-                <Row sm={4}>
-                    <Col sm={3}>
-                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
-                                    type="switch"
-                                    id="onlyEmptyCategories"
-                                    label="Only empty categories" value={filterFormState.onlyEmptyCategories}/>
+        <Row>
+            <Col sm={8}>
+                <Form className="px-4">
+                    <Row>
+                        <Col sm={2}>
+                            <Form.Check onChange={handleFilterCheckboxChange} name="onlyEmptyCategories"
+                                        type="switch"
+                                        id="onlyEmptyCategories"
+                                        label="Only empty categories" value={filterFormState.onlyEmptyCategories}/>
 
-                        <Form.Check onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
-                                    id="onlyExpenses"
-                                    label="Only expenses"
-                                    value={filterFormState.onlyExpenses}/>
-                    </Col>
-                    <Col sm={2}>
-                        <Form.Label className="text-muted small mb-0">Opis:</Form.Label>
-                        <Form.Control size={"sm"} placeholder="Opis:" type="text" onChange={handleFilterChange}
-                                      name="description" value={filterFormState.description}/>
-                    </Col>
-                    <Col sm={2}>
-                        <Form.Label className="text-muted small mb-0">Kwota:</Form.Label>
-                        <Form.Control size={"sm"} placeholder="Kwota:" type="number" step="0.01" onChange={handleFilterChange}
-                                      name="amount" value={filterFormState.amount}/>
-                    </Col>
-                    <Col sm={2}>
-                        <Form.Label className="text-muted small mb-0">Data od:</Form.Label>
-                        <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateFrom" value={filterFormState.dateFrom}/>
-                    </Col>
-                    <Col sm={2}>
-                        <Form.Label className="text-muted small mb-0">Data do:</Form.Label>
-                        <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
-                                      name="dateTo" value={filterFormState.dateTo}/>
-                    </Col>
-                </Row>
-            </Form>
-        </Col>
-        <Col sm={1}>
-            <Button onClick={loadTransactions}>{showSpinner ?
-                <Spinner size={"sm"} animation="grow"/> : <ArrowClockwise/>}
-            </Button>
-        </Col>
-        <TransactionTable transactions={paginatedData()} changeTransactionsHandler={loadTransactions}/>
+                            <Form.Check onChange={handleFilterCheckboxChange} name="onlyExpenses" type="switch"
+                                        id="onlyExpenses"
+                                        label="Only expenses"
+                                        value={filterFormState.onlyExpenses}/>
+                        </Col>
+                        <Col sm={2}>
+                            <Form.Label className="text-muted small mb-0">Opis:</Form.Label>
+                            <Form.Control size={"sm"} placeholder="Opis:" type="text" onChange={handleFilterChange}
+                                          name="description" value={filterFormState.description}/>
+                        </Col>
+                        <Col sm={2}>
+                            <Form.Label className="text-muted small mb-0">Kwota:</Form.Label>
+                            <Form.Control size={"sm"} placeholder="Kwota:" type="number" step="0.01"
+                                          onChange={handleFilterChange}
+                                          name="amount" value={filterFormState.amount}/>
+                        </Col>
+                        <Col sm={2}>
+                            <Form.Label className="text-muted small mb-0">Data od:</Form.Label>
+                            <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
+                                          name="dateFrom" value={filterFormState.dateFrom}/>
+                        </Col>
+                        <Col sm={2}>
+                            <Form.Label className="text-muted small mb-0">Data do:</Form.Label>
+                            <Form.Control size={"sm"} type="date" onChange={handleFilterChange}
+                                          name="dateTo" value={filterFormState.dateTo}/>
+                        </Col>
+                        <Col sm={2}>
+                            <Form.Label className="text-muted small mb-0">Kategoria:</Form.Label>
+                            <Form.Select placeholder="Kategoria:" onChange={handleFilterChange}
+                                         name="categoryId" value={filterFormState.categoryId}>
+                                {getCategoriesMap(categories)}
+                            </Form.Select>
+                        </Col>
+                    </Row>
+                </Form>
+            </Col>
+            <Col sm={1} className={"mt-3"}>
+                <Button onClick={loadTransactions}>{showSpinner ?
+                    <Spinner size={"sm"} animation="grow"/> : <ArrowClockwise/>}
+                </Button>
+            </Col>
+        </Row>
+        <Row className={"mt-1"}>
+            <TransactionTable transactions={paginatedData()} changeTransactionsHandler={loadTransactions}/>
+        </Row>
         <Row className="justify-content-md-center">
             <Col md={3}>
                 <Pagination>
