@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import AddCategoryModal from "../currentMonth/AddCategoryModal";
 import {getAccountsMap, getBeneficiariesMap, getCategoriesMap, useTransactionForm} from "../../hooks/transactionHooks";
-import {EMPTY_OPTION, handleError} from "../../Utils";
+import {EMPTY_OPTION, handleError, UNKNOWN_CATEGORY} from "../../Utils";
 import TransactionForm from "./TransactionForm";
 import {CategoryContext} from "../../context/CategoryContext";
 
@@ -19,9 +19,9 @@ export default function SplitTransactionModal(props) {
         payee: "",
         baseSplitAmount: 0,
         amount: 0,
-        categoryId: EMPTY_OPTION,
+        categoryId: UNKNOWN_CATEGORY,
         splitAmount: 0,
-        splitCategoryId: EMPTY_OPTION,
+        splitCategoryId: UNKNOWN_CATEGORY,
         sourceAccountId: EMPTY_OPTION,
         destinationAccountId: EMPTY_OPTION,
         beneficiaryId: EMPTY_OPTION

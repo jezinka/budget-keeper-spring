@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {EMPTY_OPTION, handleError} from "../Utils";
+import {EMPTY_OPTION, handleError, UNKNOWN_CATEGORY} from "../Utils";
 
 export function useTransactionForm(initialState) {
     const [formState, setFormState] = useState(initialState);
@@ -24,8 +24,8 @@ export function useTransactionForm(initialState) {
                     amount: data.amount,
                     baseSplitAmount: data.amount,
                     splitAmount: 0,
-                    splitCategoryId: EMPTY_OPTION,
-                    categoryId: data.categoryId ? data.categoryId : EMPTY_OPTION,
+                    splitCategoryId: UNKNOWN_CATEGORY,
+                    categoryId: data.categoryId ? data.categoryId : UNKNOWN_CATEGORY,
                     sourceAccountId: data.sourceAccountId ? data.sourceAccountId : EMPTY_OPTION,
                     destinationAccountId: data.destinationAccountId ? data.destinationAccountId : EMPTY_OPTION,
                     beneficiaryId: data.beneficiaryId ? data.beneficiaryId: EMPTY_OPTION,
