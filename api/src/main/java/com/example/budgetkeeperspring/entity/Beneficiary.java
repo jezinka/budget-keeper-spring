@@ -15,7 +15,7 @@ public class Beneficiary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    private Integer id;
+    private Long id;
 
     @Lob
     @Column

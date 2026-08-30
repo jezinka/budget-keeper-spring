@@ -132,6 +132,7 @@ public class ExpenseService {
             }
             expense.setSourceAccount(resolveAccount(expense.getSourceAccount().getId()));
             expense.setDestinationAccount(resolveAccount(expense.getDestinationAccount().getId()));
+            expense.setBeneficiary(resolveBeneficiary(expense.getBeneficiary().getId()));
 
         });
         expenseRepository.saveAll(updateExpenses);
