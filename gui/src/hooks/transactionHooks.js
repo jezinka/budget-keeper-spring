@@ -42,7 +42,6 @@ export function useTransactionForm(initialState) {
 
 export function getCategoriesMap(categories) {
     let categoriesOptions = [];
-    categoriesOptions.push(<option key={EMPTY_OPTION} value={EMPTY_OPTION}></option>);
 
     categories.forEach(category => {
         categoriesOptions.push(
