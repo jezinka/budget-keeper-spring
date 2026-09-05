@@ -11,6 +11,7 @@ export const AllTransactionsContent = () => {
     const [showSpinner, setShowSpinner] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [transactionCounter, setTransactionCounter] = useState(0);
+    const [transactionSum, setTransactionSum] = useState(0);
     const [categories, setCategories] = useState([]);
     const [filterFormState, setFilterFormState] = useState({
         onlyEmptyCategories: false, onlyExpenses: false, description: "", amount: "", dateFrom: "", dateTo: "",
@@ -53,6 +54,7 @@ export const AllTransactionsContent = () => {
         const data = await response.json();
         setTransactions(data);
         setTransactionCounter(data.length);
+        setTransactionSum(data.reduce((acc, transaction) => acc + transaction.amount, 0));
         setShowSpinner(false)
     }
 
@@ -67,7 +69,7 @@ export const AllTransactionsContent = () => {
 
     let body = <>
         <Col sm={1}>
-            <TransactionCounter transactionCounter={transactionCounter}/>
+            <TransactionCounter transactionCounter={transactionCounter} transactionSum={transactionSum}/>
         </Col>
         <Row>
             <Col sm={8}>
