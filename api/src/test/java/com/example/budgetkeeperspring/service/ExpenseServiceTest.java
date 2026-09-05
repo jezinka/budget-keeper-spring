@@ -652,7 +652,7 @@ class ExpenseServiceTest {
 
         ExpenseDTO dto = ExpenseDTO.builder()
                 .amount(BigDecimal.valueOf(-500))
-                .title("Przelew na " + accountNumber + " rata")
+                .payee("Przelew na " + accountNumber + " rata")
                 .build();
 
         when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
@@ -679,7 +679,7 @@ class ExpenseServiceTest {
 
         ExpenseDTO dto = ExpenseDTO.builder()
                 .amount(BigDecimal.valueOf(300))
-                .title("Zwrot z " + accountNumber)
+                .payee("Zwrot z " + accountNumber)
                 .build();
 
         when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
@@ -700,7 +700,6 @@ class ExpenseServiceTest {
     @Test
     void createExpense_withCategory_noMatchingAccountNumber_usesNull() {
         Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
-        Account otherAccount = Account.builder().id(2L).name("Inne").accountNumber("99999999999999999999999999").build();
         Category category = new Category("Jedzenie");
 
         ExpenseDTO dto = ExpenseDTO.builder()
@@ -709,7 +708,6 @@ class ExpenseServiceTest {
                 .build();
 
         when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
-        when(accountRepository.findBySinkingFundTrue()).thenReturn(List.of(otherAccount));
         when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
 
         expenseService.createExpense(dto, category);

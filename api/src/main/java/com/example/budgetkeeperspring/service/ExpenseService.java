@@ -59,9 +59,13 @@ public class ExpenseService {
 
     @Nullable
     private Account sinkingFundAccount(ExpenseDTO expenseDTO) {
+        if (expenseDTO == null || expenseDTO.getPayee() == null) {
+            return null;
+        }
+
         return accountRepository.findBySinkingFundTrue()
                 .stream()
-                .filter(a -> expenseDTO.getTitle().contains(a.getAccountNumber()))
+                .filter(a -> expenseDTO.getPayee().contains(a.getAccountNumber()))
                 .findFirst()
                 .orElse(null);
     }
