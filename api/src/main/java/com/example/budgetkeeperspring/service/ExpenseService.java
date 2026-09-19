@@ -91,8 +91,15 @@ public class ExpenseService {
             expenseDTO.setCategoryId(CategoryService.UNKNOWN_CATEGORY);
         }
         category = categoryRepository.findById(expenseDTO.getCategoryId()).orElseThrow(NotFoundException::new);
-        Account sourceAccount = accountRepository.getReferenceById(expenseDTO.getSourceAccountId());
-        Account destinationAccount = accountRepository.getReferenceById(expenseDTO.getDestinationAccountId());
+        Account sourceAccount = null;
+        if (expenseDTO.getDestinationAccountId() != null) {
+            sourceAccount = accountRepository.getReferenceById(expenseDTO.getSourceAccountId());
+        }
+
+        Account destinationAccount = null;
+        if (expenseDTO.getDestinationAccountId() != null) {
+            destinationAccount = accountRepository.getReferenceById(expenseDTO.getDestinationAccountId());
+        }
 
         return createExpense(expenseDTO, category, sourceAccount, destinationAccount);
     }

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-function FileUpload({closeHandler}) {
+function FileUpload({closeHandler, uploadUrl = '/budget/budgetPlan/upload'}) {
     const [file, setFile] = useState(null);
 
     const handleFileChange = (event) => {
@@ -17,20 +17,21 @@ function FileUpload({closeHandler}) {
         formData.append('file', file);
 
         try {
-            await fetch('/budget/budgetPlan/upload', {
+            const response = await fetch(uploadUrl, {
                 method: 'POST',
                 body: formData,
             });
+            if (!response.ok) return alert(await response.text());
             closeHandler();
         } catch (error) {
-            closeHandler();
+            alert('Błąd sieci: ' + error.message);
         }
     };
 
     return (
         <div>
             <input type="file" onChange={handleFileChange}/>
-            <button onClick={handleUpload}>Upload</button>
+            <button onClick={handleUpload}>Importuj</button>
         </div>
     );
 }

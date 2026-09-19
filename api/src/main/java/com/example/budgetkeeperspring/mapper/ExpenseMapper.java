@@ -20,6 +20,7 @@ public interface ExpenseMapper {
     @Mapping(source = "destinationAccountId", target = "destinationAccount.id")
     @Mapping(source = "beneficiaryId", target = "beneficiary.id")
     @Mapping(source = "beneficiaryName", target = "beneficiary.name")
+    @Mapping(target = "plannedExpense", ignore = true)
     Expense mapToEntity(ExpenseDTO expenseDTO);
 
     @Mapping(source = "deleted", target = "deleted", defaultValue = "false")
@@ -30,6 +31,7 @@ public interface ExpenseMapper {
     @Mapping(source = "destinationAccount.id", target = "destinationAccountId")
     @Mapping(source = "beneficiary.id", target = "beneficiaryId")
     @Mapping(source = "beneficiary.name", target = "beneficiaryName")
+    @Mapping(source = "plannedExpense.id", target = "plannedExpenseId")
     ExpenseDTO mapToDto(Expense expense);
 
     default LocalDate stringToLocalDate(String date) {

@@ -7,15 +7,18 @@ import {Calendar} from "./Calendar";
 import BudgetSummary from "../plan/BudgetSummary";
 import EditTransactionModal from "../transactionTable/EditTransactionModal";
 import SinkingFundsView from "../sinkingFunds/SinkingFundsView";
+import PlanPieChart from "../plan/PlanPieChart";
 
 const CurrentMonth = () => {
     const [data, setData] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [withInvestments, setWithInvestments] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [planChart, setPlanChart] = useState([]);
 
     useEffect(() => {
         loadData();
+        loadPlanChart();
     }, [withInvestments, transactions]);
 
     useEffect(() => {
@@ -35,6 +38,12 @@ const CurrentMonth = () => {
         setTransactions(data);
     }
 
+    async function loadPlanChart() {
+        const now = new Date();
+        const response = await fetch(`/budget/plans/summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`);
+        if (response.ok) setPlanChart((await response.json()).plannedVsUnplanned);
+    }
+
     // modal handles form state
 
     let body = <>
@@ -47,6 +56,12 @@ const CurrentMonth = () => {
                 <Calendar/>
                 <Col sm={1}/>
                 <SinkingFundsView/>
+            </Row>
+            <Row>
+                <Col sm={4}>
+                    <h5 className="mt-3">Zaplanowane a poza planem</h5>
+                    <PlanPieChart data={planChart}/>
+                </Col>
             </Row>
             <h5>
                 <Badge bg="light" text="dark" className={"mt-3"}>
@@ -67,6 +82,7 @@ const CurrentMonth = () => {
                                       setShowAddModal(false);
                                       loadTransactions();
                                       loadData();
+                                      loadPlanChart();
                                   }}/>
 
             <ExpensesBarChart data={data}/>

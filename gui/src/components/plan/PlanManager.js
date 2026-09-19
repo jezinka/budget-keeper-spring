@@ -1,0 +1,247 @@
+import React, {useEffect, useMemo, useState} from "react";
+import {Button, Col, Form, Modal, Row, Table} from "react-bootstrap";
+import Main from "../main/Main";
+import MonthYearFilter from "../monthlyView/MonthYearFilter";
+import PlanImport from "./PlanImport";
+import PlanPieChart from "./PlanPieChart";
+import {formatNumber, getMonthName} from "../../Utils";
+import {Pencil, Plus, Trash} from "react-bootstrap-icons";
+
+const PlanManager = () => {
+    const now = new Date();
+    const [year, setYear] = useState(now.getFullYear());
+    const [month, setMonth] = useState(now.getMonth() + 1);
+    const [summary, setSummary] = useState(null);
+    const [amount, setAmount] = useState("");
+    const [name, setName] = useState("");
+    const [selectedPlannedExpense, setSelectedPlannedExpense] = useState(null);
+    const [unplannedFilters, setUnplannedFilters] = useState({description: "", category: ""});
+    const [showImport, setShowImport] = useState(false);
+    const [editingPlannedExpense, setEditingPlannedExpense] = useState(null);
+    const [selectedExpenseIds, setSelectedExpenseIds] = useState([]);
+    const [selectedTargetId, setSelectedTargetId] = useState("");
+
+    async function loadSummary() {
+        const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
+        if (response.ok) setSummary(await response.json());
+    }
+
+    useEffect(() => {
+        loadSummary();
+    }, [year, month]);
+
+    async function createPlan() {
+        const response = await fetch("/budget/plans", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({year, month})
+        });
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function addPlannedExpense(event) {
+        event.preventDefault();
+        const response = await fetch("/budget/planned-expenses", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({planId: summary.plan.id, amount: Number(amount), name})
+        });
+        if (!response.ok) return alert(await response.text());
+        setAmount("");
+        setName("");
+        loadSummary();
+    }
+
+    async function deletePlannedExpense(id) {
+        if (!window.confirm("Usunąć planowany wydatek?")) return;
+        const response = await fetch(`/budget/planned-expenses/${id}`, {method: "DELETE"});
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function updatePlannedExpense() {
+        const response = await fetch(`/budget/planned-expenses/${editingPlannedExpense.id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({...editingPlannedExpense, amount: Number(editingPlannedExpense.amount)})
+        });
+        if (!response.ok) return alert(await response.text());
+        setEditingPlannedExpense(null);
+        loadSummary();
+    }
+
+    async function markAsPlanned(expenseId, plannedExpenseId) {
+        const url = plannedExpenseId ?
+            `/budget/planned-expenses/${plannedExpenseId}/expenses/${expenseId}` :
+            `/budget/plans/${summary.plan.id}/planned-expenses/from-expense/${expenseId}`;
+        const response = await fetch(url, {method: "POST"});
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function assignSelectedExpenses() {
+        const response = await fetch(`/budget/planned-expenses/${selectedTargetId}/expenses`, {
+            method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selectedExpenseIds)
+        });
+        if (!response.ok) return alert(await response.text());
+        setSelectedExpenseIds([]);
+        setSelectedTargetId("");
+        loadSummary();
+    }
+
+    async function createPlannedExpenseFromSelectedExpenses() {
+        const response = await fetch(`/budget/plans/${summary.plan.id}/planned-expenses/from-expenses`, {
+            method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selectedExpenseIds)
+        });
+        if (!response.ok) return alert(await response.text());
+        setSelectedExpenseIds([]);
+        loadSummary();
+    }
+
+    async function unassignExpense(expenseId) {
+        const response = await fetch(`/budget/planned-expenses/${selectedPlannedExpense.id}/expenses/${expenseId}`, {method: "DELETE"});
+        if (!response.ok) return alert(await response.text());
+        setSelectedPlannedExpense(null);
+        loadSummary();
+    }
+
+    const unplannedExpenses = useMemo(() => summary?.unplannedExpenses.filter(expense =>
+        Number(expense.amount) < 0 &&
+        (expense.description || expense.title || "").toLowerCase().includes(unplannedFilters.description.toLowerCase()) &&
+        (expense.categoryName || "").toLowerCase().includes(unplannedFilters.category.toLowerCase())
+    ) || [], [summary, unplannedFilters]);
+
+    const categories = useMemo(() => [...(summary?.categories || [])].sort(
+        (first, second) => Number(first.difference) - Number(second.difference)
+    ), [summary]);
+
+    const categoryRowStyle = difference => {
+        if (Number(difference) >= 0) return {backgroundColor: "#d1e7dd"};
+        const largestDeficit = Math.min(...categories.map(category => Number(category.difference)));
+        const level = Math.ceil(Math.abs(Number(difference) / largestDeficit) * 4);
+        return {backgroundColor: ["#f8d7da", "#f5c2c7", "#ffe5b4", "#fff3cd"][4 - level]};
+    };
+
+    const body = <Col sm={11}>
+        <h2>Plan na {getMonthName(month, "long")} {year}</h2>
+        <MonthYearFilter year={year} month={month} onYearChange={setYear} onMonthChange={setMonth}/>
+
+        {!summary?.plan ? <Button onClick={createPlan}>Utwórz plan</Button> : <>
+            <Form className="row g-2 mb-4" onSubmit={addPlannedExpense}>
+                <Col sm={2}><Form.Control required min="0.01" step="0.01" type="number" placeholder="Kwota" value={amount} onChange={e => setAmount(e.target.value)}/></Col>
+                <Col sm={3}><Form.Control placeholder="Nazwa" value={name} onChange={e => setName(e.target.value)}/></Col>
+                <Col sm={2}><Button type="submit">Dodaj do planu</Button></Col>
+                <Col sm={2}><Button type="button" variant="outline-secondary" onClick={() => setShowImport(true)}>Import CSV</Button></Col>
+            </Form>
+
+            <Row>
+                <Col md={7}>
+                    <h4>Zaplanowane wydatki</h4>
+                    <Table responsive striped bordered size="sm">
+                        <thead><tr><th>Nazwa</th><th>Plan</th><th>Wydane</th><th/></tr></thead>
+                        <tbody>{summary.plannedExpenses.map(item => {
+                            const spent = summary.plannedExpenseTransactions
+                                .filter(expense => expense.plannedExpenseId === item.id)
+                                .reduce((sum, expense) => sum + Math.abs(Number(expense.amount)), 0);
+                            return <tr key={item.id}><td>{item.name}</td>
+                                <td>{formatNumber(item.amount)}</td><td
+                                    onClick={() => setSelectedPlannedExpense({id: item.id, expenses: summary.plannedExpenseTransactions.filter(
+                                        expense => expense.plannedExpenseId === item.id)})}>{formatNumber(spent)}</td>
+                                <td><Button className="me-1" size="sm" variant="outline-primary"
+                                    onClick={() => setEditingPlannedExpense({...item})}><Pencil/></Button>
+                                    <Button size="sm" variant="outline-danger" onClick={() => deletePlannedExpense(item.id)}><Trash/></Button></td></tr>;
+                        })}</tbody>
+                    </Table>
+
+                    <h4>Poza planem</h4>
+                    <Table responsive striped bordered size="sm">
+                        <thead><tr><th><Form.Check checked={unplannedExpenses.length > 0 && unplannedExpenses.every(
+                            expense => selectedExpenseIds.includes(expense.id))} onChange={e => setSelectedExpenseIds(e.target.checked ?
+                            [...new Set([...selectedExpenseIds, ...unplannedExpenses.map(expense => expense.id)])] :
+                            selectedExpenseIds.filter(id => !unplannedExpenses.some(expense => expense.id === id)))}/></th>
+                            <th style={{width: "10%"}}>Data</th><th style={{width: "45%"}}>Opis</th><th>Kategoria</th><th>Kwota</th><th/></tr></thead>
+                        <tbody><tr><td/><td/><td><Form.Control size="sm" placeholder="Filtruj opis" value={unplannedFilters.description}
+                            onChange={e => setUnplannedFilters({...unplannedFilters, description: e.target.value})}/></td>
+                            <td><Form.Control size="sm" placeholder="Filtruj kategorię" value={unplannedFilters.category}
+                                onChange={e => setUnplannedFilters({...unplannedFilters, category: e.target.value})}/></td>
+                            <td/><td/></tr>{unplannedExpenses.map(expense =>
+                            <tr key={expense.id}><td><Form.Check checked={selectedExpenseIds.includes(expense.id)}
+                                onChange={e => setSelectedExpenseIds(e.target.checked ? [...selectedExpenseIds, expense.id] :
+                                    selectedExpenseIds.filter(id => id !== expense.id))}/></td><td>{expense.transactionDate}</td><td>{expense.description || expense.title}</td>
+                                <td>{expense.categoryName}</td><td>{formatNumber(Math.abs(Number(expense.amount)))}</td>
+                                <td>
+                                    <div className="d-flex gap-1">
+                                        {summary.plannedExpenses.length > 0 && <Form.Select size="sm" defaultValue=""
+                                            onChange={e => e.target.value && markAsPlanned(expense.id, e.target.value)}>
+                                            <option value="">Przypisz do...</option>
+                                            {summary.plannedExpenses.map(item => <option key={item.id} value={item.id}>{item.name || "Bez nazwy"}</option>)}
+                                        </Form.Select>}
+                                        <Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button>
+                                    </div>
+                                </td></tr>)}</tbody>
+                    </Table>
+                    {selectedExpenseIds.length > 0 && <div className="d-flex gap-1 mb-3">
+                        <Form.Select size="sm" value={selectedTargetId} onChange={e => setSelectedTargetId(e.target.value)}>
+                            <option value="">Przypisz do...</option>
+                            {summary.plannedExpenses.map(item => <option key={item.id} value={item.id}>{item.name || "Bez nazwy"}</option>)}
+                        </Form.Select>
+                        <Button size="sm" disabled={!selectedTargetId} onClick={assignSelectedExpenses}>Przypisz wszystkie do planowanego wydatku</Button>
+                        <Button size="sm" variant="outline-primary" onClick={createPlannedExpenseFromSelectedExpenses}>Utwórz nowy z przypisanymi wszystkimi zaznaczonymi</Button>
+                    </div>}
+                </Col>
+                <Col md={5}>
+                    <h4>Plan a rzeczywistość</h4>
+                    <p>Zaplanowane: {formatNumber(summary.plannedExpenseAmount)} | Poza planem: {formatNumber(summary.unplannedExpenseAmount)}</p>
+                    <PlanPieChart data={summary.plannedVsUnplanned}/>
+                    <h4>Kategorie</h4>
+                    <Table responsive bordered size="sm">
+                        <thead><tr><th>Kategoria</th><th>Zaplanowane</th><th>Wydane</th><th>Różnica</th></tr></thead>
+                        <tbody>{categories.map(category => {
+                            const style = categoryRowStyle(category.difference);
+                            return <tr key={category.categoryId}>
+                                <td style={style}>{category.categoryName}</td><td style={style}>{formatNumber(category.plannedAmount)}</td>
+                                <td style={style}>{formatNumber(category.actualAmount)}</td><td style={style}>{formatNumber(category.difference)}</td></tr>;
+                        })}</tbody>
+                    </Table>
+                </Col>
+            </Row>
+        </>}
+        <Modal show={showImport} onHide={() => setShowImport(false)}>
+            <Modal.Header closeButton><Modal.Title>Import planowanych wydatków</Modal.Title></Modal.Header>
+            <Modal.Body><p>Format CSV: <code>Kategoria,Kwota</code></p>
+                <PlanImport uploadUrl={`/budget/plans/${summary?.plan?.id}/upload`} closeHandler={() => {
+                    setShowImport(false);
+                    loadSummary();
+                }}/></Modal.Body>
+        </Modal>
+        <Modal show={editingPlannedExpense !== null} onHide={() => setEditingPlannedExpense(null)}>
+            <Modal.Header closeButton><Modal.Title>Edytuj planowany wydatek</Modal.Title></Modal.Header>
+            <Modal.Body>
+                <Form.Group className="mb-3"><Form.Label>Nazwa</Form.Label>
+                    <Form.Control value={editingPlannedExpense?.name || ""} onChange={e => setEditingPlannedExpense(
+                        {...editingPlannedExpense, name: e.target.value})}/></Form.Group>
+                <Form.Group><Form.Label>Kwota</Form.Label>
+                    <Form.Control min="0.01" step="0.01" type="number" value={editingPlannedExpense?.amount || ""}
+                        onChange={e => setEditingPlannedExpense({...editingPlannedExpense, amount: e.target.value})}/></Form.Group>
+            </Modal.Body>
+            <Modal.Footer><Button variant="secondary" onClick={() => setEditingPlannedExpense(null)}>Anuluj</Button>
+                <Button onClick={updatePlannedExpense}>Zapisz</Button></Modal.Footer>
+        </Modal>
+        <Modal show={selectedPlannedExpense !== null} onHide={() => setSelectedPlannedExpense(null)}>
+            <Modal.Header closeButton><Modal.Title>Przypisane wydatki</Modal.Title></Modal.Header>
+            <Modal.Body>
+                {selectedPlannedExpense?.expenses.length === 0 ? <p>Brak przypisanych wydatków.</p> :
+                    <Table responsive striped size="sm"><tbody>{selectedPlannedExpense?.expenses.map(expense =>
+                        <tr key={expense.id}><td style={{width: "20%"}}>{expense.transactionDate}</td>
+                            <td>{expense.description.substring(0, 80) || expense.title.substring(0, 80)}</td>
+                            <td>{formatNumber(Math.abs(Number(expense.amount)))}</td>
+                            <td><Button size="sm" variant="outline-danger" onClick={() => unassignExpense(expense.id)}><Trash/></Button></td></tr>)}</tbody></Table>}
+            </Modal.Body>
+        </Modal>
+    </Col>;
+
+    return <Main body={body}/>;
+};
+
+export default PlanManager;

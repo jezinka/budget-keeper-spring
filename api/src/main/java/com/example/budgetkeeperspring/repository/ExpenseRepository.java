@@ -56,4 +56,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e from Expense e where e.sourceAccount = :account or e.destinationAccount = :account")
     List<Expense> findAllByAccount(@Param("account") Account account);
+
+    @Query("select e from Expense e left join fetch e.category where e.plannedExpense.plan.id = :planId")
+    List<Expense> findAllByPlannedExpensePlanId(@Param("planId") Integer planId);
+
+    @Query("select e from Expense e left join fetch e.category left join fetch e.plannedExpense where e.transactionDate between :begin and :end and e.plannedExpense is null")
+    List<Expense> findAllUnplannedByTransactionDateBetween(@Param("begin") LocalDate begin, @Param("end") LocalDate end);
+
+    @Query("select e from Expense e left join fetch e.category left join fetch e.plannedExpense pe left join fetch pe.plan where e.transactionDate between :begin and :end and pe.plan.id = :planId")
+    List<Expense> findAllPlannedByTransactionDateBetweenAndPlanId(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("planId") Integer planId);
 }

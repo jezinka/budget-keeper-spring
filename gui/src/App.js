@@ -9,7 +9,7 @@ import CurrentMonth from "./components/currentMonth/CurrentMonth";
 import YearAtTheGlance from "./components/year/YearAtTheGlance";
 import AllTransactions from "./components/allTransactions/AllTransactions";
 import LogsView from "./components/logs/LogsView";
-import Budget from "./components/plan/Budget";
+import PlanManager from "./components/plan/PlanManager";
 import MonthlyView from "./components/monthlyView/MonthlyView";
 import YearlyView from "./components/year/YearlyView";
 import InvestmentsView from "./components/investments/InvestmentsView";
@@ -27,7 +27,7 @@ const App = () => {
                     <Route path="/gui/yearlyView" element={<YearlyView/>}/>
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
                     <Route path="/gui/monthlyView" element={<MonthlyView/>}/>
-                    <Route path="/gui/plan" element={<Budget/>}/>
+                    <Route path="/gui/plan" element={<PlanManager/>}/>
                     <Route path="/gui/logs" element={<LogsView/>}/>
                     <Route path="/gui/investments" element={<InvestmentsView/>}/>
                     <Route path="/gui/livingExpenses" element={<LivingExpensesView/>}/>

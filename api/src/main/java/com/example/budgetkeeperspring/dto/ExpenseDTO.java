@@ -37,6 +37,7 @@ public class ExpenseDTO {
 
     private Long beneficiaryId;
     private String beneficiaryName;
+    private Integer plannedExpenseId;
 
     public String getDescription() {
         if (note != null) {
