@@ -1,5 +1,5 @@
 # Build stage
-FROM gradle:7.3.3-jdk17 AS build
+FROM gradle:9.1.0-jdk21 AS build
 WORKDIR /app
 COPY settings.gradle /app/
 COPY gradle /app/gradle

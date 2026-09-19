@@ -63,7 +63,6 @@ dependencies {
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'budget-keeper-spring'
-java.sourceCompatibility = JavaVersion.VERSION_17
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -73,6 +72,7 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.release = 17
 }
 
 tasks.withType(Javadoc).configureEach {
