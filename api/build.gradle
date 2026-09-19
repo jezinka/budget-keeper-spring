@@ -6,9 +6,9 @@
 
 plugins {
     id 'java-library'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'war'
-    id "org.sonarqube" version "4.0.0.2929"
+    id "org.sonarqube" version "7.5.0.8588"
 }
 
 dependencyManagement {
@@ -30,9 +30,9 @@ dependencies {
     implementation group: 'com.opencsv', name: 'opencsv', version: '5.9'
 
     compileOnly 'org.springframework.boot:spring-boot-starter-tomcat:3.0.2'
-    compileOnly 'org.projectlombok:lombok:1.18.30'
+    compileOnly 'org.projectlombok:lombok:1.18.48'
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
 
     implementation('org.springframework.boot:spring-boot-starter-web:3.0.2')
     implementation 'org.springframework.boot:spring-boot-devtools:3.0.2'
@@ -55,6 +55,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.h2database:h2:2.1.214'
 }
@@ -63,6 +64,11 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'budget-keeper-spring'
 java.sourceCompatibility = JavaVersion.VERSION_17
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 
 tasks.withType(JavaCompile).configureEach {

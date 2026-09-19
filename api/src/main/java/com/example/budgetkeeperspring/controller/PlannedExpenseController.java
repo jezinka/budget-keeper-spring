@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.PlannedExpenseDTO;
+import com.example.budgetkeeperspring.dto.RecurringPlannedExpenseDTO;
 import com.example.budgetkeeperspring.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,18 @@ public class PlannedExpenseController {
     @Operation(summary = "Update a planned expense")
     PlannedExpenseDTO update(@PathVariable Integer id, @Valid @RequestBody PlannedExpenseDTO dto) {
         return planService.updatePlannedExpense(id, dto);
+    }
+
+    @PatchMapping("/{id}/paid")
+    @Operation(summary = "Mark a planned expense as paid or unpaid")
+    PlannedExpenseDTO updatePaid(@PathVariable Integer id, @RequestParam boolean paid) {
+        return planService.updatePaid(id, paid);
+    }
+
+    @PostMapping("/{id}/recurring")
+    @Operation(summary = "Convert a planned expense into a recurring payment")
+    RecurringPlannedExpenseDTO convertToRecurring(@PathVariable Integer id) {
+        return planService.convertPlannedExpenseToRecurring(id);
     }
 
     @PostMapping("/{plannedExpenseId}/expenses/{expenseId}")

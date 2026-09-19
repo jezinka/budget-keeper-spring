@@ -5,7 +5,7 @@ import MonthYearFilter from "../monthlyView/MonthYearFilter";
 import PlanImport from "./PlanImport";
 import PlanPieChart from "./PlanPieChart";
 import {formatNumber, getMonthName} from "../../Utils";
-import {Pencil, Plus, Trash} from "react-bootstrap-icons";
+import {ArrowRepeat, Pencil, Plus, Trash} from "react-bootstrap-icons";
 
 const PlanManager = () => {
     const now = new Date();
@@ -14,12 +14,18 @@ const PlanManager = () => {
     const [summary, setSummary] = useState(null);
     const [amount, setAmount] = useState("");
     const [name, setName] = useState("");
+    const [dueDate, setDueDate] = useState("");
     const [selectedPlannedExpense, setSelectedPlannedExpense] = useState(null);
     const [unplannedFilters, setUnplannedFilters] = useState({description: "", category: ""});
     const [showImport, setShowImport] = useState(false);
     const [editingPlannedExpense, setEditingPlannedExpense] = useState(null);
     const [selectedExpenseIds, setSelectedExpenseIds] = useState([]);
     const [selectedTargetId, setSelectedTargetId] = useState("");
+    const [showRecurring, setShowRecurring] = useState(false);
+    const [recurringPayments, setRecurringPayments] = useState([]);
+    const [recurringName, setRecurringName] = useState("");
+    const [recurringAmount, setRecurringAmount] = useState("");
+    const [recurringDueDay, setRecurringDueDay] = useState("");
 
     async function loadSummary() {
         const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
@@ -29,6 +35,15 @@ const PlanManager = () => {
     useEffect(() => {
         loadSummary();
     }, [year, month]);
+
+    useEffect(() => {
+        loadRecurringPayments();
+    }, []);
+
+    async function loadRecurringPayments() {
+        const response = await fetch("/budget/recurring-planned-expenses");
+        if (response.ok) setRecurringPayments(await response.json());
+    }
 
     async function createPlan() {
         const response = await fetch("/budget/plans", {
@@ -45,11 +60,12 @@ const PlanManager = () => {
         const response = await fetch("/budget/planned-expenses", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({planId: summary.plan.id, amount: Number(amount), name})
+            body: JSON.stringify({planId: summary.plan.id, amount: Number(amount), name, dueDate: dueDate || null})
         });
         if (!response.ok) return alert(await response.text());
         setAmount("");
         setName("");
+        setDueDate("");
         loadSummary();
     }
 
@@ -68,6 +84,53 @@ const PlanManager = () => {
         });
         if (!response.ok) return alert(await response.text());
         setEditingPlannedExpense(null);
+        loadSummary();
+    }
+
+    async function updatePaid(id, paid) {
+        const response = await fetch(`/budget/planned-expenses/${id}/paid?paid=${paid}`, {method: "PATCH"});
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function addRecurringPayment(event) {
+        event.preventDefault();
+        const response = await fetch("/budget/recurring-planned-expenses", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name: recurringName, amount: Number(recurringAmount), dueDay: Number(recurringDueDay)})
+        });
+        if (!response.ok) return alert(await response.text());
+        setRecurringName("");
+        setRecurringAmount("");
+        setRecurringDueDay("");
+        loadRecurringPayments();
+    }
+
+    async function deleteRecurringPayment(id) {
+        if (!window.confirm("Usunąć płatność cykliczną?")) return;
+        const response = await fetch(`/budget/recurring-planned-expenses/${id}`, {method: "DELETE"});
+        if (!response.ok) return alert(await response.text());
+        loadRecurringPayments();
+    }
+
+    async function applyRecurringPayments() {
+        const response = await fetch(`/budget/plans/${summary.plan.id}/recurring-planned-expenses`, {method: "POST"});
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function convertPlannedExpenseToRecurring(id) {
+        const response = await fetch(`/budget/planned-expenses/${id}/recurring`, {method: "POST"});
+        if (!response.ok) return alert(await response.text());
+        loadRecurringPayments();
+        loadSummary();
+    }
+
+    async function convertUnplannedExpenseToRecurring(id) {
+        const response = await fetch(`/budget/plans/${summary.plan.id}/unplanned-expenses/${id}/recurring`, {method: "POST"});
+        if (!response.ok) return alert(await response.text());
+        loadRecurringPayments();
         loadSummary();
     }
 
@@ -121,7 +184,8 @@ const PlanManager = () => {
             .filter(expense => expense.plannedExpenseId === item.id)
             .reduce((sum, expense) => sum + Math.abs(Number(expense.amount)), 0);
         return {...item, spent, difference: Number(item.amount) - spent};
-    }), [summary]);
+    }).sort((first, second) => Number(first.paid) - Number(second.paid) ||
+        (first.dueDate || "9999-12-31").localeCompare(second.dueDate || "9999-12-31")), [summary]);
 
     const plannedExpenseTotals = plannedExpenseRows.reduce((totals, item) => ({
         planned: totals.planned + Number(item.amount),
@@ -151,26 +215,33 @@ const PlanManager = () => {
             <Form className="row g-2 mb-4" onSubmit={addPlannedExpense}>
                 <Col sm={2}><Form.Control required min="0.01" step="0.01" type="number" placeholder="Kwota" value={amount} onChange={e => setAmount(e.target.value)}/></Col>
                 <Col sm={3}><Form.Control placeholder="Nazwa" value={name} onChange={e => setName(e.target.value)}/></Col>
+                <Col sm={2}><Form.Control type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}/></Col>
                 <Col sm={2}><Button type="submit">Dodaj do planu</Button></Col>
                 <Col sm={2}><Button type="button" variant="outline-secondary" onClick={() => setShowImport(true)}>Import CSV</Button></Col>
+                <Col sm={2}><Button type="button" variant="outline-secondary" onClick={() => setShowRecurring(true)}>Cykliczne</Button></Col>
+                <Col sm={2}><Button type="button" variant="outline-primary" onClick={applyRecurringPayments}>Dodaj cykliczne</Button></Col>
             </Form>
 
             <Row>
                 <Col md={7}>
                     <h4>Zaplanowane wydatki</h4>
                     <Table responsive striped bordered size="sm">
-                        <thead><tr><th>Nazwa</th><th>Plan</th><th>Wydane</th><th>Różnica</th><th/></tr></thead>
+                        <thead><tr><th>Opłacone</th><th>Termin</th><th>Nazwa</th><th>Plan</th><th>Wydane</th><th>Różnica</th><th/></tr></thead>
                         <tbody>{plannedExpenseRows.map(item => {
-                            return <tr key={item.id}><td>{item.name}</td>
+                            return <tr key={item.id} className={item.paid ? "table-secondary" : ""}>
+                                <td><Form.Check checked={item.paid} onChange={e => updatePaid(item.id, e.target.checked)}/></td>
+                                <td>{item.dueDate || "-"}</td><td>{item.name}</td>
                                 <td>{formatNumber(item.amount)}</td><td
                                     onClick={() => setSelectedPlannedExpense({id: item.id, expenses: summary.plannedExpenseTransactions.filter(
                                         expense => expense.plannedExpenseId === item.id)})}>{formatNumber(item.spent)}</td>
                                 <td>{formatNumber(item.difference)}</td>
                                 <td><Button className="me-1" size="sm" variant="outline-primary"
-                                    onClick={() => setEditingPlannedExpense({id: item.id, planId: item.planId, amount: item.amount, name: item.name})}><Pencil/></Button>
+                                    onClick={() => setEditingPlannedExpense({id: item.id, planId: item.planId, amount: item.amount, name: item.name, dueDate: item.dueDate, paid: item.paid})}><Pencil/></Button>
+                                    {!item.recurringPaymentId && <Button className="me-1" size="sm" variant="outline-secondary" title="Utwórz płatność cykliczną"
+                                        onClick={() => convertPlannedExpenseToRecurring(item.id)}><ArrowRepeat/></Button>}
                                     <Button size="sm" variant="outline-danger" onClick={() => deletePlannedExpense(item.id)}><Trash/></Button></td></tr>;
                         })}</tbody>
-                        <tfoot><tr><th>Razem</th><th>{formatNumber(plannedExpenseTotals.planned)}</th>
+                        <tfoot><tr><th colSpan={3}>Razem</th><th>{formatNumber(plannedExpenseTotals.planned)}</th>
                             <th>{formatNumber(plannedExpenseTotals.spent)}</th><th>{formatNumber(plannedExpenseTotals.difference)}</th><th/></tr></tfoot>
                     </Table>
 
@@ -198,6 +269,8 @@ const PlanManager = () => {
                                             {summary.plannedExpenses.map(item => <option key={item.id} value={item.id}>{item.name || "Bez nazwy"}</option>)}
                                         </Form.Select>}
                                         <Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button>
+                                        <Button size="sm" variant="outline-secondary" title="Utwórz płatność cykliczną"
+                                            onClick={() => convertUnplannedExpenseToRecurring(expense.id)}><ArrowRepeat/></Button>
                                     </div>
                                 </td></tr>)}</tbody>
                         <tfoot><tr><th colSpan={4}>Razem</th><th>{formatNumber(unplannedTotal)}</th><th/></tr></tfoot>
@@ -213,7 +286,8 @@ const PlanManager = () => {
                 </Col>
                 <Col md={5}>
                     <h4>Plan a rzeczywistość</h4>
-                    <p>Zaplanowane: {formatNumber(summary.plannedExpenseAmount)} | Poza planem: {formatNumber(summary.unplannedExpenseAmount)}</p>
+                    <p>Do zapłaty: {formatNumber(summary.remainingPlannedAmount)} ({summary.remainingPlannedCount}) | Opłacone: {formatNumber(summary.paidPlannedAmount)} ({summary.paidPlannedCount})</p>
+                    <p>Wydane w planie: {formatNumber(summary.plannedExpenseAmount)} | Poza planem: {formatNumber(summary.unplannedExpenseAmount)}</p>
                     <PlanPieChart data={summary.plannedVsUnplanned}/>
                     <h4>Kategorie</h4>
                     <Table responsive bordered size="sm">
@@ -232,11 +306,26 @@ const PlanManager = () => {
         </>}
         <Modal show={showImport} onHide={() => setShowImport(false)}>
             <Modal.Header closeButton><Modal.Title>Import planowanych wydatków</Modal.Title></Modal.Header>
-            <Modal.Body><p>Format CSV: <code>Kategoria,Kwota</code></p>
+            <Modal.Body><p>Format CSV: <code>Kategoria,Kwota</code> lub <code>Kategoria,Kwota,Termin</code></p>
                 <PlanImport uploadUrl={`/budget/plans/${summary?.plan?.id}/upload`} closeHandler={() => {
                     setShowImport(false);
                     loadSummary();
                 }}/></Modal.Body>
+        </Modal>
+        <Modal show={showRecurring} onHide={() => setShowRecurring(false)}>
+            <Modal.Header closeButton><Modal.Title>Płatności cykliczne</Modal.Title></Modal.Header>
+            <Modal.Body>
+                <Form className="row g-2 mb-3" onSubmit={addRecurringPayment}>
+                    <Col sm={5}><Form.Control required placeholder="Nazwa" value={recurringName} onChange={e => setRecurringName(e.target.value)}/></Col>
+                    <Col sm={3}><Form.Control required min="0.01" step="0.01" type="number" placeholder="Kwota" value={recurringAmount} onChange={e => setRecurringAmount(e.target.value)}/></Col>
+                    <Col sm={2}><Form.Control required min="1" max="31" type="number" placeholder="Dzień" value={recurringDueDay} onChange={e => setRecurringDueDay(e.target.value)}/></Col>
+                    <Col sm={2}><Button type="submit"><Plus/></Button></Col>
+                </Form>
+                <Table responsive striped size="sm"><thead><tr><th>Nazwa</th><th>Kwota</th><th>Dzień</th><th/></tr></thead>
+                    <tbody>{recurringPayments.map(payment => <tr key={payment.id}><td>{payment.name}</td>
+                        <td>{formatNumber(payment.amount)}</td><td>{payment.dueDay}.</td>
+                        <td><Button size="sm" variant="outline-danger" onClick={() => deleteRecurringPayment(payment.id)}><Trash/></Button></td></tr>)}</tbody></Table>
+            </Modal.Body>
         </Modal>
         <Modal show={editingPlannedExpense !== null} onHide={() => setEditingPlannedExpense(null)}>
             <Modal.Header closeButton><Modal.Title>Edytuj planowany wydatek</Modal.Title></Modal.Header>
@@ -247,6 +336,9 @@ const PlanManager = () => {
                 <Form.Group><Form.Label>Kwota</Form.Label>
                     <Form.Control min="0.01" step="0.01" type="number" value={editingPlannedExpense?.amount || ""}
                         onChange={e => setEditingPlannedExpense({...editingPlannedExpense, amount: e.target.value})}/></Form.Group>
+                <Form.Group className="mt-3"><Form.Label>Termin</Form.Label>
+                    <Form.Control type="date" value={editingPlannedExpense?.dueDate || ""}
+                        onChange={e => setEditingPlannedExpense({...editingPlannedExpense, dueDate: e.target.value || null})}/></Form.Group>
             </Modal.Body>
             <Modal.Footer><Button variant="secondary" onClick={() => setEditingPlannedExpense(null)}>Anuluj</Button>
                 <Button onClick={updatePlannedExpense}>Zapisz</Button></Modal.Footer>

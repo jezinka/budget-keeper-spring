@@ -10,4 +10,6 @@ import java.util.List;
 public interface PlannedExpenseRepository extends JpaRepository<PlannedExpense, Integer> {
     @Query("select pe from PlannedExpense pe where pe.plan.id = :planId order by pe.id")
     List<PlannedExpense> findAllByPlanId(@Param("planId") Integer planId);
+
+    boolean existsByPlan_IdAndRecurringPayment_Id(Integer planId, Integer recurringPaymentId);
 }

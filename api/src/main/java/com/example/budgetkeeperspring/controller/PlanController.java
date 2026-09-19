@@ -3,6 +3,7 @@ package com.example.budgetkeeperspring.controller;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.PlanDTO;
 import com.example.budgetkeeperspring.dto.PlannedExpenseDTO;
+import com.example.budgetkeeperspring.dto.RecurringPlannedExpenseDTO;
 import com.example.budgetkeeperspring.dto.PlanSummaryDTO;
 import com.example.budgetkeeperspring.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,6 +80,19 @@ public class PlanController {
     @Operation(summary = "Create a planned expense from selected expenses")
     PlannedExpenseDTO createPlannedExpenseFromExpenses(@PathVariable Integer planId, @RequestBody List<Long> expenseIds) {
         return planService.createPlannedExpenseFromExpenses(planId, expenseIds);
+    }
+
+    @PostMapping("/{planId}/recurring-planned-expenses")
+    @Operation(summary = "Apply active recurring planned expenses to a plan")
+    ResponseEntity<Void> applyRecurringPayments(@PathVariable Integer planId) {
+        planService.applyRecurringPayments(planId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{planId}/unplanned-expenses/{expenseId}/recurring")
+    @Operation(summary = "Convert an unplanned expense into a recurring payment")
+    RecurringPlannedExpenseDTO convertUnplannedExpenseToRecurring(@PathVariable Integer planId, @PathVariable Long expenseId) {
+        return planService.convertUnplannedExpenseToRecurring(planId, expenseId);
     }
 
     @PostMapping("/{planId}/upload")

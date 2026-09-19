@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 public class PlannedExpenseDTO {
@@ -18,4 +19,7 @@ public class PlannedExpenseDTO {
     private Integer planId;
 
     private String name;
+    private Boolean paid;
+    private LocalDate dueDate;
+    private Integer recurringPaymentId;
 }

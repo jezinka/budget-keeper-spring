@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -30,6 +31,16 @@ public class PlannedExpense {
     @Lob
     @Column(name = "name")
     private String name;
+
+    @Column(name = "paid", nullable = false)
+    private boolean paid = false;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurring_planned_expense_id")
+    private RecurringPlannedExpense recurringPayment;
 
     @OneToMany(mappedBy = "plannedExpense")
     private Set<Expense> expenses = new LinkedHashSet<>();

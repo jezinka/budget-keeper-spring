@@ -13,6 +13,10 @@ public class PlanSummaryDTO {
     private List<PlannedExpenseDTO> plannedExpenses;
     private List<ExpenseDTO> plannedExpenseTransactions;
     private List<ExpenseDTO> unplannedExpenses;
+    private BigDecimal paidPlannedAmount;
+    private BigDecimal remainingPlannedAmount;
+    private long paidPlannedCount;
+    private long remainingPlannedCount;
     private BigDecimal plannedExpenseAmount;
     private BigDecimal unplannedExpenseAmount;
     private List<PieChartExpenseDto> plannedVsUnplanned;
