@@ -116,6 +116,26 @@ const PlanManager = () => {
         (first, second) => Number(first.difference) - Number(second.difference)
     ), [summary]);
 
+    const plannedExpenseRows = useMemo(() => (summary?.plannedExpenses || []).map(item => {
+        const spent = summary.plannedExpenseTransactions
+            .filter(expense => expense.plannedExpenseId === item.id)
+            .reduce((sum, expense) => sum + Math.abs(Number(expense.amount)), 0);
+        return {...item, spent, difference: Number(item.amount) - spent};
+    }), [summary]);
+
+    const plannedExpenseTotals = plannedExpenseRows.reduce((totals, item) => ({
+        planned: totals.planned + Number(item.amount),
+        spent: totals.spent + item.spent,
+        difference: totals.difference + item.difference
+    }), {planned: 0, spent: 0, difference: 0});
+
+    const unplannedTotal = unplannedExpenses.reduce((total, expense) => total + Math.abs(Number(expense.amount)), 0);
+    const categoryTotals = categories.reduce((totals, category) => ({
+        planned: totals.planned + Number(category.plannedAmount),
+        actual: totals.actual + Number(category.actualAmount),
+        difference: totals.difference + Number(category.difference)
+    }), {planned: 0, actual: 0, difference: 0});
+
     const categoryRowStyle = difference => {
         if (Number(difference) >= 0) return {backgroundColor: "#d1e7dd"};
         const largestDeficit = Math.min(...categories.map(category => Number(category.difference)));
@@ -139,19 +159,19 @@ const PlanManager = () => {
                 <Col md={7}>
                     <h4>Zaplanowane wydatki</h4>
                     <Table responsive striped bordered size="sm">
-                        <thead><tr><th>Nazwa</th><th>Plan</th><th>Wydane</th><th/></tr></thead>
-                        <tbody>{summary.plannedExpenses.map(item => {
-                            const spent = summary.plannedExpenseTransactions
-                                .filter(expense => expense.plannedExpenseId === item.id)
-                                .reduce((sum, expense) => sum + Math.abs(Number(expense.amount)), 0);
+                        <thead><tr><th>Nazwa</th><th>Plan</th><th>Wydane</th><th>Różnica</th><th/></tr></thead>
+                        <tbody>{plannedExpenseRows.map(item => {
                             return <tr key={item.id}><td>{item.name}</td>
                                 <td>{formatNumber(item.amount)}</td><td
                                     onClick={() => setSelectedPlannedExpense({id: item.id, expenses: summary.plannedExpenseTransactions.filter(
-                                        expense => expense.plannedExpenseId === item.id)})}>{formatNumber(spent)}</td>
+                                        expense => expense.plannedExpenseId === item.id)})}>{formatNumber(item.spent)}</td>
+                                <td>{formatNumber(item.difference)}</td>
                                 <td><Button className="me-1" size="sm" variant="outline-primary"
-                                    onClick={() => setEditingPlannedExpense({...item})}><Pencil/></Button>
+                                    onClick={() => setEditingPlannedExpense({id: item.id, planId: item.planId, amount: item.amount, name: item.name})}><Pencil/></Button>
                                     <Button size="sm" variant="outline-danger" onClick={() => deletePlannedExpense(item.id)}><Trash/></Button></td></tr>;
                         })}</tbody>
+                        <tfoot><tr><th>Razem</th><th>{formatNumber(plannedExpenseTotals.planned)}</th>
+                            <th>{formatNumber(plannedExpenseTotals.spent)}</th><th>{formatNumber(plannedExpenseTotals.difference)}</th><th/></tr></tfoot>
                     </Table>
 
                     <h4>Poza planem</h4>
@@ -180,6 +200,7 @@ const PlanManager = () => {
                                         <Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button>
                                     </div>
                                 </td></tr>)}</tbody>
+                        <tfoot><tr><th colSpan={4}>Razem</th><th>{formatNumber(unplannedTotal)}</th><th/></tr></tfoot>
                     </Table>
                     {selectedExpenseIds.length > 0 && <div className="d-flex gap-1 mb-3">
                         <Form.Select size="sm" value={selectedTargetId} onChange={e => setSelectedTargetId(e.target.value)}>
@@ -203,6 +224,8 @@ const PlanManager = () => {
                                 <td style={style}>{category.categoryName}</td><td style={style}>{formatNumber(category.plannedAmount)}</td>
                                 <td style={style}>{formatNumber(category.actualAmount)}</td><td style={style}>{formatNumber(category.difference)}</td></tr>;
                         })}</tbody>
+                        <tfoot><tr><th>Razem</th><th>{formatNumber(categoryTotals.planned)}</th>
+                            <th>{formatNumber(categoryTotals.actual)}</th><th>{formatNumber(categoryTotals.difference)}</th></tr></tfoot>
                     </Table>
                 </Col>
             </Row>

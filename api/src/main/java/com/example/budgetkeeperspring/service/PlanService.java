@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
+import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
+
 @RequiredArgsConstructor
 @Service
 public class PlanService {
@@ -199,7 +201,7 @@ public class PlanService {
 
     public List<ExpenseDTO> findUnplannedExpenses(int year, int month) {
         YearMonth selectedMonth = YearMonth.of(year, month);
-        return expenseRepository.findAllUnplannedByTransactionDateBetween(selectedMonth.atDay(1), selectedMonth.atEndOfMonth())
+        return withoutInvestments(expenseRepository.findAllUnplannedByTransactionDateBetween(selectedMonth.atDay(1), selectedMonth.atEndOfMonth()))
                 .stream().map(expenseMapper::mapToDto).toList();
     }
 
@@ -210,8 +212,8 @@ public class PlanService {
         Plan plan = planRepository.findByStartDate(begin).orElse(null);
         List<PlannedExpense> plannedExpenses = plan == null ? List.of() : plannedExpenseRepository.findAllByPlanId(plan.getId());
         List<Expense> plannedTransactions = plan == null ? List.of() :
-                expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanId(begin, end, plan.getId());
-        List<Expense> unplannedExpenses = expenseRepository.findAllUnplannedByTransactionDateBetween(begin, end);
+                withoutInvestments(expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanId(begin, end, plan.getId()));
+        List<Expense> unplannedExpenses = withoutInvestments(expenseRepository.findAllUnplannedByTransactionDateBetween(begin, end));
 
         BigDecimal plannedAmount = expenseAmount(plannedTransactions);
         BigDecimal unplannedAmount = expenseAmount(unplannedExpenses);
@@ -264,6 +266,11 @@ public class PlanService {
     private BigDecimal expenseAmount(List<Expense> expenses) {
         return expenses.stream().map(Expense::getAmount).filter(amount -> amount.signum() < 0)
                 .map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<Expense> withoutInvestments(List<Expense> expenses) {
+        return expenses.stream().filter(expense -> expense.getCategory() == null ||
+                !INVESTMENT_CATEGORY_LEVEL.equals(expense.getCategory().getLevel())).toList();
     }
 
     private Plan plan(Integer id) {

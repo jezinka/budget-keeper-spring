@@ -58,7 +58,7 @@ const CurrentMonth = () => {
                 <SinkingFundsView/>
             </Row>
             <Row>
-                <Col sm={4}>
+                <Col>
                     <h5 className="mt-3">Zaplanowane a poza planem</h5>
                     <PlanPieChart data={planChart}/>
                 </Col>
