@@ -62,6 +62,9 @@ class PlanServiceTest {
         assertEquals(1, summary.getRemainingPlannedCount());
         assertEquals(new BigDecimal("120.00"), summary.getCategories().get(0).getActualAmount());
         assertTrue(summary.getCategories().get(0).isUnderPlanned());
+
+        budget.setPaid(true);
+        assertEquals(new BigDecimal("70.00"), service.summary(2026, 9).getPaidPlannedAmount());
     }
 
     @Test

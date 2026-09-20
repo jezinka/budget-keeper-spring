@@ -284,7 +284,8 @@ public class PlanService {
         BigDecimal plannedAmount = expenseAmount(plannedTransactions);
         BigDecimal unplannedAmount = expenseAmount(unplannedExpenses);
         BigDecimal paidPlannedAmount = plannedExpenses.stream().filter(PlannedExpense::isPaid)
-                .map(PlannedExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal remainingPlannedAmount = plannedExpenses.stream().filter(plannedExpense -> !plannedExpense.isPaid())
                 .map(plannedExpense -> plannedExpense.getAmount().subtract(spentAmount(plannedExpense, plannedTransactions)).max(BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
