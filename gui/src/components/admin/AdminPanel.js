@@ -4,6 +4,7 @@ import Main from "../main/Main";
 import {CategoryAdminContent} from "./CategoryAdmin";
 import {AllTransactionsContent} from "../allTransactions/AllTransactions";
 import LogTable from "../logs/LogTable";
+import RecurringPaymentsAdmin from "./RecurringPaymentsAdmin";
 
 const AdminPanel = () => {
     const body = (
@@ -16,6 +17,9 @@ const AdminPanel = () => {
             </Tab>
             <Tab eventKey="logs" title="Logi">
                 <LogTable/>
+            </Tab>
+            <Tab eventKey="recurring-payments" title="Płatności cykliczne">
+                <RecurringPaymentsAdmin/>
             </Tab>
         </Tabs>
     );

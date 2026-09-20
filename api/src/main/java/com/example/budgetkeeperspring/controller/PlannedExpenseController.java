@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/planned-expenses")
+@RequestMapping("/plannedExpenses")
 @Tag(name = "Planned expenses", description = "Operations for monthly planned expenses")
 public class PlannedExpenseController {
     private final PlanService planService;

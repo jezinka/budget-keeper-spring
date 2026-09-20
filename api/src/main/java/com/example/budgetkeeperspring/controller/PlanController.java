@@ -58,7 +58,7 @@ public class PlanController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{planId}/planned-expenses")
+    @GetMapping("/{planId}/plannedExpenses")
     @Operation(summary = "Get planned expenses for a plan")
     List<PlannedExpenseDTO> findPlannedExpenses(@PathVariable Integer planId) {
         return planService.findPlannedExpenses(planId);
@@ -70,26 +70,26 @@ public class PlanController {
         return planService.findExpensesForPlan(planId);
     }
 
-    @PostMapping("/{planId}/planned-expenses/from-expense/{expenseId}")
+    @PostMapping("/{planId}/plannedExpenses/fromExpense/{expenseId}")
     @Operation(summary = "Mark an expense as planned and create its planned expense")
     PlannedExpenseDTO markExpenseAsPlanned(@PathVariable Integer planId, @PathVariable Long expenseId) {
         return planService.markExpenseAsPlanned(planId, expenseId);
     }
 
-    @PostMapping("/{planId}/planned-expenses/from-expenses")
+    @PostMapping("/{planId}/plannedExpenses/fromExpenses")
     @Operation(summary = "Create a planned expense from selected expenses")
     PlannedExpenseDTO createPlannedExpenseFromExpenses(@PathVariable Integer planId, @RequestBody List<Long> expenseIds) {
         return planService.createPlannedExpenseFromExpenses(planId, expenseIds);
     }
 
-    @PostMapping("/{planId}/recurring-planned-expenses")
+    @PostMapping("/{planId}/recurringPlannedExpenses")
     @Operation(summary = "Apply active recurring planned expenses to a plan")
     ResponseEntity<Void> applyRecurringPayments(@PathVariable Integer planId) {
         planService.applyRecurringPayments(planId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{planId}/unplanned-expenses/{expenseId}/recurring")
+    @PostMapping("/{planId}/unplannedExpenses/{expenseId}/recurring")
     @Operation(summary = "Convert an unplanned expense into a recurring payment")
     RecurringPlannedExpenseDTO convertUnplannedExpenseToRecurring(@PathVariable Integer planId, @PathVariable Long expenseId) {
         return planService.convertUnplannedExpenseToRecurring(planId, expenseId);
@@ -105,7 +105,7 @@ public class PlanController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/unplanned-expenses")
+    @GetMapping("/unplannedExpenses")
     @Operation(summary = "Get expenses outside a plan for a selected month")
     List<ExpenseDTO> findUnplannedExpenses(@RequestParam @Min(1) int year, @RequestParam @Min(1) @Max(12) int month) {
         return planService.findUnplannedExpenses(year, month);

@@ -41,7 +41,7 @@ const PlanManager = () => {
     }, []);
 
     async function loadRecurringPayments() {
-        const response = await fetch("/budget/recurring-planned-expenses");
+        const response = await fetch("/budget/recurringPlannedExpenses");
         if (response.ok) setRecurringPayments(await response.json());
     }
 
@@ -57,7 +57,7 @@ const PlanManager = () => {
 
     async function addPlannedExpense(event) {
         event.preventDefault();
-        const response = await fetch("/budget/planned-expenses", {
+        const response = await fetch("/budget/plannedExpenses", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({planId: summary.plan.id, amount: Number(amount), name, dueDate: dueDate || null})
@@ -71,13 +71,13 @@ const PlanManager = () => {
 
     async function deletePlannedExpense(id) {
         if (!window.confirm("Usunąć planowany wydatek?")) return;
-        const response = await fetch(`/budget/planned-expenses/${id}`, {method: "DELETE"});
+        const response = await fetch(`/budget/plannedExpenses/${id}`, {method: "DELETE"});
         if (!response.ok) return alert(await response.text());
         loadSummary();
     }
 
     async function updatePlannedExpense() {
-        const response = await fetch(`/budget/planned-expenses/${editingPlannedExpense.id}`, {
+        const response = await fetch(`/budget/plannedExpenses/${editingPlannedExpense.id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({...editingPlannedExpense, amount: Number(editingPlannedExpense.amount)})
@@ -88,14 +88,14 @@ const PlanManager = () => {
     }
 
     async function updatePaid(id, paid) {
-        const response = await fetch(`/budget/planned-expenses/${id}/paid?paid=${paid}`, {method: "PATCH"});
+        const response = await fetch(`/budget/plannedExpenses/${id}/paid?paid=${paid}`, {method: "PATCH"});
         if (!response.ok) return alert(await response.text());
         loadSummary();
     }
 
     async function addRecurringPayment(event) {
         event.preventDefault();
-        const response = await fetch("/budget/recurring-planned-expenses", {
+        const response = await fetch("/budget/recurringPlannedExpenses", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({name: recurringName, amount: Number(recurringAmount), dueDay: Number(recurringDueDay)})
@@ -109,26 +109,26 @@ const PlanManager = () => {
 
     async function deleteRecurringPayment(id) {
         if (!window.confirm("Usunąć płatność cykliczną?")) return;
-        const response = await fetch(`/budget/recurring-planned-expenses/${id}`, {method: "DELETE"});
+        const response = await fetch(`/budget/recurringPlannedExpenses/${id}`, {method: "DELETE"});
         if (!response.ok) return alert(await response.text());
         loadRecurringPayments();
     }
 
     async function applyRecurringPayments() {
-        const response = await fetch(`/budget/plans/${summary.plan.id}/recurring-planned-expenses`, {method: "POST"});
+        const response = await fetch(`/budget/plans/${summary.plan.id}/recurringPlannedExpenses`, {method: "POST"});
         if (!response.ok) return alert(await response.text());
         loadSummary();
     }
 
     async function convertPlannedExpenseToRecurring(id) {
-        const response = await fetch(`/budget/planned-expenses/${id}/recurring`, {method: "POST"});
+        const response = await fetch(`/budget/plannedExpenses/${id}/recurring`, {method: "POST"});
         if (!response.ok) return alert(await response.text());
         loadRecurringPayments();
         loadSummary();
     }
 
     async function convertUnplannedExpenseToRecurring(id) {
-        const response = await fetch(`/budget/plans/${summary.plan.id}/unplanned-expenses/${id}/recurring`, {method: "POST"});
+        const response = await fetch(`/budget/plans/${summary.plan.id}/unplannedExpenses/${id}/recurring`, {method: "POST"});
         if (!response.ok) return alert(await response.text());
         loadRecurringPayments();
         loadSummary();
@@ -136,15 +136,15 @@ const PlanManager = () => {
 
     async function markAsPlanned(expenseId, plannedExpenseId) {
         const url = plannedExpenseId ?
-            `/budget/planned-expenses/${plannedExpenseId}/expenses/${expenseId}` :
-            `/budget/plans/${summary.plan.id}/planned-expenses/from-expense/${expenseId}`;
+            `/budget/plannedExpenses/${plannedExpenseId}/expenses/${expenseId}` :
+            `/budget/plans/${summary.plan.id}/plannedExpenses/fromExpense/${expenseId}`;
         const response = await fetch(url, {method: "POST"});
         if (!response.ok) return alert(await response.text());
         loadSummary();
     }
 
     async function assignSelectedExpenses() {
-        const response = await fetch(`/budget/planned-expenses/${selectedTargetId}/expenses`, {
+        const response = await fetch(`/budget/plannedExpenses/${selectedTargetId}/expenses`, {
             method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selectedExpenseIds)
         });
         if (!response.ok) return alert(await response.text());
@@ -154,7 +154,7 @@ const PlanManager = () => {
     }
 
     async function createPlannedExpenseFromSelectedExpenses() {
-        const response = await fetch(`/budget/plans/${summary.plan.id}/planned-expenses/from-expenses`, {
+        const response = await fetch(`/budget/plans/${summary.plan.id}/plannedExpenses/fromExpenses`, {
             method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(selectedExpenseIds)
         });
         if (!response.ok) return alert(await response.text());
@@ -163,7 +163,7 @@ const PlanManager = () => {
     }
 
     async function unassignExpense(expenseId) {
-        const response = await fetch(`/budget/planned-expenses/${selectedPlannedExpense.id}/expenses/${expenseId}`, {method: "DELETE"});
+        const response = await fetch(`/budget/plannedExpenses/${selectedPlannedExpense.id}/expenses/${expenseId}`, {method: "DELETE"});
         if (!response.ok) return alert(await response.text());
         setSelectedPlannedExpense(null);
         loadSummary();
