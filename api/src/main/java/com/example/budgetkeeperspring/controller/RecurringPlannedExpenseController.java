@@ -13,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/recurring-planned-expenses")
+@RequestMapping("/recurringPlannedExpenses")
 @Tag(name = "Recurring planned expenses", description = "Monthly recurring payment templates")
 public class RecurringPlannedExpenseController {
     private final PlanService planService;
