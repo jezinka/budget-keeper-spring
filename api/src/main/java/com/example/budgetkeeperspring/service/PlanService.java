@@ -286,7 +286,8 @@ public class PlanService {
         BigDecimal paidPlannedAmount = plannedExpenses.stream().filter(PlannedExpense::isPaid)
                 .map(PlannedExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal remainingPlannedAmount = plannedExpenses.stream().filter(plannedExpense -> !plannedExpense.isPaid())
-                .map(PlannedExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(plannedExpense -> plannedExpense.getAmount().subtract(spentAmount(plannedExpense, plannedTransactions)).max(BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         long paidPlannedCount = plannedExpenses.stream().filter(PlannedExpense::isPaid).count();
         long remainingPlannedCount = plannedExpenses.size() - paidPlannedCount;
         Map<Long, CategoryPlanSummaryDTO> categories = new LinkedHashMap<>();
@@ -341,6 +342,13 @@ public class PlanService {
 
     private BigDecimal expenseAmount(List<Expense> expenses) {
         return expenses.stream().map(Expense::getAmount).filter(amount -> amount.signum() < 0)
+                .map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal spentAmount(PlannedExpense plannedExpense, List<Expense> expenses) {
+        return expenses.stream()
+                .filter(expense -> expense.getPlannedExpense().getId().equals(plannedExpense.getId()))
+                .map(Expense::getAmount).filter(amount -> amount.signum() < 0)
                 .map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
