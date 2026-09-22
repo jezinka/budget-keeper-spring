@@ -31,6 +31,7 @@ public class ExpenseDTO {
     private String note;
 
     private Boolean manually;
+    private Boolean excludedFromPlan;
 
     private Long sourceAccountId;
     private Long destinationAccountId;

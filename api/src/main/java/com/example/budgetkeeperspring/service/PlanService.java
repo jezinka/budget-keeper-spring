@@ -278,11 +278,12 @@ public class PlanService {
         Plan plan = planRepository.findByStartDate(begin).orElse(null);
         List<PlannedExpense> plannedExpenses = plan == null ? List.of() : plannedExpenseRepository.findAllByPlanId(plan.getId());
         List<Expense> plannedTransactions = plan == null ? List.of() :
-                withoutInvestments(expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanId(begin, end, plan.getId()));
+                includedInPlan(withoutInvestments(expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanId(begin, end, plan.getId())));
         List<Expense> unplannedExpenses = withoutInvestments(expenseRepository.findAllUnplannedByTransactionDateBetween(begin, end));
+        List<Expense> includedUnplannedExpenses = includedInPlan(unplannedExpenses);
 
         BigDecimal plannedAmount = expenseAmount(plannedTransactions);
-        BigDecimal unplannedAmount = expenseAmount(unplannedExpenses);
+        BigDecimal unplannedAmount = expenseAmount(includedUnplannedExpenses);
         BigDecimal paidPlannedAmount = plannedExpenses.stream().filter(PlannedExpense::isPaid)
                 .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -293,7 +294,7 @@ public class PlanService {
         long remainingPlannedCount = plannedExpenses.size() - paidPlannedCount;
         Map<Long, CategoryPlanSummaryDTO> categories = new LinkedHashMap<>();
         addActualAmounts(categories, plannedTransactions, true);
-        addActualAmounts(categories, unplannedExpenses, false);
+        addActualAmounts(categories, includedUnplannedExpenses, false);
         addPlannedAmounts(categories, plannedExpenses, plannedTransactions);
 
         return new PlanSummaryDTO(
@@ -356,6 +357,10 @@ public class PlanService {
     private List<Expense> withoutInvestments(List<Expense> expenses) {
         return expenses.stream().filter(expense -> expense.getCategory() == null ||
                 !INVESTMENT_CATEGORY_LEVEL.equals(expense.getCategory().getLevel())).toList();
+    }
+
+    private List<Expense> includedInPlan(List<Expense> expenses) {
+        return expenses.stream().filter(expense -> !expense.isExcludedFromPlan()).toList();
     }
 
     private Plan plan(Integer id) {

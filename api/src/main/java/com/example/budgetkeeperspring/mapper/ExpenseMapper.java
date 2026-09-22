@@ -20,6 +20,7 @@ public interface ExpenseMapper {
     @Mapping(source = "destinationAccountId", target = "destinationAccount.id")
     @Mapping(source = "beneficiaryId", target = "beneficiary.id")
     @Mapping(source = "beneficiaryName", target = "beneficiary.name")
+    @Mapping(source = "excludedFromPlan", target = "excludedFromPlan")
     @Mapping(target = "plannedExpense", ignore = true)
     Expense mapToEntity(ExpenseDTO expenseDTO);
 
@@ -31,6 +32,7 @@ public interface ExpenseMapper {
     @Mapping(source = "destinationAccount.id", target = "destinationAccountId")
     @Mapping(source = "beneficiary.id", target = "beneficiaryId")
     @Mapping(source = "beneficiary.name", target = "beneficiaryName")
+    @Mapping(source = "excludedFromPlan", target = "excludedFromPlan")
     @Mapping(source = "plannedExpense.id", target = "plannedExpenseId")
     ExpenseDTO mapToDto(Expense expense);
 

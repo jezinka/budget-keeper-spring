@@ -55,6 +55,9 @@ public class Expense implements Serializable {
     @Builder.Default
     private Boolean manually = Boolean.FALSE;
 
+    @Builder.Default
+    private boolean excludedFromPlan = Boolean.FALSE;
+
     private String note;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -270,6 +270,12 @@ public class ExpenseService {
                 .orElse(null)));
     }
 
+    public ExpenseDTO updateExcludedFromPlan(Long id, boolean excluded) {
+        Expense expense = expenseRepository.findById(id).orElseThrow(NotFoundException::new);
+        expense.setExcludedFromPlan(excluded);
+        return expenseMapper.mapToDto(expenseRepository.save(expense));
+    }
+
     public List<ExpenseDTO> findAllByTransactionDateBetween(LocalDate begin, LocalDate end) {
         return expenseRepository
                 .findAllByTransactionDateBetween(begin, end)

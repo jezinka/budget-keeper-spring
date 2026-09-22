@@ -5,7 +5,7 @@ import MonthYearFilter from "../monthlyView/MonthYearFilter";
 import PlanImport from "./PlanImport";
 import PlanPieChart from "./PlanPieChart";
 import {formatNumber, getMonthName} from "../../Utils";
-import {ArrowRepeat, Pencil, Plus, Trash} from "react-bootstrap-icons";
+import {ArrowRepeat, Pencil, Plus, Trash, ArrowCounterclockwise, ShieldExclamation} from "react-bootstrap-icons";
 
 const PlanManager = () => {
     const now = new Date();
@@ -26,6 +26,7 @@ const PlanManager = () => {
     const [recurringName, setRecurringName] = useState("");
     const [recurringAmount, setRecurringAmount] = useState("");
     const [recurringDueDay, setRecurringDueDay] = useState("");
+    const [showExcluded, setShowExcluded] = useState(false);
 
     async function loadSummary() {
         const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
@@ -134,6 +135,13 @@ const PlanManager = () => {
         loadSummary();
     }
 
+    async function updateExcludedFromPlan(id, excluded) {
+        const response = await fetch(`/budget/expenses/${id}/excludedFromPlan?excluded=${excluded}`, {method: "PATCH"});
+        if (!response.ok) return alert(await response.text());
+        setSelectedExpenseIds(selectedExpenseIds.filter(expenseId => expenseId !== id));
+        loadSummary();
+    }
+
     async function markAsPlanned(expenseId, plannedExpenseId) {
         const url = plannedExpenseId ?
             `/budget/plannedExpenses/${plannedExpenseId}/expenses/${expenseId}` :
@@ -171,9 +179,12 @@ const PlanManager = () => {
 
     const unplannedExpenses = useMemo(() => summary?.unplannedExpenses.filter(expense =>
         Number(expense.amount) < 0 &&
+        (showExcluded || !expense.excludedFromPlan) &&
         (expense.description || expense.title || "").toLowerCase().includes(unplannedFilters.description.toLowerCase()) &&
         (expense.categoryName || "").toLowerCase().includes(unplannedFilters.category.toLowerCase())
-    ) || [], [summary, unplannedFilters]);
+    ) || [], [summary, unplannedFilters, showExcluded]);
+
+    const selectableUnplannedExpenses = unplannedExpenses.filter(expense => !expense.excludedFromPlan);
 
     const categories = useMemo(() => [...(summary?.categories || [])].sort(
         (first, second) => Number(first.difference) - Number(second.difference)
@@ -193,7 +204,8 @@ const PlanManager = () => {
         difference: totals.difference + item.difference
     }), {planned: 0, spent: 0, difference: 0});
 
-    const unplannedTotal = unplannedExpenses.reduce((total, expense) => total + Math.abs(Number(expense.amount)), 0);
+    const unplannedTotal = unplannedExpenses.filter(expense => !expense.excludedFromPlan)
+        .reduce((total, expense) => total + Math.abs(Number(expense.amount)), 0);
     const categoryTotals = categories.reduce((totals, category) => ({
         planned: totals.planned + Number(category.plannedAmount),
         actual: totals.actual + Number(category.actualAmount),
@@ -246,23 +258,26 @@ const PlanManager = () => {
                     </Table>
 
                     <h4>Poza planem</h4>
+                    <Form.Check className="mb-2" label="Pokaż wykluczone" checked={showExcluded}
+                        onChange={e => setShowExcluded(e.target.checked)}/>
                     <Table responsive striped bordered size="sm">
-                        <thead><tr><th><Form.Check checked={unplannedExpenses.length > 0 && unplannedExpenses.every(
+                        <thead><tr><th><Form.Check checked={selectableUnplannedExpenses.length > 0 && selectableUnplannedExpenses.every(
                             expense => selectedExpenseIds.includes(expense.id))} onChange={e => setSelectedExpenseIds(e.target.checked ?
-                            [...new Set([...selectedExpenseIds, ...unplannedExpenses.map(expense => expense.id)])] :
-                            selectedExpenseIds.filter(id => !unplannedExpenses.some(expense => expense.id === id)))}/></th>
+                            [...new Set([...selectedExpenseIds, ...selectableUnplannedExpenses.map(expense => expense.id)])] :
+                            selectedExpenseIds.filter(id => !selectableUnplannedExpenses.some(expense => expense.id === id)))}/></th>
                             <th style={{width: "10%"}}>Data</th><th style={{width: "45%"}}>Opis</th><th>Kategoria</th><th>Kwota</th><th/></tr></thead>
                         <tbody><tr><td/><td/><td><Form.Control size="sm" placeholder="Filtruj opis" value={unplannedFilters.description}
                             onChange={e => setUnplannedFilters({...unplannedFilters, description: e.target.value})}/></td>
                             <td><Form.Control size="sm" placeholder="Filtruj kategorię" value={unplannedFilters.category}
                                 onChange={e => setUnplannedFilters({...unplannedFilters, category: e.target.value})}/></td>
                             <td/><td/></tr>{unplannedExpenses.map(expense =>
-                            <tr key={expense.id}><td><Form.Check checked={selectedExpenseIds.includes(expense.id)}
+                            <tr key={expense.id} className={expense.excludedFromPlan ? "table-secondary" : ""}><td>{!expense.excludedFromPlan && <Form.Check checked={selectedExpenseIds.includes(expense.id)}
                                 onChange={e => setSelectedExpenseIds(e.target.checked ? [...selectedExpenseIds, expense.id] :
-                                    selectedExpenseIds.filter(id => id !== expense.id))}/></td><td>{expense.transactionDate}</td><td>{expense.description || expense.title}</td>
+                                    selectedExpenseIds.filter(id => id !== expense.id))}/>}</td><td>{expense.transactionDate}</td><td>{expense.description || expense.title}</td>
                                 <td>{expense.categoryName}</td><td>{formatNumber(Math.abs(Number(expense.amount)))}</td>
                                 <td>
-                                    <div className="d-flex gap-1">
+                                    {expense.excludedFromPlan ? <Button size="sm" variant="outline-secondary"
+                                        onClick={() => updateExcludedFromPlan(expense.id, false)}><ArrowCounterclockwise/></Button> : <div className="d-flex gap-1">
                                         {summary.plannedExpenses.length > 0 && <Form.Select size="sm" defaultValue=""
                                             onChange={e => e.target.value && markAsPlanned(expense.id, e.target.value)}>
                                             <option value="">Przypisz do...</option>
@@ -271,7 +286,8 @@ const PlanManager = () => {
                                         <Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button>
                                         <Button size="sm" variant="outline-secondary" title="Utwórz płatność cykliczną"
                                             onClick={() => convertUnplannedExpenseToRecurring(expense.id)}><ArrowRepeat/></Button>
-                                    </div>
+                                        <Button size="sm" variant="outline-secondary"
+                                            onClick={() => updateExcludedFromPlan(expense.id, true)}><ShieldExclamation/></Button></div>}
                                 </td></tr>)}</tbody>
                         <tfoot><tr><th colSpan={4}>Razem</th><th>{formatNumber(unplannedTotal)}</th><th/></tr></tfoot>
                     </Table>

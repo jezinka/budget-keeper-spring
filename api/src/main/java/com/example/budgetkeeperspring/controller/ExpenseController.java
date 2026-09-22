@@ -95,6 +95,12 @@ public class ExpenseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/excludedFromPlan")
+    @Operation(summary = "Include or exclude an expense from plan summaries")
+    ExpenseDTO updateExcludedFromPlan(@PathVariable Long id, @RequestParam boolean excluded) {
+        return expenseService.updateExcludedFromPlan(id, excluded);
+    }
+
     @Operation(summary = "Split an expense into multiple expenses")
     @PostMapping("/split/{id}")
     ResponseEntity<ExpenseDTO> splitExpense(@PathVariable Long id, @Validated @RequestBody List<ExpenseDTO> expenseDTOS) {
