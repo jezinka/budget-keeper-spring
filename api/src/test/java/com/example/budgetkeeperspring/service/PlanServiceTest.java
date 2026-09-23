@@ -43,7 +43,7 @@ class PlanServiceTest {
         budget.setId(3);
         budget.setPlan(plan);
         budget.setAmount(new BigDecimal("100.00"));
-        Expense planned = expense(new BigDecimal("-70.00"), category);
+        Expense planned = expense(new BigDecimal("-120.00"), category);
         planned.setPlannedExpense(budget);
         Expense unplanned = expense(new BigDecimal("-50.00"), category);
 
@@ -55,19 +55,22 @@ class PlanServiceTest {
 
         PlanSummaryDTO summary = service.summary(2026, 9);
 
-        assertEquals(new BigDecimal("70.00"), summary.getPlannedExpenseAmount());
+        assertEquals(new BigDecimal("120.00"), summary.getPlannedExpenseAmount());
         assertEquals(new BigDecimal("50.00"), summary.getUnplannedExpenseAmount());
         assertEquals(BigDecimal.ZERO, summary.getPaidPlannedAmount());
-        assertEquals(new BigDecimal("30.00"), summary.getRemainingPlannedAmount());
+        assertEquals(BigDecimal.ZERO, summary.getRemainingPlannedAmount());
         assertEquals(1, summary.getRemainingPlannedCount());
-        assertEquals(new BigDecimal("120.00"), summary.getCategories().get(0).getActualAmount());
+        assertEquals(new BigDecimal("170.00"), summary.getCategories().get(0).getActualAmount());
         assertTrue(summary.getCategories().get(0).isUnderPlanned());
+        assertEquals(new BigDecimal("100.00"), summary.getPlannedVsUnplanned().get(0).getAmount());
+        assertEquals(new BigDecimal("20.00"), summary.getPlannedVsUnplanned().get(1).getAmount());
+        assertEquals(new BigDecimal("50.00"), summary.getPlannedVsUnplanned().get(2).getAmount());
 
         unplanned.setExcludedFromPlan(true);
         assertEquals(BigDecimal.ZERO, service.summary(2026, 9).getUnplannedExpenseAmount());
 
         budget.setPaid(true);
-        assertEquals(new BigDecimal("70.00"), service.summary(2026, 9).getPaidPlannedAmount());
+        assertEquals(new BigDecimal("120.00"), service.summary(2026, 9).getPaidPlannedAmount());
     }
 
     @Test

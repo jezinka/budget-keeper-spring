@@ -284,6 +284,12 @@ public class PlanService {
 
         BigDecimal plannedAmount = expenseAmount(plannedTransactions);
         BigDecimal unplannedAmount = expenseAmount(includedUnplannedExpenses);
+        BigDecimal withinPlanAmount = plannedExpenses.stream()
+                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).min(plannedExpense.getAmount()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal overPlanAmount = plannedExpenses.stream()
+                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).subtract(plannedExpense.getAmount()).max(BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal paidPlannedAmount = plannedExpenses.stream().filter(PlannedExpense::isPaid)
                 .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -308,7 +314,9 @@ public class PlanService {
                 remainingPlannedCount,
                 plannedAmount,
                 unplannedAmount,
-                List.of(new PieChartExpenseDto("Planned", plannedAmount), new PieChartExpenseDto("Unplanned", unplannedAmount)),
+                List.of(new PieChartExpenseDto("Zaplanowane", withinPlanAmount),
+                        new PieChartExpenseDto("Przekroczony plan", overPlanAmount),
+                        new PieChartExpenseDto("Niezaplanowane", unplannedAmount)),
                 categories.values().stream().sorted(Comparator.comparing(CategoryPlanSummaryDTO::getCategoryName)).toList());
     }
 

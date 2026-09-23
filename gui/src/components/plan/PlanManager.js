@@ -206,6 +206,7 @@ const PlanManager = () => {
 
     const unplannedTotal = unplannedExpenses.filter(expense => !expense.excludedFromPlan)
         .reduce((total, expense) => total + Math.abs(Number(expense.amount)), 0);
+    const chartAmount = name => summary?.plannedVsUnplanned.find(item => item.name === name)?.amount || 0;
     const categoryTotals = categories.reduce((totals, category) => ({
         planned: totals.planned + Number(category.plannedAmount),
         actual: totals.actual + Number(category.actualAmount),
@@ -303,7 +304,7 @@ const PlanManager = () => {
                 <Col md={5}>
                     <h4>Plan a rzeczywistość</h4>
                     <p>Do zapłaty: {formatNumber(summary.remainingPlannedAmount)} ({summary.remainingPlannedCount}) | Opłacone: {formatNumber(summary.paidPlannedAmount)} ({summary.paidPlannedCount})</p>
-                    <p>Wydane w planie: {formatNumber(summary.plannedExpenseAmount)} | Poza planem: {formatNumber(summary.unplannedExpenseAmount)}</p>
+                    <p>Wydane w planie: {formatNumber(chartAmount("Zaplanowane"))} | Przekroczone: {formatNumber(chartAmount("Przekroczony plan"))} | Poza planem: {formatNumber(chartAmount("Niezaplanowane"))}</p>
                     <PlanPieChart data={summary.plannedVsUnplanned}/>
                     <h4>Kategorie</h4>
                     <Table responsive bordered size="sm">
