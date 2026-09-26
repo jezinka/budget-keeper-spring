@@ -43,7 +43,7 @@ const MonthlyView = () => {
 
     async function loadPlanChart() {
         const now = new Date();
-        const response = await fetch(`/budget/plans/summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`);
+        const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
         if (response.ok) setPlanChart((await response.json()).plannedVsUnplanned);
     }
 
