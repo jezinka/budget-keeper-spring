@@ -49,7 +49,7 @@ public class PlanService {
     }
 
     public PlanDTO findById(Integer id) {
-        return planMapper.mapToDto(plan(id));
+        return planMapper.mapToDto(findPlanById(id));
     }
 
     public PlanDTO create(PlanDTO dto) {
@@ -65,7 +65,7 @@ public class PlanService {
     }
 
     public PlanDTO update(Integer id, PlanDTO dto) {
-        Plan plan = plan(id);
+        Plan plan = findPlanById(id);
         YearMonth month = YearMonth.of(dto.getYear(), dto.getMonth());
         planRepository.findByStartDate(month.atDay(1))
                 .filter(existing -> !existing.getId().equals(id))
@@ -83,11 +83,11 @@ public class PlanService {
         expenses.forEach(expense -> expense.setPlannedExpense(null));
         expenseRepository.saveAll(expenses);
         plannedExpenseRepository.deleteAll(plannedExpenses);
-        planRepository.delete(plan(id));
+        planRepository.delete(findPlanById(id));
     }
 
     public List<PlannedExpenseDTO> findPlannedExpenses(Integer planId) {
-        plan(planId);
+        findPlanById(planId);
         return plannedExpenseRepository.findAllByPlanId(planId).stream().map(planMapper::mapToDto).toList();
     }
 
@@ -97,13 +97,13 @@ public class PlanService {
 
     public PlannedExpenseDTO createPlannedExpense(PlannedExpenseDTO dto) {
         PlannedExpense plannedExpense = new PlannedExpense();
-        planMapper.updatePlannedExpenseFromDto(dto, plan(dto.getPlanId()), plannedExpense);
+        planMapper.updatePlannedExpenseFromDto(dto, findPlanById(dto.getPlanId()), plannedExpense);
         return planMapper.mapToDto(plannedExpenseRepository.save(plannedExpense));
     }
 
     @Transactional
     public void importPlannedExpenses(Integer planId, MultipartFile file) {
-        Plan plan = plan(planId);
+        Plan plan = findPlanById(planId);
         try (CSVReader reader = new CSVReader(new FileReader(FileService.getTempFile(file)))) {
             String[] header = reader.readNext();
             boolean hasDueDate = Arrays.equals(header, new String[]{"Kategoria", "Kwota", "Termin"});
@@ -137,7 +137,7 @@ public class PlanService {
 
     public PlannedExpenseDTO updatePlannedExpense(Integer id, PlannedExpenseDTO dto) {
         PlannedExpense plannedExpense = plannedExpense(id);
-        planMapper.updatePlannedExpenseFromDto(dto, plan(dto.getPlanId()), plannedExpense);
+        planMapper.updatePlannedExpenseFromDto(dto, findPlanById(dto.getPlanId()), plannedExpense);
         return planMapper.mapToDto(plannedExpenseRepository.save(plannedExpense));
     }
 
@@ -183,7 +183,7 @@ public class PlanService {
 
     @Transactional
     public RecurringPlannedExpenseDTO convertUnplannedExpenseToRecurring(Integer planId, Long expenseId) {
-        Plan plan = plan(planId);
+        Plan plan = findPlanById(planId);
         Expense expense = expenseRepository.findById(expenseId).orElseThrow(NotFoundException::new);
         validateExpenseForPlan(expense, plan);
         RecurringPlannedExpense recurringPayment = createRecurringPayment(
@@ -197,7 +197,7 @@ public class PlanService {
 
     @Transactional
     public void applyRecurringPayments(Integer planId) {
-        applyRecurringPayments(plan(planId));
+        applyRecurringPayments(findPlanById(planId));
     }
 
     @Transactional
@@ -211,7 +211,7 @@ public class PlanService {
 
     @Transactional
     public PlannedExpenseDTO markExpenseAsPlanned(Integer planId, Long expenseId) {
-        Plan plan = plan(planId);
+        Plan plan = findPlanById(planId);
         Expense expense = expenseRepository.findById(expenseId).orElseThrow(NotFoundException::new);
         if (expense.getAmount().signum() >= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only an expense can be planned");
@@ -251,7 +251,7 @@ public class PlanService {
 
     @Transactional
     public PlannedExpenseDTO createPlannedExpenseFromExpenses(Integer planId, List<Long> expenseIds) {
-        Plan plan = plan(planId);
+        Plan plan = findPlanById(planId);
         List<Expense> expenses = expenses(expenseIds);
         expenses.forEach(expense -> validateExpenseForPlan(expense, plan));
         PlannedExpense plannedExpense = new PlannedExpense();
@@ -275,7 +275,7 @@ public class PlanService {
     }
 
     public List<ExpenseDTO> findExpensesForPlan(Integer planId) {
-        plan(planId);
+        findPlanById(planId);
         return expenseRepository.findAllByPlannedExpensePlanId(planId).stream().map(expenseMapper::mapToDto).toList();
     }
 
@@ -385,7 +385,7 @@ public class PlanService {
         return expenses.stream().filter(expense -> !expense.isExcludedFromPlan()).toList();
     }
 
-    private Plan plan(Integer id) {
+    private Plan findPlanById(Integer id) {
         return planRepository.findById(id).orElseThrow(NotFoundException::new);
     }
 
