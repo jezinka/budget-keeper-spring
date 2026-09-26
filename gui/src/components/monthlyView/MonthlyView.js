@@ -6,6 +6,7 @@ import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "rechart
 import MonthYearFilter from "./MonthYearFilter";
 import SankeyComponent from "./SankeyComponent";
 import ExpenseTreeMap from "./ExpenseTreeMap";
+import PlanPieChart from "../plan/PlanPieChart";
 
 const MonthlyView = () => {
     const [year, setYear] = useState(new Date().getFullYear());
@@ -13,11 +14,13 @@ const MonthlyView = () => {
     const [topExpenses, setTopExpenses] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [expensePieData, setExpensePieData] = useState([]);
+    const [planChart, setPlanChart] = useState([]);
 
     useEffect(() => {
         loadTopExpenses();
         loadExpensePieData();
         loadExpenses();
+        loadPlanChart();
     }, [year, month]);
 
     async function loadTopExpenses() {
@@ -38,9 +41,15 @@ const MonthlyView = () => {
         setExpensePieData(data);
     }
 
+    async function loadPlanChart() {
+        const now = new Date();
+        const response = await fetch(`/budget/plans/summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`);
+        if (response.ok) setPlanChart((await response.json()).plannedVsUnplanned);
+    }
+
     let body = <>
         <Col sm={11}>
-            <h2>{`Wydatki i wpływy za ${getMonthName(month, 'long')} ${year}`}</h2>
+            <h2 className="mt-3">{`Wydatki i wpływy za ${getMonthName(month, 'long')} ${year}`}</h2>
 
             <MonthYearFilter
                 year={year}
@@ -52,7 +61,7 @@ const MonthlyView = () => {
             <Row className="mt-4">
                 {expensePieData.length > 0 && (
                     <Col sm={4}>
-                        <h4>Wydatki wg poziomów</h4>
+                        <h4 className="mt-3">Wydatki wg poziomów</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -76,7 +85,7 @@ const MonthlyView = () => {
                 )}
                 {topExpenses.length > 0 && (
                     <Col sm={4}>
-                        <h4>Największe wydatki</h4>
+                        <h4 className="mt-3">Największe wydatki</h4>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -100,6 +109,12 @@ const MonthlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
+                <Col sm={4}>
+                    <h4 className="mt-3">Zaplanowane a poza planem</h4>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PlanPieChart data={planChart}/>
+                    </ResponsiveContainer>
+                </Col>
             </Row>
             <Row>
                 <ExpenseTreeMap expenses={expenses}/>

@@ -7,6 +7,8 @@ import com.example.budgetkeeperspring.entity.PlannedExpense;
 import com.example.budgetkeeperspring.entity.RecurringPlannedExpense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
+import com.example.budgetkeeperspring.mapper.PlanMapper;
+import com.example.budgetkeeperspring.mapper.RecurringPlannedExpenseMapper;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
 import com.example.budgetkeeperspring.repository.PlanRepository;
 import com.example.budgetkeeperspring.repository.PlannedExpenseRepository;
@@ -38,14 +40,16 @@ public class PlanService {
     private final PlannedExpenseRepository plannedExpenseRepository;
     private final ExpenseRepository expenseRepository;
     private final ExpenseMapper expenseMapper;
+    private final PlanMapper planMapper;
+    private final RecurringPlannedExpenseMapper recurringPlannedExpenseMapper;
     private final RecurringPlannedExpenseRepository recurringPlannedExpenseRepository;
 
     public List<PlanDTO> findAll() {
-        return planRepository.findAll().stream().map(this::toDto).toList();
+        return planRepository.findAll().stream().map(planMapper::mapToDto).toList();
     }
 
     public PlanDTO findById(Integer id) {
-        return toDto(plan(id));
+        return planMapper.mapToDto(plan(id));
     }
 
     public PlanDTO create(PlanDTO dto) {
@@ -53,9 +57,11 @@ public class PlanService {
         if (planRepository.findByStartDate(month.atDay(1)).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan already exists for this month");
         }
-        Plan plan = planRepository.save(planFrom(dto, new Plan()));
+        Plan plan = new Plan();
+        planMapper.updatePlanFromDto(dto, plan);
+        plan = planRepository.save(plan);
         applyRecurringPayments(plan);
-        return toDto(plan);
+        return planMapper.mapToDto(plan);
     }
 
     public PlanDTO update(Integer id, PlanDTO dto) {
@@ -66,7 +72,8 @@ public class PlanService {
                 .ifPresent(existing -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan already exists for this month");
                 });
-        return toDto(planRepository.save(planFrom(dto, plan)));
+        planMapper.updatePlanFromDto(dto, plan);
+        return planMapper.mapToDto(planRepository.save(plan));
     }
 
     @Transactional
@@ -81,15 +88,17 @@ public class PlanService {
 
     public List<PlannedExpenseDTO> findPlannedExpenses(Integer planId) {
         plan(planId);
-        return plannedExpenseRepository.findAllByPlanId(planId).stream().map(this::toDto).toList();
+        return plannedExpenseRepository.findAllByPlanId(planId).stream().map(planMapper::mapToDto).toList();
     }
 
     public PlannedExpenseDTO findPlannedExpense(Integer id) {
-        return toDto(plannedExpense(id));
+        return planMapper.mapToDto(plannedExpense(id));
     }
 
     public PlannedExpenseDTO createPlannedExpense(PlannedExpenseDTO dto) {
-        return toDto(plannedExpenseRepository.save(plannedExpenseFrom(dto, new PlannedExpense())));
+        PlannedExpense plannedExpense = new PlannedExpense();
+        planMapper.updatePlannedExpenseFromDto(dto, plan(dto.getPlanId()), plannedExpense);
+        return planMapper.mapToDto(plannedExpenseRepository.save(plannedExpense));
     }
 
     @Transactional
@@ -127,26 +136,31 @@ public class PlanService {
     }
 
     public PlannedExpenseDTO updatePlannedExpense(Integer id, PlannedExpenseDTO dto) {
-        return toDto(plannedExpenseRepository.save(plannedExpenseFrom(dto, plannedExpense(id))));
+        PlannedExpense plannedExpense = plannedExpense(id);
+        planMapper.updatePlannedExpenseFromDto(dto, plan(dto.getPlanId()), plannedExpense);
+        return planMapper.mapToDto(plannedExpenseRepository.save(plannedExpense));
     }
 
     public PlannedExpenseDTO updatePaid(Integer id, boolean paid) {
         PlannedExpense plannedExpense = plannedExpense(id);
         plannedExpense.setPaid(paid);
-        return toDto(plannedExpenseRepository.save(plannedExpense));
+        return planMapper.mapToDto(plannedExpenseRepository.save(plannedExpense));
     }
 
     public List<RecurringPlannedExpenseDTO> findRecurringPayments() {
-        return recurringPlannedExpenseRepository.findAll().stream().map(this::toDto).toList();
+        return recurringPlannedExpenseRepository.findAll().stream().map(recurringPlannedExpenseMapper::mapToDto).toList();
     }
 
     public RecurringPlannedExpenseDTO createRecurringPayment(RecurringPlannedExpenseDTO dto) {
-        return toDto(recurringPlannedExpenseRepository.save(recurringPaymentFrom(dto, new RecurringPlannedExpense())));
+        RecurringPlannedExpense recurringPayment = new RecurringPlannedExpense();
+        recurringPlannedExpenseMapper.updateFromDto(dto, recurringPayment);
+        return recurringPlannedExpenseMapper.mapToDto(recurringPlannedExpenseRepository.save(recurringPayment));
     }
 
     public RecurringPlannedExpenseDTO updateRecurringPayment(Integer id, RecurringPlannedExpenseDTO dto) {
         RecurringPlannedExpense recurringPayment = recurringPlannedExpenseRepository.findById(id).orElseThrow(NotFoundException::new);
-        return toDto(recurringPlannedExpenseRepository.save(recurringPaymentFrom(dto, recurringPayment)));
+        recurringPlannedExpenseMapper.updateFromDto(dto, recurringPayment);
+        return recurringPlannedExpenseMapper.mapToDto(recurringPlannedExpenseRepository.save(recurringPayment));
     }
 
     public void deleteRecurringPayment(Integer id) {
@@ -157,14 +171,14 @@ public class PlanService {
     public RecurringPlannedExpenseDTO convertPlannedExpenseToRecurring(Integer plannedExpenseId) {
         PlannedExpense plannedExpense = plannedExpense(plannedExpenseId);
         if (plannedExpense.getRecurringPayment() != null) {
-            return toDto(plannedExpense.getRecurringPayment());
+            return recurringPlannedExpenseMapper.mapToDto(plannedExpense.getRecurringPayment());
         }
         RecurringPlannedExpense recurringPayment = createRecurringPayment(
                 plannedExpense.getName(), plannedExpense.getAmount(),
                 plannedExpense.getDueDate() == null ? plannedExpense.getPlan().getStartDate().getDayOfMonth() : plannedExpense.getDueDate().getDayOfMonth());
         plannedExpense.setRecurringPayment(recurringPayment);
         plannedExpenseRepository.save(plannedExpense);
-        return toDto(recurringPayment);
+        return recurringPlannedExpenseMapper.mapToDto(recurringPayment);
     }
 
     @Transactional
@@ -175,10 +189,10 @@ public class PlanService {
         RecurringPlannedExpense recurringPayment = createRecurringPayment(
                 expense.getTitle() == null || expense.getTitle().isBlank() ? "Wydatek cykliczny" : expense.getTitle(),
                 expense.getAmount().abs(), expense.getTransactionDate().getDayOfMonth());
-        PlannedExpense plannedExpense = plannedExpenseRepository.save(plannedExpenseFromRecurringPayment(plan, recurringPayment));
+        PlannedExpense plannedExpense = plannedExpenseRepository.save(recurringPlannedExpenseMapper.mapToPlannedExpense(plan, recurringPayment));
         expense.setPlannedExpense(plannedExpense);
         expenseRepository.save(expense);
-        return toDto(recurringPayment);
+        return recurringPlannedExpenseMapper.mapToDto(recurringPayment);
     }
 
     @Transactional
@@ -214,7 +228,7 @@ public class PlanService {
         plannedExpense.setName(expense.getTitle());
         expense.setPlannedExpense(plannedExpenseRepository.save(plannedExpense));
         expenseRepository.save(expense);
-        return toDto(expense.getPlannedExpense());
+        return planMapper.mapToDto(expense.getPlannedExpense());
     }
 
     @Transactional
@@ -247,7 +261,7 @@ public class PlanService {
         plannedExpenseRepository.save(plannedExpense);
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
         expenseRepository.saveAll(expenses);
-        return toDto(plannedExpense);
+        return planMapper.mapToDto(plannedExpense);
     }
 
     @Transactional
@@ -304,8 +318,8 @@ public class PlanService {
         addPlannedAmounts(categories, plannedExpenses, plannedTransactions);
 
         return new PlanSummaryDTO(
-                plan == null ? null : toDto(plan),
-                plannedExpenses.stream().map(this::toDto).toList(),
+                plan == null ? null : planMapper.mapToDto(plan),
+                plannedExpenses.stream().map(planMapper::mapToDto).toList(),
                 plannedTransactions.stream().map(expenseMapper::mapToDto).toList(),
                 unplannedExpenses.stream().map(expenseMapper::mapToDto).toList(),
                 paidPlannedAmount,
@@ -402,41 +416,15 @@ public class PlanService {
         }
     }
 
-    private Plan planFrom(PlanDTO dto, Plan plan) {
-        YearMonth month = YearMonth.of(dto.getYear(), dto.getMonth());
-        plan.setStartDate(month.atDay(1));
-        plan.setEndDate(month.atEndOfMonth());
-        return plan;
-    }
-
-    private PlannedExpense plannedExpenseFrom(PlannedExpenseDTO dto, PlannedExpense plannedExpense) {
-        plannedExpense.setAmount(dto.getAmount());
-        plannedExpense.setName(dto.getName());
-        if (dto.getPaid() != null) {
-            plannedExpense.setPaid(dto.getPaid());
-        }
-        plannedExpense.setDueDate(dto.getDueDate());
-        plannedExpense.setPlan(plan(dto.getPlanId()));
-        return plannedExpense;
-    }
 
     private void applyRecurringPayments(Plan plan) {
         List<PlannedExpense> plannedExpenses = recurringPlannedExpenseRepository.findAllByActiveTrueOrderByDueDayAscNameAsc().stream()
                 .filter(recurringPayment -> !plannedExpenseRepository.existsByPlan_IdAndRecurringPayment_Id(plan.getId(), recurringPayment.getId()))
-                .map(recurringPayment -> plannedExpenseFromRecurringPayment(plan, recurringPayment))
+                .map(recurringPayment -> recurringPlannedExpenseMapper.mapToPlannedExpense(plan, recurringPayment))
                 .toList();
         plannedExpenseRepository.saveAll(plannedExpenses);
     }
 
-    private PlannedExpense plannedExpenseFromRecurringPayment(Plan plan, RecurringPlannedExpense recurringPayment) {
-        PlannedExpense plannedExpense = new PlannedExpense();
-        plannedExpense.setPlan(plan);
-        plannedExpense.setRecurringPayment(recurringPayment);
-        plannedExpense.setName(recurringPayment.getName());
-        plannedExpense.setAmount(recurringPayment.getAmount());
-        plannedExpense.setDueDate(plan.getStartDate().withDayOfMonth(Math.min(recurringPayment.getDueDay(), plan.getEndDate().getDayOfMonth())));
-        return plannedExpense;
-    }
 
     private RecurringPlannedExpense createRecurringPayment(String name, BigDecimal amount, int dueDay) {
         RecurringPlannedExpense recurringPayment = new RecurringPlannedExpense();
@@ -446,43 +434,4 @@ public class PlanService {
         return recurringPlannedExpenseRepository.save(recurringPayment);
     }
 
-    private RecurringPlannedExpense recurringPaymentFrom(RecurringPlannedExpenseDTO dto, RecurringPlannedExpense recurringPayment) {
-        recurringPayment.setName(dto.getName());
-        recurringPayment.setAmount(dto.getAmount());
-        recurringPayment.setDueDay(dto.getDueDay());
-        if (dto.getActive() != null) {
-            recurringPayment.setActive(dto.getActive());
-        }
-        return recurringPayment;
-    }
-
-    private PlanDTO toDto(Plan plan) {
-        PlanDTO dto = new PlanDTO();
-        dto.setId(plan.getId());
-        dto.setYear(plan.getStartDate().getYear());
-        dto.setMonth(plan.getStartDate().getMonthValue());
-        return dto;
-    }
-
-    private PlannedExpenseDTO toDto(PlannedExpense plannedExpense) {
-        PlannedExpenseDTO dto = new PlannedExpenseDTO();
-        dto.setId(plannedExpense.getId());
-        dto.setAmount(plannedExpense.getAmount());
-        dto.setPlanId(plannedExpense.getPlan().getId());
-        dto.setName(plannedExpense.getName());
-        dto.setPaid(plannedExpense.isPaid());
-        dto.setDueDate(plannedExpense.getDueDate());
-        dto.setRecurringPaymentId(plannedExpense.getRecurringPayment() == null ? null : plannedExpense.getRecurringPayment().getId());
-        return dto;
-    }
-
-    private RecurringPlannedExpenseDTO toDto(RecurringPlannedExpense recurringPayment) {
-        RecurringPlannedExpenseDTO dto = new RecurringPlannedExpenseDTO();
-        dto.setId(recurringPayment.getId());
-        dto.setName(recurringPayment.getName());
-        dto.setAmount(recurringPayment.getAmount());
-        dto.setDueDay(recurringPayment.getDueDay());
-        dto.setActive(recurringPayment.isActive());
-        return dto;
-    }
 }
