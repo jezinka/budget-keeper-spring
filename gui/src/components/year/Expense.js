@@ -52,12 +52,14 @@ const Expense = ({expense, year, modalHandler, modalContentHandler, selectCurren
         return (<td className={className} style={{textAlign: 'right'}}>{formatNumber(expense.amount)}</td>);
     }
 
-    if (expense.goalAmount !== null) {
-        className += "triangle " + (expense.goalAmount <= expense.amount ? "success" : "fail");
+    const targetAmount = expense.plannedAmount;
+
+    if (targetAmount != null) {
+        className += "triangle " + (targetAmount <= expense.amount ? "success" : "fail");
         return (<OverlayTrigger
                 placement={'top-end'}
                 overlay={<Tooltip id={`tooltip-cell-${expense.id}`}>
-                    {formatNumber(expense.goalAmount)}
+                    {formatNumber(targetAmount)}
                 </Tooltip>}>
                 <td className={className} style={{textAlign: 'right'}}
                     onClick={renderTooltip}>{formatNumber(expense.amount)}</td>

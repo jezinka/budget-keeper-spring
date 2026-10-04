@@ -12,7 +12,7 @@ public class MonthCategoryAmountDTO {
     private Integer month;
     private String category;
     private BigDecimal amount;
-    private BigDecimal goalAmount;
+    private BigDecimal plannedAmount;
     private long transactionCount;
 
     public MonthCategoryAmountDTO(Integer month, String category, BigDecimal amount) {

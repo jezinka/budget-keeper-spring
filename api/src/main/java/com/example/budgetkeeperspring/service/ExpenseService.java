@@ -5,12 +5,16 @@ import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Beneficiary;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.entity.Plan;
+import com.example.budgetkeeperspring.entity.PlannedExpense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.AccountRepository;
 import com.example.budgetkeeperspring.repository.BeneficiaryRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import com.example.budgetkeeperspring.repository.PlanRepository;
+import com.example.budgetkeeperspring.repository.PlannedExpenseRepository;
 import com.example.budgetkeeperspring.utils.DateUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +51,8 @@ public class ExpenseService {
     private final GoalService goalService;
     private final CategoryLevelService categoryLevelService;
     private final BeneficiaryRepository beneficiaryRepository;
+    private final PlanRepository planRepository;
+    private final PlannedExpenseRepository plannedExpenseRepository;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
@@ -213,7 +219,6 @@ public class ExpenseService {
         LocalDate end = DateUtils.getEndOfSelectedYear(year);
 
         List<MonthCategoryAmountDTO> groupedExpenses = new ArrayList<>();
-        List<GoalDTO> goals = goalService.findAllForYear(year);
 
         List<Expense> yearlyExpenses = expenseRepository.findAllByTransactionDateBetween(begin, end)
                 .stream()
@@ -227,20 +232,43 @@ public class ExpenseService {
                     groupedExpenses.add(new MonthCategoryAmountDTO(month, category, amount, transactionCount));
                 }));
 
-        goals.forEach(g ->
-        {
-            MonthCategoryAmountDTO monthCategoryAmountDTO = groupedExpenses.stream()
-                    .filter(expense -> expense.getMonth() == g.getDate().getMonthValue() && expense.getCategory().equals(g.getCategoryName()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        MonthCategoryAmountDTO dto = new MonthCategoryAmountDTO(g.getDate().getMonthValue(), g.getCategoryName(), BigDecimal.ZERO);
-                        groupedExpenses.add(dto);
-                        return dto;
-                    });
-            monthCategoryAmountDTO.setGoalAmount(g.getAmount());
-        });
+        addPlannedExpensesToYearAtGlance(groupedExpenses, begin, end);
 
         return groupedExpenses;
+    }
+
+    private void addPlannedExpensesToYearAtGlance(List<MonthCategoryAmountDTO> groupedExpenses, LocalDate begin, LocalDate end) {
+        Set<String> yearlyChartCategories = categoryRepository.findAll().stream()
+                .filter(Category::isUseInYearlyCharts)
+                .map(Category::getName)
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<Integer> planIds = planRepository.findAllByStartDateBetween(begin, end).stream()
+                .map(Plan::getId)
+                .toList();
+
+        if (planIds.isEmpty()) {
+            return;
+        }
+
+        plannedExpenseRepository.findAllByPlanIdIn(planIds).stream()
+                .filter(plannedExpense -> plannedExpense.getPlan() != null)
+                .filter(plannedExpense -> plannedExpense.getName() != null && yearlyChartCategories.contains(plannedExpense.getName()))
+                .collect(groupingBy(plannedExpense -> plannedExpense.getPlan().getStartDate().getMonthValue(),
+                        groupingBy(PlannedExpense::getName, reducing(BigDecimal.ZERO, PlannedExpense::getAmount, BigDecimal::add))))
+                .forEach((month, value) -> value.forEach((category, amount) ->
+                        findOrCreateYearAtGlanceExpense(groupedExpenses, month, category).setPlannedAmount(amount)));
+    }
+
+    private MonthCategoryAmountDTO findOrCreateYearAtGlanceExpense(List<MonthCategoryAmountDTO> groupedExpenses, Integer month, String category) {
+        return groupedExpenses.stream()
+                .filter(expense -> expense.getMonth().equals(month) && expense.getCategory().equals(category))
+                .findFirst()
+                .orElseGet(() -> {
+                    MonthCategoryAmountDTO dto = new MonthCategoryAmountDTO(month, category, BigDecimal.ZERO);
+                    groupedExpenses.add(dto);
+                    return dto;
+                });
     }
 
     public List<MonthCategoryAmountDTO> getGroupedByCategory(LocalDate begin, LocalDate end,

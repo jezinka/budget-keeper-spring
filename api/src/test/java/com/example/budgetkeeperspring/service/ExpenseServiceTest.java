@@ -7,11 +7,15 @@ import com.example.budgetkeeperspring.dto.PurchaseInfoDTO;
 import com.example.budgetkeeperspring.entity.Account;
 import com.example.budgetkeeperspring.entity.Category;
 import com.example.budgetkeeperspring.entity.Expense;
+import com.example.budgetkeeperspring.entity.Plan;
+import com.example.budgetkeeperspring.entity.PlannedExpense;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
 import com.example.budgetkeeperspring.repository.AccountRepository;
 import com.example.budgetkeeperspring.repository.CategoryRepository;
 import com.example.budgetkeeperspring.repository.ExpenseRepository;
+import com.example.budgetkeeperspring.repository.PlanRepository;
+import com.example.budgetkeeperspring.repository.PlannedExpenseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -46,6 +50,12 @@ class ExpenseServiceTest {
 
     @Mock
     CategoryLevelService categoryLevelService;
+
+    @Mock
+    PlanRepository planRepository;
+
+    @Mock
+    PlannedExpenseRepository plannedExpenseRepository;
 
     @InjectMocks
     ExpenseService expenseService;
@@ -294,6 +304,79 @@ class ExpenseServiceTest {
                 "description", "shop"));
 
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void getYearAtGlance_usesPlannedExpenseFromMatchingPlan() {
+        Category food = new Category("Food");
+        food.setUseInYearlyCharts(true);
+
+        Expense januaryExpense = new Expense();
+        januaryExpense.setCategory(food);
+        januaryExpense.setAmount(BigDecimal.valueOf(120));
+        januaryExpense.setTransactionDate(LocalDate.of(2026, 1, 10));
+
+        Plan januaryPlan = new Plan();
+        januaryPlan.setId(11);
+        januaryPlan.setStartDate(LocalDate.of(2026, 1, 1));
+        januaryPlan.setEndDate(LocalDate.of(2026, 1, 31));
+
+        PlannedExpense plannedExpense = new PlannedExpense();
+        plannedExpense.setPlan(januaryPlan);
+        plannedExpense.setName("Food");
+        plannedExpense.setAmount(BigDecimal.valueOf(100));
+
+        when(expenseRepository.findAllByTransactionDateBetween(any(), any())).thenReturn(List.of(januaryExpense));
+        when(categoryRepository.findAll()).thenReturn(List.of(food));
+        when(planRepository.findAllByStartDateBetween(any(), any())).thenReturn(List.of(januaryPlan));
+        when(plannedExpenseRepository.findAllByPlanIdIn(List.of(11))).thenReturn(List.of(plannedExpense));
+
+        List<MonthCategoryAmountDTO> result = expenseService.getYearAtGlance(2026);
+
+        assertEquals(1, result.size());
+        MonthCategoryAmountDTO dto = result.get(0);
+        assertEquals(1, dto.getMonth());
+        assertEquals("Food", dto.getCategory());
+        assertEquals(0, BigDecimal.valueOf(120).compareTo(dto.getAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(dto.getPlannedAmount()));
+        assertEquals(1, dto.getTransactionCount());
+        verifyNoInteractions(goalService);
+    }
+
+    @Test
+    void getYearAtGlance_addsMissingRowForPlannedExpenseWithoutTransactions() {
+        Category rent = new Category("Rent");
+        rent.setUseInYearlyCharts(true);
+
+        Plan februaryPlan = new Plan();
+        februaryPlan.setId(12);
+        februaryPlan.setStartDate(LocalDate.of(2026, 2, 1));
+        februaryPlan.setEndDate(LocalDate.of(2026, 2, 28));
+
+        PlannedExpense rentPlanPartOne = new PlannedExpense();
+        rentPlanPartOne.setPlan(februaryPlan);
+        rentPlanPartOne.setName("Rent");
+        rentPlanPartOne.setAmount(BigDecimal.valueOf(70));
+
+        PlannedExpense rentPlanPartTwo = new PlannedExpense();
+        rentPlanPartTwo.setPlan(februaryPlan);
+        rentPlanPartTwo.setName("Rent");
+        rentPlanPartTwo.setAmount(BigDecimal.valueOf(30));
+
+        when(expenseRepository.findAllByTransactionDateBetween(any(), any())).thenReturn(List.of());
+        when(categoryRepository.findAll()).thenReturn(List.of(rent));
+        when(planRepository.findAllByStartDateBetween(any(), any())).thenReturn(List.of(februaryPlan));
+        when(plannedExpenseRepository.findAllByPlanIdIn(List.of(12))).thenReturn(List.of(rentPlanPartOne, rentPlanPartTwo));
+
+        List<MonthCategoryAmountDTO> result = expenseService.getYearAtGlance(2026);
+
+        assertEquals(1, result.size());
+        MonthCategoryAmountDTO dto = result.get(0);
+        assertEquals(2, dto.getMonth());
+        assertEquals("Rent", dto.getCategory());
+        assertEquals(0, BigDecimal.ZERO.compareTo(dto.getAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(dto.getPlannedAmount()));
+        assertEquals(0, dto.getTransactionCount());
     }
 
     @Test

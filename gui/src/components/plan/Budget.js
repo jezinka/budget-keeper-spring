@@ -129,7 +129,7 @@ export default function Budget() {
                 month: currentMonth,
                 category: row.category,
                 amount: row.expense,
-                goalAmount: row.goal,
+                plannedAmount: row.goal,
                 transactionCount: row.transactionCount
             }}
             year={currentYear}
