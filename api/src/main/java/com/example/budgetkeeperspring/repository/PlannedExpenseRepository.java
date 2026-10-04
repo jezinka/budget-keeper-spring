@@ -11,5 +11,8 @@ public interface PlannedExpenseRepository extends JpaRepository<PlannedExpense, 
     @Query("select pe from PlannedExpense pe where pe.plan.id = :planId order by pe.id")
     List<PlannedExpense> findAllByPlanId(@Param("planId") Integer planId);
 
+    @Query("select pe from PlannedExpense pe where pe.plan.id in (:planIds) order by pe.id")
+    List<PlannedExpense> findAllByPlanIdIn(@Param("planIds") List<Integer> planIds);
+
     boolean existsByPlan_IdAndRecurringPayment_Id(Integer planId, Integer recurringPaymentId);
 }

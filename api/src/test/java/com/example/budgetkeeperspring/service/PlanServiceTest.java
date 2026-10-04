@@ -87,6 +87,57 @@ class PlanServiceTest {
     }
 
     @Test
+    void yearlySummaryAggregatesPlannedOverPlanAndUnplanned() {
+        PlanRepository planRepository = mock(PlanRepository.class);
+        PlannedExpenseRepository plannedExpenseRepository = mock(PlannedExpenseRepository.class);
+        ExpenseRepository expenseRepository = mock(ExpenseRepository.class);
+        PlanService service = new PlanService(planRepository, plannedExpenseRepository, expenseRepository,
+                mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class),
+                mock(RecurringPlannedExpenseRepository.class));
+
+        Plan januaryPlan = new Plan();
+        januaryPlan.setId(1);
+        januaryPlan.setStartDate(LocalDate.of(2026, 1, 1));
+        januaryPlan.setEndDate(LocalDate.of(2026, 1, 31));
+        Plan februaryPlan = new Plan();
+        februaryPlan.setId(2);
+        februaryPlan.setStartDate(LocalDate.of(2026, 2, 1));
+        februaryPlan.setEndDate(LocalDate.of(2026, 2, 28));
+
+        PlannedExpense januaryBudget = new PlannedExpense();
+        januaryBudget.setId(10);
+        januaryBudget.setPlan(januaryPlan);
+        januaryBudget.setAmount(new BigDecimal("100.00"));
+        PlannedExpense februaryBudget = new PlannedExpense();
+        februaryBudget.setId(20);
+        februaryBudget.setPlan(februaryPlan);
+        februaryBudget.setAmount(new BigDecimal("200.00"));
+
+        Expense januaryExpense = expense(new BigDecimal("-120.00"), null);
+        januaryExpense.setPlannedExpense(januaryBudget);
+        Expense februaryExpense = expense(new BigDecimal("-150.00"), null);
+        februaryExpense.setPlannedExpense(februaryBudget);
+        Expense unplannedExpense = expense(new BigDecimal("-40.00"), null);
+        Expense excludedUnplannedExpense = expense(new BigDecimal("-30.00"), null);
+        excludedUnplannedExpense.setExcludedFromPlan(true);
+
+        LocalDate yearStart = LocalDate.of(2026, 1, 1);
+        LocalDate yearEnd = LocalDate.of(2026, 12, 31);
+        when(planRepository.findAllByStartDateBetween(yearStart, yearEnd)).thenReturn(List.of(januaryPlan, februaryPlan));
+        when(plannedExpenseRepository.findAllByPlanIdIn(List.of(1, 2))).thenReturn(List.of(januaryBudget, februaryBudget));
+        when(expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanIdIn(yearStart, yearEnd, List.of(1, 2)))
+                .thenReturn(List.of(januaryExpense, februaryExpense));
+        when(expenseRepository.findAllUnplannedByTransactionDateBetween(yearStart, yearEnd))
+                .thenReturn(List.of(unplannedExpense, excludedUnplannedExpense));
+
+        var summary = service.summaryForYear(2026);
+
+        assertEquals(new BigDecimal("250.00"), summary.get(0).getAmount());
+        assertEquals(new BigDecimal("20.00"), summary.get(1).getAmount());
+        assertEquals(new BigDecimal("40.00"), summary.get(2).getAmount());
+    }
+
+    @Test
     void manuallyMarksPlannedExpenseAsPaid() {
         PlanRepository planRepository = mock(PlanRepository.class);
         PlannedExpenseRepository plannedExpenseRepository = mock(PlannedExpenseRepository.class);

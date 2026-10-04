@@ -4,8 +4,11 @@ import com.example.budgetkeeperspring.entity.Plan;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface PlanRepository extends JpaRepository<Plan, Integer> {
     Optional<Plan> findByStartDate(LocalDate startDate);
+
+    List<Plan> findAllByStartDateBetween(LocalDate begin, LocalDate end);
 }

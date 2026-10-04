@@ -42,9 +42,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "group by c.level, cl.name order by c.level")
     List<PieChartExpenseDto> findSumAmountGroupedByCategoryLevelForLevels(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("levels") List<Integer> levels);
 
-    @Query("select e from Expense e left join fetch e.category c where c.level = :level")
-    List<Expense> findAllByCategoryLevel(@Param("level") Integer level);
-
     @Query("select e from Expense e left join fetch e.category c where c.name in (:categoryNames)")
     List<Expense> findAllByCategoryNameIn(@Param("categoryNames") List<String> categoryNames);
 
@@ -65,4 +62,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("select e from Expense e left join fetch e.category left join fetch e.plannedExpense pe left join fetch pe.plan where e.transactionDate between :begin and :end and pe.plan.id = :planId")
     List<Expense> findAllPlannedByTransactionDateBetweenAndPlanId(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("planId") Integer planId);
+
+    @Query("select e from Expense e left join fetch e.category left join fetch e.plannedExpense pe left join fetch pe.plan where e.transactionDate between :begin and :end and pe.plan.id in (:planIds)")
+    List<Expense> findAllPlannedByTransactionDateBetweenAndPlanIdIn(@Param("begin") LocalDate begin, @Param("end") LocalDate end, @Param("planIds") List<Integer> planIds);
 }

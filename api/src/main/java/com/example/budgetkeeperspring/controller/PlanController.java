@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.dto.PlanDTO;
 import com.example.budgetkeeperspring.dto.PlannedExpenseDTO;
 import com.example.budgetkeeperspring.dto.RecurringPlannedExpenseDTO;
 import com.example.budgetkeeperspring.dto.PlanSummaryDTO;
+import com.example.budgetkeeperspring.dto.PieChartExpenseDto;
 import com.example.budgetkeeperspring.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -115,5 +116,11 @@ public class PlanController {
     @Operation(summary = "Get planned and unplanned monthly expenses, pie chart and category statistics")
     PlanSummaryDTO summary(@RequestParam @Min(1) int year, @RequestParam @Min(1) @Max(12) int month) {
         return planService.summary(year, month);
+    }
+
+    @GetMapping("/summaryForYear")
+    @Operation(summary = "Get planned and unplanned yearly expenses for pie chart")
+    List<PieChartExpenseDto> summaryForYear(@RequestParam @Min(1) int year) {
+        return planService.summaryForYear(year);
     }
 }

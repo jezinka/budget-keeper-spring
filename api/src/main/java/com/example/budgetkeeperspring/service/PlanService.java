@@ -298,12 +298,7 @@ public class PlanService {
 
         BigDecimal plannedAmount = expenseAmount(plannedTransactions);
         BigDecimal unplannedAmount = expenseAmount(includedUnplannedExpenses);
-        BigDecimal withinPlanAmount = plannedExpenses.stream()
-                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).min(plannedExpense.getAmount()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal overPlanAmount = plannedExpenses.stream()
-                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).subtract(plannedExpense.getAmount()).max(BigDecimal.ZERO))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<PieChartExpenseDto> plannedVsUnplanned = plannedVsUnplanned(plannedExpenses, plannedTransactions, includedUnplannedExpenses);
         BigDecimal paidPlannedAmount = plannedExpenses.stream().filter(PlannedExpense::isPaid)
                 .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -328,10 +323,34 @@ public class PlanService {
                 remainingPlannedCount,
                 plannedAmount,
                 unplannedAmount,
-                List.of(new PieChartExpenseDto("Zaplanowane", withinPlanAmount),
-                        new PieChartExpenseDto("Przekroczony plan", overPlanAmount),
-                        new PieChartExpenseDto("Niezaplanowane", unplannedAmount)),
+                plannedVsUnplanned,
                 categories.values().stream().sorted(Comparator.comparing(CategoryPlanSummaryDTO::getCategoryName)).toList());
+    }
+
+    public List<PieChartExpenseDto> summaryForYear(int year) {
+        LocalDate begin = LocalDate.of(year, 1, 1);
+        LocalDate end = LocalDate.of(year, 12, 31);
+        List<Integer> planIds = planRepository.findAllByStartDateBetween(begin, end).stream().map(Plan::getId).toList();
+        List<PlannedExpense> plannedExpenses = planIds.isEmpty() ? List.of() : plannedExpenseRepository.findAllByPlanIdIn(planIds);
+        List<Expense> plannedTransactions = planIds.isEmpty() ? List.of() :
+                includedInPlan(withoutInvestments(expenseRepository.findAllPlannedByTransactionDateBetweenAndPlanIdIn(begin, end, planIds)));
+        List<Expense> includedUnplannedExpenses = includedInPlan(withoutInvestments(expenseRepository.findAllUnplannedByTransactionDateBetween(begin, end)));
+
+        return plannedVsUnplanned(plannedExpenses, plannedTransactions, includedUnplannedExpenses);
+    }
+
+    private List<PieChartExpenseDto> plannedVsUnplanned(List<PlannedExpense> plannedExpenses, List<Expense> plannedTransactions,
+                                                        List<Expense> includedUnplannedExpenses) {
+        BigDecimal withinPlanAmount = plannedExpenses.stream()
+                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).min(plannedExpense.getAmount()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal overPlanAmount = plannedExpenses.stream()
+                .map(plannedExpense -> spentAmount(plannedExpense, plannedTransactions).subtract(plannedExpense.getAmount()).max(BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal unplannedAmount = expenseAmount(includedUnplannedExpenses);
+        return List.of(new PieChartExpenseDto("Zaplanowane", withinPlanAmount),
+                new PieChartExpenseDto("Przekroczony plan", overPlanAmount),
+                new PieChartExpenseDto("Niezaplanowane", unplannedAmount));
     }
 
     private void addActualAmounts(Map<Long, CategoryPlanSummaryDTO> categories, List<Expense> expenses, boolean planned) {

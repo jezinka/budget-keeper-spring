@@ -7,6 +7,7 @@ import YearFilter from "./YearFilter";
 import SankeyComponent from "../monthlyView/SankeyComponent";
 import PictorialBar from "./PictorialBar";
 import ExpenseTreeMap from "../monthlyView/ExpenseTreeMap";
+import PlanPieChart from "../plan/PlanPieChart";
 
 const YearlyView = () => {
     const [expenses, setExpenses] = useState([]);
@@ -17,12 +18,14 @@ const YearlyView = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [topExpenses, setTopExpenses] = useState([]);
     const [expensePieData, setExpensePieData] = useState([]);
+    const [planChart, setPlanChart] = useState([]);
 
     useEffect(() => {
         loadTransactions();
         loadTopExpenses();
         loadExpensePieData();
         loadExpenses();
+        loadPlanChart();
     }, [year]);
 
     async function loadTransactions() {
@@ -50,6 +53,13 @@ const YearlyView = () => {
         const response = await fetch("/budget/expenses/getExpensesForYear?year=" + year);
         const data = await response.json();
         setTreeMapExpenses(data);
+    }
+
+    async function loadPlanChart() {
+        const response = await fetch(`/budget/plans/summaryForYear?year=${year}`);
+        if (response.ok) {
+            setPlanChart(await response.json());
+        }
     }
 
     function ExpenseForMonthAndCategory(filteredTransactions, currMonth, currCategory) {
@@ -162,7 +172,12 @@ const YearlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
-
+                <Col sm={4}>
+                    <h4>Zaplanowane & poza planem</h4>
+                    {planChart.length > 0 && (
+                        <PlanPieChart data={planChart}/>
+                    )}
+                </Col>
             </Row>
             <Row className={"my-4"}>
                 <Col sm={4}>
