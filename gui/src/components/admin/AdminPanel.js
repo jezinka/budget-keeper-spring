@@ -5,12 +5,16 @@ import {CategoryAdminContent} from "./CategoryAdmin";
 import {AllTransactionsContent} from "../allTransactions/AllTransactions";
 import LogTable from "../logs/LogTable";
 import RecurringPaymentsAdmin from "./RecurringPaymentsAdmin";
+import {PlansAdminContent} from "./PlansAdmin";
 
 const AdminPanel = () => {
     const body = (
         <Tabs defaultActiveKey="categories" className="mb-3">
             <Tab eventKey="categories" title="Kategorie">
                 <CategoryAdminContent/>
+            </Tab>
+            <Tab eventKey="plans" title="Plany">
+                <PlansAdminContent/>
             </Tab>
             <Tab eventKey="transactions" title="Wszystkie transakcje">
                 <AllTransactionsContent/>

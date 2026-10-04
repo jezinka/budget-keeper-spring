@@ -109,12 +109,14 @@ const MonthlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
-                <Col sm={4}>
-                    <h4 className="mt-3">Zaplanowane a poza planem</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PlanPieChart data={planChart}/>
-                    </ResponsiveContainer>
-                </Col>
+                {planChart.length > 0 && (
+                    <Col sm={4}>
+                        <h4 className="mt-3">Zaplanowane a poza planem</h4>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PlanPieChart data={planChart}/>
+                        </ResponsiveContainer>
+                    </Col>
+                )}
             </Row>
             <Row>
                 <ExpenseTreeMap expenses={expenses}/>

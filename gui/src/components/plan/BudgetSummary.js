@@ -7,6 +7,7 @@ export default function BudgetSummary() {
     const [budgetPlanSummary, setBudgetPlanSummary] = useState({});
     const [moneyAmount, setMoneyAmount] = useState({});
     const [overSum, setOverSum] = useState(0);
+    const [remainingPlannedAmount, setRemainingPlannedAmount] = useState(0);
 
     async function loadData() {
         const response = await fetch('/budget/budgetPlan/summary')
@@ -38,11 +39,31 @@ export default function BudgetSummary() {
         }
     }
 
+    async function loadPlanSummary() {
+        try {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
+            if (!response.ok) {
+                setRemainingPlannedAmount(0);
+                return;
+            }
+            const data = await response.json();
+            setRemainingPlannedAmount(Number(data.remainingPlannedAmount) || 0);
+        } catch (err) {
+            setRemainingPlannedAmount(0);
+        }
+    }
+
     useEffect(() => {
         loadData();
         moneyAmountLoad();
         overLoad();
+        loadPlanSummary();
     }, []);
+
+    const freeFunds = (Number(moneyAmount.accountBalance) || 0) - remainingPlannedAmount;
 
     return (
         <>
@@ -82,7 +103,7 @@ export default function BudgetSummary() {
                         </tr>
                         <tr>
                             <td className='table-info'>WOLNE ŚRODKI</td>
-                            <td>{formatNumber(moneyAmount.accountBalance + budgetPlanSummary.noPayGoal)}</td>
+                            <td>{formatNumber(freeFunds)}</td>
                         </tr>
                         </tbody>
                     </Table>

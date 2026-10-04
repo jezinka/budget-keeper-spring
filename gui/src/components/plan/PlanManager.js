@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Button, Col, Form, Modal, Row, Table} from "react-bootstrap";
 import Main from "../main/Main";
 import MonthYearFilter from "../monthlyView/MonthYearFilter";
@@ -6,9 +6,11 @@ import PlanImport from "./PlanImport";
 import PlanPieChart from "./PlanPieChart";
 import {formatNumber, getMonthName} from "../../Utils";
 import {ArrowRepeat, Pencil, Plus, Trash, ArrowCounterclockwise, ShieldExclamation} from "react-bootstrap-icons";
+import {useLocation} from "react-router-dom";
 
 const PlanManager = () => {
     const now = new Date();
+    const location = useLocation();
     const [year, setYear] = useState(now.getFullYear());
     const [month, setMonth] = useState(now.getMonth() + 1);
     const [summary, setSummary] = useState(null);
@@ -28,14 +30,27 @@ const PlanManager = () => {
     const [recurringDueDay, setRecurringDueDay] = useState("");
     const [showExcluded, setShowExcluded] = useState(false);
 
-    async function loadSummary() {
+    const loadSummary = useCallback(async () => {
         const response = await fetch(`/budget/plans/summary?year=${year}&month=${month}`);
         if (response.ok) setSummary(await response.json());
-    }
+    }, [year, month]);
 
     useEffect(() => {
         loadSummary();
-    }, [year, month]);
+    }, [loadSummary]);
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const queryYear = Number(params.get("year"));
+        const queryMonth = Number(params.get("month"));
+
+        if (Number.isInteger(queryYear) && queryYear > 0) {
+            setYear(prev => prev === queryYear ? prev : queryYear);
+        }
+        if (Number.isInteger(queryMonth) && queryMonth >= 1 && queryMonth <= 12) {
+            setMonth(prev => prev === queryMonth ? prev : queryMonth);
+        }
+    }, [location.search]);
 
     useEffect(() => {
         loadRecurringPayments();
@@ -347,13 +362,13 @@ const PlanManager = () => {
         <Modal show={editingPlannedExpense !== null} onHide={() => setEditingPlannedExpense(null)}>
             <Modal.Header closeButton><Modal.Title>Edytuj planowany wydatek</Modal.Title></Modal.Header>
             <Modal.Body>
-                <Form.Group className="mb-3"><Form.Label>Nazwa</Form.Label>
+                <Form.Group className="mb-3"><Form.Label column>Nazwa</Form.Label>
                     <Form.Control value={editingPlannedExpense?.name || ""} onChange={e => setEditingPlannedExpense(
                         {...editingPlannedExpense, name: e.target.value})}/></Form.Group>
-                <Form.Group><Form.Label>Kwota</Form.Label>
+                <Form.Group><Form.Label column>Kwota</Form.Label>
                     <Form.Control min="0.01" step="0.01" type="number" value={editingPlannedExpense?.amount || ""}
                         onChange={e => setEditingPlannedExpense({...editingPlannedExpense, amount: e.target.value})}/></Form.Group>
-                <Form.Group className="mt-3"><Form.Label>Termin</Form.Label>
+                <Form.Group className="mt-3"><Form.Label column>Termin</Form.Label>
                     <Form.Control type="date" value={editingPlannedExpense?.dueDate || ""}
                         onChange={e => setEditingPlannedExpense({...editingPlannedExpense, dueDate: e.target.value || null})}/></Form.Group>
             </Modal.Body>
