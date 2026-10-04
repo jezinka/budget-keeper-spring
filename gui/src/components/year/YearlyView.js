@@ -162,11 +162,12 @@ const YearlyView = () => {
                         </ResponsiveContainer>
                     </Col>
                 )}
+
+            </Row>
+            <Row className={"my-4"}>
                 <Col sm={4}>
                     <h4>Cel inwestycyjny</h4>
-                    <ResponsiveContainer width="80%" height={100}>
-                        <PictorialBar year={year}/>
-                    </ResponsiveContainer>
+                    <PictorialBar year={year}/>
                 </Col>
             </Row>
             <Row>
