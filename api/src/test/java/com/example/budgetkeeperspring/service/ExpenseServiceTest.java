@@ -49,9 +49,6 @@ class ExpenseServiceTest {
     GoalService goalService;
 
     @Mock
-    CategoryLevelService categoryLevelService;
-
-    @Mock
     PlanRepository planRepository;
 
     @Mock

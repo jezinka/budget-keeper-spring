@@ -24,7 +24,6 @@ public class RabbitMQService {
     private final CategoryService categoryService;
     private final LogRepository logRepository;
     private final LogMapper logMapper;
-    private final AccountRepository accountRepository;
 
     @RabbitListener(queues = "expense")
     public void listenExpenses(String in) {
