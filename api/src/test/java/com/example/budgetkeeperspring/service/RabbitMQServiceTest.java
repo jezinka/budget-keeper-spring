@@ -50,11 +50,11 @@ class RabbitMQServiceTest {
         ExpenseDTO expenseDTO = gson.fromJson(messageJson, ExpenseDTO.class);
         Category category = new Category();
         when(categoryService.findCategoryByConditions(any(ExpenseDTO.class))).thenReturn(category);
-        when(expenseService.createExpense(any(ExpenseDTO.class), any(Category.class))).thenReturn(expenseDTO);
+        when(expenseService.createExpenseFromQueue(any(ExpenseDTO.class), any(Category.class))).thenReturn(expenseDTO);
 
         rabbitMQService.listenExpenses(messageJson);
 
-        verify(expenseService, times(1)).createExpense(any(ExpenseDTO.class), any(Category.class));
+        verify(expenseService).createExpenseFromQueue(any(ExpenseDTO.class), any(Category.class));
     }
 
     @Test

@@ -627,6 +627,31 @@ class ExpenseServiceTest {
     }
 
     @Test
+    void createExpense_assignsMatchingPlannedExpense() {
+        Category category = new Category("Utilities");
+        PlannedExpense plannedExpense = new PlannedExpense();
+        Account defaultAccount = Account.builder().id(1L).name("Default").defaultAccount(true).build();
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-50))
+                .title("Electricity")
+                .transactionDate("2026-07-19")
+                .build();
+        Expense savedExpense = new Expense();
+        savedExpense.setAmount(dto.getAmount());
+
+        when(plannedExpenseRepository.findFirstByNameAndPlan_StartDateLessThanEqualAndPlan_EndDateGreaterThanEqualOrderById(
+                "Electricity", LocalDate.of(2026, 7, 19), LocalDate.of(2026, 7, 19))).thenReturn(Optional.of(plannedExpense));
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(expenseRepository.save(any(Expense.class))).thenReturn(savedExpense);
+
+        expenseService.createExpenseFromQueue(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        assertSame(plannedExpense, captor.getValue().getPlannedExpense());
+    }
+
+    @Test
     void createExpense_withNullCategoryId_usesUnknownCategory() {
         ExpenseDTO dto = ExpenseDTO.builder()
                 .amount(BigDecimal.valueOf(-30))

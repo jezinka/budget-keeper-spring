@@ -63,6 +63,15 @@ public class ExpenseService {
         return createExpense(expenseDTO, category, defaultAccount, account);
     }
 
+    public ExpenseDTO createExpenseFromQueue(ExpenseDTO expenseDTO, Category category) {
+        Account defaultAccount = accountRepository.findByDefaultAccountTrue();
+        Account account = sinkingFundAccount(expenseDTO);
+        if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+            return createExpense(expenseDTO, category, account, defaultAccount, true);
+        }
+        return createExpense(expenseDTO, category, defaultAccount, account, true);
+    }
+
     @Nullable
     private Account sinkingFundAccount(ExpenseDTO expenseDTO) {
         if (expenseDTO == null || expenseDTO.getPayee() == null) {
@@ -77,11 +86,21 @@ public class ExpenseService {
     }
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount) {
+        return createExpense(expenseDTO, category, sourceAccount, destinationAccount, false);
+    }
+
+    private ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount,
+                                     boolean matchPlannedExpense) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
         expense.setCategory(category);
         expense.setSourceAccount(sourceAccount);
         expense.setDestinationAccount(destinationAccount);
         expense.setBeneficiary(null);
+        if (matchPlannedExpense) {
+            plannedExpenseRepository.findFirstByNameAndPlan_StartDateLessThanEqualAndPlan_EndDateGreaterThanEqualOrderById(
+                            expense.getTitle(), expense.getTransactionDate(), expense.getTransactionDate())
+                    .ifPresent(expense::setPlannedExpense);
+        }
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }
 
@@ -99,7 +118,7 @@ public class ExpenseService {
         category = categoryRepository.findById(expenseDTO.getCategoryId()).orElseThrow(NotFoundException::new);
 
         Account sourceAccount = resolveAccount(expenseDTO.getSourceAccountId());
-        Account destinationAccount  = resolveAccount(expenseDTO.getDestinationAccountId());
+        Account destinationAccount = resolveAccount(expenseDTO.getDestinationAccountId());
         return createExpense(expenseDTO, category, sourceAccount, destinationAccount);
     }
 

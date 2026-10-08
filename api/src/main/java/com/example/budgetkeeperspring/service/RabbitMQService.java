@@ -32,7 +32,7 @@ public class RabbitMQService {
         Gson g = new Gson();
         ExpenseDTO message = g.fromJson(in, ExpenseDTO.class);
         Category category = categoryService.findCategoryByConditions(message);
-        ExpenseDTO savedExpense = expenseService.createExpense(message, category);
+        ExpenseDTO savedExpense = expenseService.createExpenseFromQueue(message, category);
         log.info("Saved expense: " + savedExpense);
     }
 
