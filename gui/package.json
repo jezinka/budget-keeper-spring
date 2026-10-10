@@ -29,7 +29,8 @@
   },
   "scripts": {
     "dev": "webpack-dev-server",
-    "build": "webpack"
+    "build": "webpack",
+    "test": "react-scripts test --watchAll=false"
   },
   "main": "src/index.js",
   "eslintConfig": {
@@ -51,6 +52,8 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "html-inline-script-webpack-plugin": "^3.2.1"
   }
 }
