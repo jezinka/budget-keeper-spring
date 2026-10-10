@@ -48,7 +48,7 @@ const CurrentMonth = () => {
 
     let body = <>
         <Col sm={8}>
-            <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions}/>
+            <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions} showAddModalHandler={setShowAddModal}/>
         </Col>
         <Col sm={4} className="mt-1">
             <BudgetSummary/>
@@ -75,8 +75,6 @@ const CurrentMonth = () => {
                 </Badge>
             </h5>
 
-            <h5 className="mt-3">Dodaj wydatek</h5>
-            <Button size="sm" variant="primary" onClick={() => setShowAddModal(true)}>Dodaj</Button>
             <EditTransactionModal show={showAddModal} id={null} closeHandler={() => setShowAddModal(false)}
                                   changeTransactionsHandler={() => {
                                       setShowAddModal(false);

@@ -1,9 +1,11 @@
 import Table from 'react-bootstrap/Table';
-import React, {useState, useMemo} from "react";
-import {handleError, formatNumber} from "../../Utils";
+import React, {useMemo, useState} from "react";
+import {formatNumber, handleError} from "../../Utils";
 import EditTransactionModal from "./EditTransactionModal";
 import SplitTransactionModal from "./SplitTransactionModal";
 import TransactionRow from "./TransactionRow";
+import {Button} from "react-bootstrap";
+import {Plus} from "react-bootstrap-icons";
 
 export default function TransactionTable(props) {
     const [showEditForm, setShowEditForm] = useState(false);
@@ -121,6 +123,9 @@ export default function TransactionTable(props) {
                         <button className="btn btn-sm btn-secondary me-1"
                                 onClick={() => setFilters({description: '', category: '', beneficiary: ''})}>Wyczyść
                         </button>
+                        {props.showAddModalHandler &&
+                            <Button size="sm" variant="primary"
+                                    onClick={() => props.showAddModalHandler(true)}><Plus/></Button>}
                     </th>
                 </tr>
                 </thead>
