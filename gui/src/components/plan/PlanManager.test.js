@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 import {MemoryRouter} from "react-router-dom";
 import PlanManager from "./PlanManager";
 
-jest.mock("../main/Main", () => ({body}) => body);
-jest.mock("./PlanPieChart", () => () => null);
+vi.mock("../main/Main", () => ({default: ({body}) => body}));
+vi.mock("./PlanPieChart", () => ({default: () => null}));
 
 const summary = {
     plan: {id: 7},
@@ -24,7 +24,7 @@ const response = body => ({ok: true, json: async () => body});
 
 describe("PlanManager", () => {
     beforeEach(() => {
-        global.fetch = jest.fn((url) => {
+        global.fetch = vi.fn((url) => {
             if (url.startsWith("/budget/plans/summary")) return Promise.resolve(response(summary));
             if (url === "/budget/recurringPlannedExpenses") return Promise.resolve(response([]));
             return Promise.resolve(response({}));
@@ -32,7 +32,7 @@ describe("PlanManager", () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
     });
 
     it("creates a planned expense from the form", async () => {

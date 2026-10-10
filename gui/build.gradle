@@ -12,7 +12,7 @@ apply plugin: 'com.github.node-gradle.node'
 
 node {
     download = true
-    version = "18.16.1"
+    version = "20.19.0"
 }
 
 tasks.register('npmBuild', NpmTask) {
