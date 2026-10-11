@@ -56,6 +56,9 @@ public class Expense implements Serializable {
     private Boolean manually = Boolean.FALSE;
 
     @Builder.Default
+    private boolean automaticCategory = Boolean.FALSE;
+
+    @Builder.Default
     private boolean excludedFromPlan = Boolean.FALSE;
 
     private String note;

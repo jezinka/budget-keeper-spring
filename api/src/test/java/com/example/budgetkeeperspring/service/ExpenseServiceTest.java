@@ -626,6 +626,7 @@ class ExpenseServiceTest {
     @Test
     void createExpense_assignsMatchingPlannedExpense() {
         Category category = new Category("Utilities");
+        category.setId(5L);
         PlannedExpense plannedExpense = new PlannedExpense();
         Account defaultAccount = Account.builder().id(1L).name("Default").defaultAccount(true).build();
         ExpenseDTO dto = ExpenseDTO.builder()
@@ -645,7 +646,9 @@ class ExpenseServiceTest {
 
         ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
         verify(expenseRepository).save(captor.capture());
-        assertSame(plannedExpense, captor.getValue().getPlannedExpense());
+        Expense persistedExpense = captor.getValue();
+        assertTrue(persistedExpense.isAutomaticCategory());
+        assertSame(plannedExpense, persistedExpense.getPlannedExpense());
     }
 
     @Test

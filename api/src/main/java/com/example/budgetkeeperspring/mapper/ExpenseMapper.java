@@ -21,6 +21,7 @@ public interface ExpenseMapper {
     @Mapping(source = "beneficiaryId", target = "beneficiary.id")
     @Mapping(source = "beneficiaryName", target = "beneficiary.name")
     @Mapping(source = "excludedFromPlan", target = "excludedFromPlan")
+    @Mapping(target = "automaticCategory", ignore = true)
     @Mapping(target = "plannedExpense", ignore = true)
     Expense mapToEntity(ExpenseDTO expenseDTO);
 

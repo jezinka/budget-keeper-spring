@@ -1,20 +1,10 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.*;
-import com.example.budgetkeeperspring.entity.Account;
-import com.example.budgetkeeperspring.entity.Beneficiary;
-import com.example.budgetkeeperspring.entity.Category;
-import com.example.budgetkeeperspring.entity.Expense;
-import com.example.budgetkeeperspring.entity.Plan;
-import com.example.budgetkeeperspring.entity.PlannedExpense;
+import com.example.budgetkeeperspring.entity.*;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.ExpenseMapper;
-import com.example.budgetkeeperspring.repository.AccountRepository;
-import com.example.budgetkeeperspring.repository.BeneficiaryRepository;
-import com.example.budgetkeeperspring.repository.CategoryRepository;
-import com.example.budgetkeeperspring.repository.ExpenseRepository;
-import com.example.budgetkeeperspring.repository.PlanRepository;
-import com.example.budgetkeeperspring.repository.PlannedExpenseRepository;
+import com.example.budgetkeeperspring.repository.*;
 import com.example.budgetkeeperspring.utils.DateUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -66,10 +56,11 @@ public class ExpenseService {
     public ExpenseDTO createExpenseFromQueue(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
         Account account = sinkingFundAccount(expenseDTO);
+        boolean automaticCategory = CategoryService.UNKNOWN_CATEGORY != category.getId();
         if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-            return createExpense(expenseDTO, category, account, defaultAccount, true);
+            return createExpense(expenseDTO, category, account, defaultAccount, true, automaticCategory);
         }
-        return createExpense(expenseDTO, category, defaultAccount, account, true);
+        return createExpense(expenseDTO, category, defaultAccount, account, true, automaticCategory);
     }
 
     @Nullable
@@ -86,16 +77,17 @@ public class ExpenseService {
     }
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount) {
-        return createExpense(expenseDTO, category, sourceAccount, destinationAccount, false);
+        return createExpense(expenseDTO, category, sourceAccount, destinationAccount, false, false);
     }
 
     private ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category, Account sourceAccount, Account destinationAccount,
-                                     boolean matchPlannedExpense) {
+                                     boolean matchPlannedExpense, boolean automaticCategory) {
         Expense expense = expenseMapper.mapToEntity(expenseDTO);
         expense.setCategory(category);
         expense.setSourceAccount(sourceAccount);
         expense.setDestinationAccount(destinationAccount);
         expense.setBeneficiary(null);
+        expense.setAutomaticCategory(automaticCategory);
         if (matchPlannedExpense) {
             plannedExpenseRepository.findFirstByNameAndPlan_StartDateLessThanEqualAndPlan_EndDateGreaterThanEqualOrderById(
                             expense.getTitle(), expense.getTransactionDate(), expense.getTransactionDate())
