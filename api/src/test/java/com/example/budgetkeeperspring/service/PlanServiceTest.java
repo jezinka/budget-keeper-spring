@@ -1,6 +1,7 @@
 package com.example.budgetkeeperspring.service;
 
 import com.example.budgetkeeperspring.dto.PlanDTO;
+import com.example.budgetkeeperspring.dto.PlanAdminSummaryDTO;
 import com.example.budgetkeeperspring.dto.PlanSummaryDTO;
 import com.example.budgetkeeperspring.dto.PlannedExpenseDTO;
 import com.example.budgetkeeperspring.entity.Category;
@@ -35,6 +36,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class PlanServiceTest {
+
+    @Test
+    void returnsAllAdminSummariesFromOneAggregatedQuery() {
+        PlanRepository planRepository = mock(PlanRepository.class);
+        when(planRepository.findAllAdminSummaries(2)).thenReturn(List.<Object[]>of(new Object[]{
+                7, 2026, 9, new BigDecimal("120.00"), new BigDecimal("50.00"),
+                new BigDecimal("40.00"), new BigDecimal("60.00"), 3L, 2L
+        }));
+        PlanService service = new PlanService(planRepository, mock(PlannedExpenseRepository.class), mock(ExpenseRepository.class),
+                mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class),
+                mock(RecurringPlannedExpenseRepository.class));
+
+        List<PlanAdminSummaryDTO> summaries = service.findAllAdminSummaries();
+
+        assertEquals(List.of(new PlanAdminSummaryDTO(7, 2026, 9,
+                new BigDecimal("120.00"), new BigDecimal("50.00"), new BigDecimal("40.00"),
+                new BigDecimal("60.00"), 3, 2)), summaries);
+        verify(planRepository).findAllAdminSummaries(2);
+    }
 
     @Test
     void summarySeparatesPlannedAndUnplannedExpensesAndFlagsShortCategoryPlan() {

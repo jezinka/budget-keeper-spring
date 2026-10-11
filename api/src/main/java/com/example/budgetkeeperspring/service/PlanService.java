@@ -48,6 +48,21 @@ public class PlanService {
         return planRepository.findAll().stream().map(planMapper::mapToDto).toList();
     }
 
+    public List<PlanAdminSummaryDTO> findAllAdminSummaries() {
+        return planRepository.findAllAdminSummaries(INVESTMENT_CATEGORY_LEVEL).stream()
+                .map(row -> new PlanAdminSummaryDTO(
+                        ((Number) row[0]).intValue(),
+                        ((Number) row[1]).intValue(),
+                        ((Number) row[2]).intValue(),
+                        (BigDecimal) row[3],
+                        (BigDecimal) row[4],
+                        (BigDecimal) row[5],
+                        (BigDecimal) row[6],
+                        ((Number) row[7]).longValue(),
+                        ((Number) row[8]).longValue()))
+                .toList();
+    }
+
     public PlanDTO findById(Integer id) {
         return planMapper.mapToDto(findPlanById(id));
     }

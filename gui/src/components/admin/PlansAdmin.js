@@ -16,37 +16,18 @@ export const PlansAdminContent = () => {
         setError("");
 
         try {
-            const response = await fetch("/budget/plans");
+            const response = await fetch("/budget/plans/adminSummary");
             if (!response.ok) {
                 setError(await response.text());
                 return;
             }
 
-            const sourcePlans = await response.json();
-            const rows = await Promise.all(sourcePlans.map(async plan => {
-                const summaryResponse = await fetch(`/budget/plans/summary?year=${plan.year}&month=${plan.month}`);
-                if (!summaryResponse.ok) {
-                    return {
-                        ...plan,
-                        plannedExpenseAmount: 0,
-                        unplannedExpenseAmount: 0,
-                        paidPlannedAmount: 0,
-                        remainingPlannedAmount: 0,
-                        plannedCount: 0,
-                        unplannedCount: 0
-                    };
-                }
-
-                const summary = await summaryResponse.json();
-                return {
-                    ...plan,
-                    plannedExpenseAmount: toNumber(summary.plannedExpenseAmount),
-                    unplannedExpenseAmount: toNumber(summary.unplannedExpenseAmount),
-                    paidPlannedAmount: toNumber(summary.paidPlannedAmount),
-                    remainingPlannedAmount: toNumber(summary.remainingPlannedAmount),
-                    plannedCount: summary.plannedExpenses?.length ?? 0,
-                    unplannedCount: summary.unplannedExpenses?.length ?? 0
-                };
+            const rows = (await response.json()).map(summary => ({
+                ...summary,
+                plannedExpenseAmount: toNumber(summary.plannedExpenseAmount),
+                unplannedExpenseAmount: toNumber(summary.unplannedExpenseAmount),
+                paidPlannedAmount: toNumber(summary.paidPlannedAmount),
+                remainingPlannedAmount: toNumber(summary.remainingPlannedAmount)
             }));
 
             rows.sort((first, second) => second.year - first.year || second.month - first.month);
@@ -144,5 +125,3 @@ export const PlansAdminContent = () => {
         </>
     );
 };
-
-

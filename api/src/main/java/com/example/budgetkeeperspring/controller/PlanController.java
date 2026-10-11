@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.PlanDTO;
+import com.example.budgetkeeperspring.dto.PlanAdminSummaryDTO;
 import com.example.budgetkeeperspring.dto.PlannedExpenseDTO;
 import com.example.budgetkeeperspring.dto.RecurringPlannedExpenseDTO;
 import com.example.budgetkeeperspring.dto.PlanSummaryDTO;
@@ -32,6 +33,12 @@ public class PlanController {
     @Operation(summary = "Get all plans")
     List<PlanDTO> findAll() {
         return planService.findAll();
+    }
+
+    @GetMapping("/adminSummary")
+    @Operation(summary = "Get aggregated summaries for all plans")
+    List<PlanAdminSummaryDTO> findAllAdminSummaries() {
+        return planService.findAllAdminSummaries();
     }
 
     @GetMapping("/{id}")
