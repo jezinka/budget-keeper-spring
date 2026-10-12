@@ -91,7 +91,10 @@ public class ExpenseService {
         if (matchPlannedExpense) {
             plannedExpenseRepository.findFirstByNameAndPlan_StartDateLessThanEqualAndPlan_EndDateGreaterThanEqualOrderById(
                             expense.getTitle(), expense.getTransactionDate(), expense.getTransactionDate())
-                    .ifPresent(expense::setPlannedExpense);
+                    .ifPresent(p -> {
+                        expense.setPlannedExpense(p);
+                        p.setPaid(p.isPaid() || expense.getAmount().compareTo(p.getAmount()) == 0);
+                    });
         }
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }

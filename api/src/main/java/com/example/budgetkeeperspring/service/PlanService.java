@@ -248,11 +248,7 @@ public class PlanService {
 
     @Transactional
     public void assignExpenseToPlannedExpense(Integer plannedExpenseId, Long expenseId) {
-        PlannedExpense plannedExpense = plannedExpense(plannedExpenseId);
-        Expense expense = expenseRepository.findById(expenseId).orElseThrow(NotFoundException::new);
-        validateExpenseForPlan(expense, plannedExpense.getPlan());
-        expense.setPlannedExpense(plannedExpense);
-        expenseRepository.save(expense);
+        assignExpensesToPlannedExpense(plannedExpenseId, List.of(expenseId));
     }
 
     @Transactional
@@ -261,6 +257,7 @@ public class PlanService {
         List<Expense> expenses = expenses(expenseIds);
         expenses.forEach(expense -> validateExpenseForPlan(expense, plannedExpense.getPlan()));
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
+        plannedExpense.setPaid(plannedExpense.isPaid() || expenses.stream().map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(plannedExpense.getAmount()) == 0);
         expenseRepository.saveAll(expenses);
     }
 

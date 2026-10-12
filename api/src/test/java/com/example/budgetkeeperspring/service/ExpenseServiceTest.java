@@ -628,6 +628,7 @@ class ExpenseServiceTest {
         Category category = new Category("Utilities");
         category.setId(5L);
         PlannedExpense plannedExpense = new PlannedExpense();
+        plannedExpense.setAmount(BigDecimal.valueOf(100));
         Account defaultAccount = Account.builder().id(1L).name("Default").defaultAccount(true).build();
         ExpenseDTO dto = ExpenseDTO.builder()
                 .amount(BigDecimal.valueOf(-50))
