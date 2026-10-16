@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {
     CartesianGrid,
-    Customized,
     Line,
     LineChart,
+    ReferenceLine,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -95,44 +95,6 @@ const FireCrossingDot = (props) => {
     );
 };
 
-const FireVerticalLines = ({xAxisMap, yAxisMap, crossingPoints}) => {
-    if (!xAxisMap || !yAxisMap || !crossingPoints.length) return null;
-    const xAxis = Object.values(xAxisMap)[0];
-    const yAxis = Object.values(yAxisMap)[0];
-    if (!xAxis?.scale || !yAxis?.scale) return null;
-
-    const yBottom = yAxis.scale.range()[0];
-
-    return (
-        <g>
-            {crossingPoints.map(({date, value, threshold}) => {
-                const x = xAxis.scale(date);
-                const y = yAxis.scale(value);
-                if (x === undefined || isNaN(x)) return null;
-                return (
-                    <g key={date}>
-                        <line
-                            x1={x} y1={yBottom}
-                            x2={x} y2={y}
-                            stroke="#198754"
-                            strokeDasharray="4 3"
-                            strokeWidth={1.5}
-                        />
-                        <text
-                            x={x + 3}
-                            y={yBottom - 4}
-                            fontSize={10}
-                            fill="#198754"
-                        >
-                            {formatThreshold(threshold)}
-                        </text>
-                    </g>
-                );
-            })}
-        </g>
-    );
-};
-
 const PortfolioChart = ({fireStages = [], snapshots: snapshotsProp = null}) => {
     const [snapshots, setSnapshots] = useState(snapshotsProp || []);
     const [loading, setLoading] = useState(!snapshotsProp);
@@ -161,6 +123,7 @@ const PortfolioChart = ({fireStages = [], snapshots: snapshotsProp = null}) => {
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
     const padding = (maxVal - minVal) * 0.1 || 1000;
+    const yMin = Math.floor(minVal - padding);
 
     const crossingKeys = new Set(
         fireStages
@@ -211,13 +174,20 @@ const PortfolioChart = ({fireStages = [], snapshots: snapshotsProp = null}) => {
                     />
                     <YAxis
                         tickFormatter={formatYAxis}
-                        domain={[Math.floor(minVal - padding), Math.ceil(maxVal + padding)]}
+                        domain={[yMin, Math.ceil(maxVal + padding)]}
                         width={55}
                     />
                     <Tooltip content={<CustomTooltip granularity={granularity}/>}/>
-                    <Customized component={(props) => (
-                        <FireVerticalLines {...props} crossingPoints={crossingPoints}/>
-                    )}/>
+                    {crossingPoints.map(({date, value, threshold}) => (
+                        <ReferenceLine
+                            key={date}
+                            segment={[{x: date, y: yMin}, {x: date, y: value}]}
+                            stroke="#198754"
+                            strokeDasharray="4 3"
+                            strokeWidth={1.5}
+                            label={{value: formatThreshold(threshold), position: 'insideBottomLeft', fontSize: 10, fill: '#198754'}}
+                        />
+                    ))}
                     <Line
                         type="monotone"
                         dataKey="investedCapital"
