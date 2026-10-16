@@ -1,215 +1,116 @@
 import React, {useEffect, useState} from "react";
-import {Col, Row, Table} from "react-bootstrap";
-import {formatNumber, getMonthName, monthColors, MONTHS_ARRAY} from "../../Utils";
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
-} from "recharts";
+import {ButtonGroup, Card, Col, Form, Row, Table, ToggleButton} from "react-bootstrap";
+import {formatNumber} from "../../Utils";
 import Main from "../main/Main";
-import CategoryCheckboxRow from "../year/CategoryCheckboxRow";
-import MonthYearFilter from "../monthlyView/MonthYearFilter";
+import TrendTable from "./TrendTable";
+import TrendSparkline from "./TrendSparkline";
+import {changeColor, formatDiff, formatPercent, groupTrendsByLevel} from "./trendUtils";
+
+const TOP_COUNT = 5;
+
+const TopList = ({title, trends}) => (
+    <Card className="h-100">
+        <Card.Header><strong>{title}</strong></Card.Header>
+        <Card.Body className="p-2">
+            {trends.length === 0
+                ? <span className="text-muted">Brak</span>
+                : (
+                    <Table size="sm" borderless className="mb-0">
+                        <tbody>
+                        {trends.map(t => (
+                            <tr key={t.category}>
+                                <td className="align-middle">{t.category}</td>
+                                <td><TrendSparkline trend={t}/></td>
+                                <td className="align-middle"
+                                    style={{textAlign: "right", color: changeColor(t.diffPercent), fontWeight: "bold"}}>
+                                    {formatDiff(t.diff)} zł
+                                </td>
+                                <td className="align-middle"
+                                    style={{textAlign: "right", color: changeColor(t.diffPercent)}}>
+                                    {formatPercent(t.diffPercent)}
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </Table>
+                )}
+        </Card.Body>
+    </Card>
+);
 
 const LivingExpensesView = () => {
-    const [categories, setCategories] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [topExpenses, setTopExpenses] = useState([]);
-    const [data, setData] = useState({});
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [trends, setTrends] = useState([]);
+    const [levels, setLevels] = useState([]);
+    const [groupBy, setGroupBy] = useState("category");
+    const [minAmount, setMinAmount] = useState(500);
 
     useEffect(() => {
-        const currentYear = new Date().getFullYear();
-        fetch("/budget/categories/getActiveForSelectedYear/" + currentYear)
+        fetch("/budget/expenses/categoryTrends")
             .then(r => r.json())
-            .then(cats => {
-                const expenseCats = cats.filter(c => c.level !== null && c.level >= 0);
-                setCategories(expenseCats);
-            });
+            .then(setTrends);
+        fetch("/budget/categories/levels")
+            .then(r => r.json())
+            .then(setLevels);
     }, []);
 
-    useEffect(() => {
-        loadTopExpenses();
-    }, [year, month, selectedCategories]);
+    const rows = (groupBy === "level" ? groupTrendsByLevel(trends, levels) : trends)
+        .filter(t => Math.max(t.last12, t.previous12) >= (Number(minAmount) || 0));
 
-    async function loadTopExpenses() {
-        const response = await fetch("/budget/expenses/topExpensesForMonthAndCategory?year=" + year + "&month=" + month + "&categories=" + selectedCategories);
-        const data = await response.json();
-        setTopExpenses(data);
-    }
+    const risers = rows.filter(t => t.diff > 0).sort((a, b) => b.diff - a.diff).slice(0, TOP_COUNT);
+    const fallers = rows.filter(t => t.diff < 0).sort((a, b) => a.diff - b.diff).slice(0, TOP_COUNT);
 
-    useEffect(() => {
-        if (selectedCategories.length === 0) {
-            setData({});
-            return;
-        }
-        fetch("/budget/expenses/livingExpensesComparison", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(selectedCategories)
-        })
-            .then(r => r.json())
-            .then(setData);
-    }, [selectedCategories]);
-
-    const years = Object.keys(data).map(Number).sort();
-
-    const chartData = MONTHS_ARRAY.map(month => {
-        const row = {monthName: getMonthName(month, "short"), month};
-        years.forEach(year => {
-            const found = (data[year] || []).find(d => d.month === month);
-            row[year] = found ? Math.abs(found.amount) : 0;
-        });
-        return row;
-    });
-
-    function getAmount(year, month) {
-        const found = (data[year] || []).find(d => d.month === month);
-        return found ? Math.abs(found.amount) : 0;
-    }
-
-    function getYearTotal(year) {
-        return (data[year] || []).reduce((sum, d) => sum + Math.abs(d.amount), 0);
-    }
-
-    function getMonthAvg(month) {
-        if (years.length === 0) return 0;
-        return years.reduce((sum, year) => sum + getAmount(year, month), 0) / years.length;
-    }
+    const totalLast12 = trends.reduce((s, t) => s + t.last12, 0);
+    const totalPrevious12 = trends.reduce((s, t) => s + t.previous12, 0);
+    const totalPercent = totalPrevious12 === 0 ? null : (totalLast12 - totalPrevious12) / totalPrevious12;
 
     const body = (
         <Col sm={12}>
-            <h2>Wydatki na życie – porównanie rok do roku</h2>
+            <h2>Na co wydaję coraz więcej</h2>
 
-            <MonthYearFilter
-                year={year}
-                month={month}
-                onYearChange={setYear}
-                onMonthChange={setMonth}
-            />
-
-            <CategoryCheckboxRow
-                categories={categories}
-                selectedCategories={selectedCategories}
-                setSelectedCategories={setSelectedCategories}
-            />
-
-            {years.length > 0 && (
+            {trends.length > 0 && (
                 <>
-                    <Row className="mt-3 mb-4">
-                        <Col sm={12}>
-                            <h5>Miesięczne wydatki rok do roku</h5>
-                            <ResponsiveContainer width="100%" height={150}>
-                                <BarChart data={chartData} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-                                    <CartesianGrid strokeDasharray="3 3"/>
-                                    <XAxis dataKey="monthName"/>
-                                    <YAxis tickFormatter={v => formatNumber(v)}/>
-                                    <Tooltip formatter={(value) => formatNumber(value)}/>
-                                    <Legend/>
-                                    {years.map((year, idx) => (
-                                        <Bar key={year} dataKey={year}
-                                             fill={monthColors[idx % monthColors.length]}/>
-                                    ))}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </Col>
-                    </Row>
-                    <Row>
-                        {topExpenses.length > 0 && (
-                            <Col sm={4}>
-                                <h4>Największe wydatki</h4>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={topExpenses}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="amount">
-                                            {topExpenses.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            formatter={(value) => formatNumber(-value)}
-                                            labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </Col>
-                        )}
-                    </Row>
-                    <Row>
-                        <Col sm={12}>
-                            <h5>Zestawienie miesiąc do miesiąca</h5>
-                            <Table responsive="sm" striped bordered size="sm">
-                                <thead>
-                                <tr className="table-info">
-                                    <th>Miesiąc</th>
-                                    {years.map(year => (
-                                        <th key={year} style={{textAlign: "right"}}>{year}</th>
-                                    ))}
-                                    <th style={{textAlign: "right"}}>Srednia</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {MONTHS_ARRAY.map(month => {
-                                    const avg = getMonthAvg(month);
-                                    return (
-                                        <tr key={month}>
-                                            <td>{getMonthName(month, "long")}</td>
-                                            {years.map(year => {
-                                                const amount = getAmount(year, month);
-                                                const isAbove = amount > 0 && avg > 0 && amount > avg * 1.1;
-                                                const isBelow = amount > 0 && avg > 0 && amount < avg * 0.9;
-                                                return (
-                                                    <td key={year} style={{
-                                                        textAlign: "right",
-                                                        color: isAbove ? "#c0392b" : isBelow ? "#27ae60" : "inherit"
-                                                    }}>
-                                                        {amount > 0 ? formatNumber(amount) : "–"}
-                                                    </td>
-                                                );
-                                            })}
-                                            <td style={{textAlign: "right", fontWeight: "bold"}}>
-                                                {formatNumber(avg)}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                                </tbody>
-                                <tfoot>
-                                <tr className="table-secondary" style={{fontWeight: "bold"}}>
-                                    <td>SUMA</td>
-                                    {years.map(year => (
-                                        <td key={year} style={{textAlign: "right"}}>
-                                            {formatNumber(getYearTotal(year))}
-                                        </td>
-                                    ))}
-                                    <td style={{textAlign: "right"}}>
-                                        {formatNumber(years.reduce((s, y) => s + getYearTotal(y), 0) / (years.length || 1))}
-                                    </td>
-                                </tr>
-                                </tfoot>
-                            </Table>
-                        </Col>
-                    </Row>
-                </>
-            )}
+                    <p className="lead mb-3">
+                        Ostatnie 12 mies.: <strong>{formatNumber(totalLast12)} zł</strong>{" "}
+                        <span style={{color: changeColor(totalPercent)}}>
+                            ({formatDiff(totalLast12 - totalPrevious12)} zł, {formatPercent(totalPercent)} r/r)
+                        </span>
+                    </p>
 
-            {years.length === 0 && selectedCategories.length > 0 && (
-                <p className="text-muted mt-3">Brak danych dla wybranych kategorii.</p>
+                    <Row className="mb-3 align-items-center g-2">
+                        <Col xs="auto">
+                            <ButtonGroup size="sm">
+                                {[["category", "Kategorie"], ["level", "Poziomy kategorii"]].map(([value, label]) => (
+                                    <ToggleButton key={value} id={"group-" + value} type="radio"
+                                                  variant="outline-primary" value={value}
+                                                  checked={groupBy === value}
+                                                  onChange={e => setGroupBy(e.currentTarget.value)}>
+                                        {label}
+                                    </ToggleButton>
+                                ))}
+                            </ButtonGroup>
+                        </Col>
+                        <Col xs="auto">
+                            <Form.Label className="mb-0 me-2" htmlFor="minAmount">Ukryj poniżej (zł / 12 mies.)</Form.Label>
+                        </Col>
+                        <Col xs="auto">
+                            <Form.Control id="minAmount" size="sm" type="number" step={100} min={0}
+                                          style={{width: 110}} value={minAmount}
+                                          onChange={e => setMinAmount(e.target.value)}/>
+                        </Col>
+                    </Row>
+
+                    <Row className="mb-4 g-3">
+                        <Col md={6}><TopList title="▲ Rośnie najbardziej" trends={risers}/></Col>
+                        <Col md={6}><TopList title="▼ Spada najbardziej" trends={fallers}/></Col>
+                    </Row>
+
+                    <h5>Wszystkie {groupBy === "level" ? "poziomy" : "kategorie"}</h5>
+                    <p className="text-muted small mb-2">
+                        Ostatnie 12 pełnych miesięcy vs 12 miesięcy wcześniej. Trend: sumy z pełnych lat
+                        i ostatnie 12 mies. jako ostatni punkt. Kliknij wiersz, żeby zobaczyć miesiące rok do roku.
+                    </p>
+                    <TrendTable key={groupBy} trends={rows}/>
+                </>
             )}
         </Col>
     );

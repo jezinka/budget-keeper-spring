@@ -223,6 +223,12 @@ public class ExpenseController {
         return expenseService.getLivingExpensesComparison(categoryNames);
     }
 
+    @Operation(summary = "Get per-category spending trends: yearly totals and last 12 months vs previous 12 months")
+    @GetMapping("/categoryTrends")
+    List<CategoryTrendDTO> getCategoryTrends() {
+        return expenseService.getCategoryTrends();
+    }
+
     @GetMapping("/sinkingFunds/{accountName}")
     List<ExpenseDTO> getSinkingFundsExpenses(@PathVariable("accountName") String accountName ) {
         return expenseService.getSinkingFundsExpenses(accountName);

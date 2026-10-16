@@ -93,4 +93,29 @@ class ExpenseRepositoryTest {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void sumNegativeAmountByCategoryAndMonth_groupsAndSkipsExcludedLevels() {
+        Category food = new Category("Jedzenie");
+        food.setLevel(1);
+        food = categoryRepository.save(food);
+        Category stocks = new Category("Akcje");
+        stocks.setLevel(2);
+        stocks = categoryRepository.save(stocks);
+
+        repository.save(Expense.builder().amount(BigDecimal.valueOf(-10)).category(food).transactionDate(LocalDate.of(2025, 3, 1)).build());
+        repository.save(Expense.builder().amount(BigDecimal.valueOf(-15)).category(food).transactionDate(LocalDate.of(2025, 3, 20)).build());
+        repository.save(Expense.builder().amount(BigDecimal.valueOf(40)).category(food).transactionDate(LocalDate.of(2025, 3, 21)).build());
+        repository.save(Expense.builder().amount(BigDecimal.valueOf(-99)).category(stocks).transactionDate(LocalDate.of(2025, 3, 2)).build());
+
+        List<Object[]> result = repository.sumNegativeAmountByCategoryAndMonth(List.of(2));
+
+        assertEquals(1, result.size());
+        Object[] row = result.get(0);
+        assertEquals("Jedzenie", row[0]);
+        assertEquals(1, ((Number) row[1]).intValue());
+        assertEquals(2025, ((Number) row[2]).intValue());
+        assertEquals(3, ((Number) row[3]).intValue());
+        assertEquals(0, ((BigDecimal) row[4]).compareTo(BigDecimal.valueOf(-25)));
+    }
 }

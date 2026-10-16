@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -465,6 +466,67 @@ public class ExpenseService {
                 });
 
         return result;
+    }
+
+    public List<CategoryTrendDTO> getCategoryTrends() {
+        return getCategoryTrends(LocalDate.now());
+    }
+
+    List<CategoryTrendDTO> getCategoryTrends(LocalDate today) {
+        // windows end with the last full month, the current month is incomplete
+        YearMonth lastFullMonth = YearMonth.from(today).minusMonths(1);
+        YearMonth last12Start = lastFullMonth.minusMonths(11);
+        YearMonth previous12Start = last12Start.minusMonths(12);
+        int currentYear = today.getYear();
+
+        Map<String, CategoryTrendDTO> trends = new LinkedHashMap<>();
+        expenseRepository.sumNegativeAmountByCategoryAndMonth(List.of(INVESTMENT_CATEGORY_LEVEL, INCOME_CATEGORY_LEVEL))
+                .forEach(row -> {
+                    String name = (String) row[0];
+                    Integer level = ((Number) row[1]).intValue();
+                    YearMonth yearMonth = YearMonth.of(((Number) row[2]).intValue(), ((Number) row[3]).intValue());
+                    BigDecimal amount = ((BigDecimal) row[4]).abs();
+
+                    CategoryTrendDTO trend = trends.computeIfAbsent(name, n -> CategoryTrendDTO.builder()
+                            .category(n)
+                            .level(level)
+                            .yearly(new TreeMap<>())
+                            .last12(BigDecimal.ZERO)
+                            .previous12(BigDecimal.ZERO)
+                            .build());
+
+                    trend.getYearly().merge(yearMonth.getYear(), amount, BigDecimal::add);
+                    if (!yearMonth.isBefore(last12Start) && !yearMonth.isAfter(lastFullMonth)) {
+                        trend.setLast12(trend.getLast12().add(amount));
+                    } else if (!yearMonth.isBefore(previous12Start) && yearMonth.isBefore(last12Start)) {
+                        trend.setPrevious12(trend.getPrevious12().add(amount));
+                    }
+                });
+
+        trends.values().forEach(trend -> {
+            trend.setDiff(trend.getLast12().subtract(trend.getPrevious12()));
+            trend.setDiffPercent(trend.getPrevious12().signum() == 0 ? null
+                    : trend.getDiff().doubleValue() / trend.getPrevious12().doubleValue());
+            trend.setCagr(calculateCagr(trend.getYearly(), currentYear));
+        });
+
+        return trends.values().stream()
+                .sorted(Comparator.comparing(CategoryTrendDTO::getDiff).reversed())
+                .toList();
+    }
+
+    private Double calculateCagr(Map<Integer, BigDecimal> yearly, int currentYear) {
+        List<Map.Entry<Integer, BigDecimal>> fullYears = yearly.entrySet().stream()
+                .filter(e -> e.getKey() < currentYear && e.getValue().signum() > 0)
+                .sorted(Map.Entry.comparingByKey())
+                .toList();
+        if (fullYears.size() < 2) {
+            return null;
+        }
+        Map.Entry<Integer, BigDecimal> first = fullYears.get(0);
+        Map.Entry<Integer, BigDecimal> last = fullYears.get(fullYears.size() - 1);
+        int span = last.getKey() - first.getKey();
+        return Math.pow(last.getValue().doubleValue() / first.getValue().doubleValue(), 1.0 / span) - 1;
     }
 
     private void addSumColumn(List<MonthCategoryAmountDTO> expenses) {

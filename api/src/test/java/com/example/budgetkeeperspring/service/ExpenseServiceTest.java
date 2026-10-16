@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.service;
 
+import com.example.budgetkeeperspring.dto.CategoryTrendDTO;
 import com.example.budgetkeeperspring.dto.DailyExpensesDTO;
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
@@ -844,5 +845,36 @@ class ExpenseServiceTest {
 
         assertThrows(NotFoundException.class, () -> expenseService.createExpense(dto));
         verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    void getCategoryTrends_comparesLast12MonthsWithPrevious12() {
+        // today 2026-10-16 -> last 12 = 2025-10..2026-09, previous 12 = 2024-10..2025-09
+        when(expenseRepository.sumNegativeAmountByCategoryAndMonth(any())).thenReturn(List.of(
+                new Object[]{"Jedzenie", 1, 2023, 5, BigDecimal.valueOf(-1000)},
+                new Object[]{"Jedzenie", 1, 2025, 3, BigDecimal.valueOf(-1000)},
+                new Object[]{"Jedzenie", 1, 2025, 9, BigDecimal.valueOf(-500)},
+                new Object[]{"Jedzenie", 1, 2025, 10, BigDecimal.valueOf(-2000)},
+                new Object[]{"Jedzenie", 1, 2026, 10, BigDecimal.valueOf(-9999)},
+                new Object[]{"Kino", 0, 2026, 1, BigDecimal.valueOf(-100)}
+        ));
+
+        List<CategoryTrendDTO> result = expenseService.getCategoryTrends(LocalDate.of(2026, 10, 16));
+
+        assertEquals(2, result.size());
+        CategoryTrendDTO food = result.get(0);
+        assertEquals("Jedzenie", food.getCategory());
+        assertEquals(0, food.getLast12().compareTo(BigDecimal.valueOf(2000)));
+        assertEquals(0, food.getPrevious12().compareTo(BigDecimal.valueOf(1500)));
+        assertEquals(0, food.getDiff().compareTo(BigDecimal.valueOf(500)));
+        assertEquals(1.0 / 3, food.getDiffPercent(), 1e-9);
+        assertEquals(0, food.getYearly().get(2025).compareTo(BigDecimal.valueOf(3500)));
+        // CAGR over full years only: 2023 = 1000, 2025 = 3500
+        assertEquals(Math.sqrt(3.5) - 1, food.getCagr(), 1e-9);
+
+        CategoryTrendDTO cinema = result.get(1);
+        assertEquals(0, cinema.getDiff().compareTo(BigDecimal.valueOf(100)));
+        assertNull(cinema.getDiffPercent());
+        assertNull(cinema.getCagr());
     }
 }
