@@ -45,6 +45,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("select e from Expense e left join fetch e.category c where c.name in (:categoryNames)")
     List<Expense> findAllByCategoryNameIn(@Param("categoryNames") List<String> categoryNames);
 
+    @Query("select c.name, c.level, year(e.transactionDate), month(e.transactionDate), sum(e.amount) from Expense e " +
+            "join e.category c " +
+            "where e.amount < 0 and c.level >= 0 and c.level not in (:excludedLevels) " +
+            "group by c.name, c.level, year(e.transactionDate), month(e.transactionDate)")
+    List<Object[]> sumNegativeAmountByCategoryAndMonth(@Param("excludedLevels") List<Integer> excludedLevels);
+
     @Query("select e.destinationAccount.id, sum(abs(e.amount)) from Expense e where e.destinationAccount is not null group by e.destinationAccount.id")
     List<Object[]> sumAmountByDestinationAccount();
 
