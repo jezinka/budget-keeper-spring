@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Col, Row, Table} from 'react-bootstrap';
+import {Col, Table} from 'react-bootstrap';
 import {formatNumber} from '../../Utils';
 
 // Non-zero statement balances of external accounts (e.g. Revolut), one table per account.

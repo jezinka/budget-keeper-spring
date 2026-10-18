@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
@@ -51,6 +52,6 @@ public class AccountTransaction {
     private BigDecimal balance;
 
     public String naturalKey() {
-        return currency + "|" + startedAt + "|" + amount.setScale(2) + "|" + description;
+        return currency + "|" + startedAt + "|" + amount.setScale(2, RoundingMode.HALF_UP) + "|" + description;
     }
 }

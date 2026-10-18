@@ -164,7 +164,7 @@ public class AccountTransactionService {
 
     public List<StatementBalance> getBalances() {
         Map<Long, String> names = accountRepository.findAll().stream()
-                .collect(Collectors.toMap(a -> a.getId(), a -> a.getName()));
+                .collect(Collectors.toMap(Account::getId, Account::getName));
         // ponytail: aggregates in memory; fine for a few thousand statement rows, move to SQL if it grows
         return balances(accountTransactionRepository.findAll(), names);
     }
