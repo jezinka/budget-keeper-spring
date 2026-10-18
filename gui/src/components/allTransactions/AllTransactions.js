@@ -5,7 +5,7 @@ import TransactionCounter from "./TransactionCounter";
 import {ArrowClockwise} from "react-bootstrap-icons";
 import TransactionTable from "../transactionTable/TransactionTable";
 import {getCategoriesMap} from "../../hooks/transactionHooks";
-import {handleError} from "../../Utils";
+import {EMPTY_OPTION, handleError} from "../../Utils";
 
 export const AllTransactionsContent = () => {
     const [showSpinner, setShowSpinner] = useState(false);
@@ -31,6 +31,7 @@ export const AllTransactionsContent = () => {
         if (response.ok) {
             const data = await response.json();
             if (data) {
+                data.unshift({id: EMPTY_OPTION, name: ""});
                 setCategories(data);
             }
         } else {
