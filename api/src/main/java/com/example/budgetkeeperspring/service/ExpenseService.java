@@ -119,8 +119,7 @@ public class ExpenseService {
 
     /**
      * Create expense resolving category according to expenseDTO.categoryId:
-     * - null: try to find category by conditions (CategoryService.findCategoryByConditions)
-     * - -1: treat as no category (null)
+     * - null: CategoryService.UNKNOWN_CATEGORY
      * - >0: load category by id or throw NotFoundException
      */
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO) {
@@ -147,16 +146,9 @@ public class ExpenseService {
             if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
                 foundExpense.setNote(updateExpenseDTO.getNote());
             }
-            if (updateExpenseDTO.getCategoryId() == -1) {
-                foundExpense.setCategory(null);
-            } else {
-                categoryRepository.findById(updateExpenseDTO.getCategoryId()).ifPresentOrElse(
-                        foundExpense::setCategory,
-                        () -> {
-                            throw new NotFoundException();
-                        }
-                );
-            }
+            // -1 = "no category" from the GUI: expenses always keep a category, so it means UNKNOWN
+            Long categoryId = updateExpenseDTO.getCategoryId() == -1 ? CategoryService.UNKNOWN_CATEGORY : updateExpenseDTO.getCategoryId();
+            foundExpense.setCategory(categoryRepository.findById(categoryId).orElseThrow(NotFoundException::new));
             expenseRepository.save(foundExpense);
             if (!oldCategory.equals(foundExpense.getCategoryName())) {
                 logService.expense(id, LogService.USER, "kategoria ręcznie: %s → %s".formatted(oldCategory, foundExpense.getCategoryName()));

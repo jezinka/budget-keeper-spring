@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,5 +108,12 @@ class LogServiceTest {
         when(logRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> logService.getLogById(1L));
+    }
+
+    @Test
+    void expense_doesNotThrowWhenSaveFails() {
+        when(logRepository.save(any(Log.class))).thenThrow(new IllegalStateException("db down"));
+
+        assertDoesNotThrow(() -> logService.expense(1L, LogService.INFO, "x"));
     }
 }

@@ -86,14 +86,14 @@ class RabbitMQServiceTest {
     }
 
     @Test
-    @DisplayName("Should log error and rethrow when expense cannot be saved")
-    void listenExpenses_logsErrorOnFailure() {
+    @DisplayName("Should rethrow without logging when expense cannot be saved (retry recoverer logs once)")
+    void listenExpenses_rethrowsOnFailure() {
         String messageJson = "{\"title\":\"Sklep\",\"payee\":\"X\",\"amount\":-5.0}";
         when(categoryService.findMatchingCondition(any(ExpenseDTO.class))).thenThrow(new IllegalStateException("boom"));
 
         assertThrows(IllegalStateException.class, () -> rabbitMQService.listenExpenses(messageJson));
 
-        verify(logService).expense(eq(null), eq(LogService.ERROR), endsWith("boom"));
+        verifyNoInteractions(logService);
     }
 
     @Test

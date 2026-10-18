@@ -5,6 +5,7 @@ import com.example.budgetkeeperspring.entity.Log;
 import com.example.budgetkeeperspring.exception.NotFoundException;
 import com.example.budgetkeeperspring.mapper.LogMapper;
 import com.example.budgetkeeperspring.repository.LogRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @Service
 public class LogService {
 
@@ -64,13 +66,20 @@ public class LogService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    /** One short entry in an expense's history (expenseId null = event not tied to an expense yet). */
+    /**
+     * One short entry in an expense's history (expenseId null = event not tied to an expense yet).
+     * Best effort: never throws, so a failed history write can't fail (and redeliver) the action it describes.
+     */
     public void expense(Long expenseId, String level, String message) {
-        logRepository.save(Log.builder()
-                .date(LocalDateTime.now())
-                .level(level)
-                .expenseId(expenseId)
-                .message(StringUtils.abbreviate(message, 255))
-                .build());
+        try {
+            logRepository.save(Log.builder()
+                    .date(LocalDateTime.now())
+                    .level(level)
+                    .expenseId(expenseId)
+                    .message(StringUtils.abbreviate(message, 255))
+                    .build());
+        } catch (RuntimeException e) {
+            log.warn("Could not write expense log [{}] {}: {}", expenseId, message, e.toString());
+        }
     }
 }

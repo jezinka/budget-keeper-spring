@@ -29,30 +29,25 @@ public class RabbitMQService {
     private final LogMapper logMapper;
     private final LogService logService;
 
-    @RabbitListener(queues = "expense")
+    @RabbitListener(queues = "expense", containerFactory = "expenseListenerFactory")
     public void listenExpenses(String in) {
         log.info("Received message: " + in);
         Gson g = new Gson();
         ExpenseDTO message = g.fromJson(in, ExpenseDTO.class);
-        try {
-            Optional<CategoryCondition> condition = categoryService.findMatchingCondition(message);
-            Category category = condition.map(CategoryCondition::getCategory).orElseGet(categoryService::unknownCategory);
-            ExpenseDTO saved = expenseService.createExpenseFromQueue(message, category);
-            Long id = saved.getId();
-            logService.expense(id, LogService.INFO, "mail z banku: %s | %s | %s".formatted(message.getTitle(), message.getPayee(), message.getAmount()));
-            logService.expense(id, condition.isPresent() ? LogService.INFO : LogService.WARN, condition
-                    .map(c -> "kategoria auto: %s (warunek %s)".formatted(category.getName(), describe(c.getCirc())))
-                    .orElse("kategoria: żaden warunek nie pasuje do tytułu/odbiorcy – do ręcznego przypisania"));
-            if (saved.getPlannedExpenseId() != null) {
-                logService.expense(id, LogService.INFO, "plan auto: pozycja '%s' (#%d)".formatted(message.getTitle(), saved.getPlannedExpenseId()));
-            } else if (message.getAmount().signum() < 0) {
-                logService.expense(id, LogService.WARN, "plan: brak pozycji o nazwie '%s' w planie na ten miesiąc – do ręcznego przypisania".formatted(message.getTitle()));
-            }
-            log.info("Saved expense: " + saved);
-        } catch (RuntimeException e) {
-            logService.expense(null, LogService.ERROR, "mail z banku nieprzetworzony: %s | %s | %s: %s".formatted(message.getTitle(), message.getPayee(), message.getAmount(), e.getMessage()));
-            throw e;
+        Optional<CategoryCondition> condition = categoryService.findMatchingCondition(message);
+        Category category = condition.map(CategoryCondition::getCategory).orElseGet(categoryService::unknownCategory);
+        ExpenseDTO saved = expenseService.createExpenseFromQueue(message, category);
+        Long id = saved.getId();
+        logService.expense(id, LogService.INFO, "mail z banku: %s | %s | %s".formatted(message.getTitle(), message.getPayee(), message.getAmount()));
+        logService.expense(id, condition.isPresent() ? LogService.INFO : LogService.WARN, condition
+                .map(c -> "kategoria auto: %s (warunek %s)".formatted(category.getName(), describe(c.getCirc())))
+                .orElse("kategoria: żaden warunek nie pasuje do tytułu/odbiorcy – do ręcznego przypisania"));
+        if (saved.getPlannedExpenseId() != null) {
+            logService.expense(id, LogService.INFO, "plan auto: pozycja '%s' (#%d)".formatted(message.getTitle(), saved.getPlannedExpenseId()));
+        } else if (message.getAmount().signum() < 0) {
+            logService.expense(id, LogService.WARN, "plan: brak pozycji o nazwie '%s' w planie na ten miesiąc – do ręcznego przypisania".formatted(message.getTitle()));
         }
+        log.info("Saved expense: " + saved);
     }
 
     private static String describe(Circ c) {

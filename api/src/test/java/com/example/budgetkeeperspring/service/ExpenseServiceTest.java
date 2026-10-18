@@ -905,4 +905,20 @@ class ExpenseServiceTest {
         assertNull(cinema.getDiffPercent());
         assertNull(cinema.getCagr());
     }
+
+    @Test
+    void updateExpense_noCategoryMeansUnknown() {
+        Expense expense = new Expense();
+        expense.setCategory(new Category("Jedzenie"));
+        Category unknown = new Category("Nieznana");
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(expense));
+        when(categoryRepository.findById(CategoryService.UNKNOWN_CATEGORY)).thenReturn(Optional.of(unknown));
+        ExpenseDTO dto = new ExpenseDTO();
+        dto.setCategoryId(-1L);
+
+        expenseService.updateExpense(1L, dto);
+
+        assertSame(unknown, expense.getCategory());
+        verify(logService).expense(1L, LogService.USER, "kategoria ręcznie: Jedzenie → Nieznana");
+    }
 }
