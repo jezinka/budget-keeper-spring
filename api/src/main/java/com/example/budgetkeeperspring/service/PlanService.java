@@ -43,6 +43,7 @@ public class PlanService {
     private final PlanMapper planMapper;
     private final RecurringPlannedExpenseMapper recurringPlannedExpenseMapper;
     private final RecurringPlannedExpenseRepository recurringPlannedExpenseRepository;
+    private final LogService logService;
 
     public List<PlanDTO> findAll() {
         return planRepository.findAll().stream().map(planMapper::mapToDto).toList();
@@ -207,6 +208,7 @@ public class PlanService {
         PlannedExpense plannedExpense = plannedExpenseRepository.save(recurringPlannedExpenseMapper.mapToPlannedExpense(plan, recurringPayment));
         expense.setPlannedExpense(plannedExpense);
         expenseRepository.save(expense);
+        logPlan(expense, "nowa pozycja cykliczna", plannedExpense);
         return recurringPlannedExpenseMapper.mapToDto(recurringPayment);
     }
 
@@ -221,6 +223,7 @@ public class PlanService {
         List<Expense> expenses = plannedExpense.getExpenses().stream().toList();
         expenses.forEach(expense -> expense.setPlannedExpense(null));
         expenseRepository.saveAll(expenses);
+        expenses.forEach(expense -> logPlan(expense, "usunięto pozycję", plannedExpense));
         plannedExpenseRepository.delete(plannedExpense);
     }
 
@@ -243,6 +246,7 @@ public class PlanService {
         plannedExpense.setName(expense.getTitle());
         expense.setPlannedExpense(plannedExpenseRepository.save(plannedExpense));
         expenseRepository.save(expense);
+        logPlan(expense, "nowa pozycja", expense.getPlannedExpense());
         return planMapper.mapToDto(expense.getPlannedExpense());
     }
 
@@ -257,6 +261,7 @@ public class PlanService {
         List<Expense> expenses = expenses(expenseIds);
         expenses.forEach(expense -> validateExpenseForPlan(expense, plannedExpense.getPlan()));
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
+        expenses.forEach(expense -> logPlan(expense, "przypisano do", plannedExpense));
         plannedExpense.setPaid(plannedExpense.isPaid() || expenses.stream().map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(plannedExpense.getAmount()) == 0);
         expenseRepository.saveAll(expenses);
     }
@@ -273,6 +278,7 @@ public class PlanService {
         plannedExpenseRepository.save(plannedExpense);
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
         expenseRepository.saveAll(expenses);
+        expenses.forEach(expense -> logPlan(expense, "nowa pozycja", plannedExpense));
         return planMapper.mapToDto(plannedExpense);
     }
 
@@ -282,8 +288,13 @@ public class PlanService {
         if (expense.getPlannedExpense() == null || !expense.getPlannedExpense().getId().equals(plannedExpenseId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is not assigned to this planned expense");
         }
+        logPlan(expense, "odpięto od", expense.getPlannedExpense());
         expense.setPlannedExpense(null);
         expenseRepository.save(expense);
+    }
+
+    private void logPlan(Expense expense, String action, PlannedExpense plannedExpense) {
+        logService.expense(expense.getId(), LogService.USER, "plan ręcznie: %s '%s' (#%d)".formatted(action, plannedExpense.getName(), plannedExpense.getId()));
     }
 
     public List<ExpenseDTO> findExpensesForPlan(Integer planId) {

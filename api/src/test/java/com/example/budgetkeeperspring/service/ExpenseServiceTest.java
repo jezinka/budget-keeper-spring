@@ -50,6 +50,9 @@ class ExpenseServiceTest {
     GoalService goalService;
 
     @Mock
+    LogService logService;
+
+    @Mock
     PlanRepository planRepository;
 
     @Mock

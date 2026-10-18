@@ -27,6 +27,7 @@ public class Log {
     private LocalDateTime date;
     private String level;
     private String message;
+    private Long expenseId;
 
     @Builder.Default
     private boolean deleted = Boolean.FALSE;

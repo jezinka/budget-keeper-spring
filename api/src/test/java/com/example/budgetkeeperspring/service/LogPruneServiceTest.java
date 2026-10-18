@@ -28,16 +28,9 @@ class LogPruneServiceTest {
     }
 
     @Test
-    void execute_prunesLogsOlderThanSevenDays() {
-        LocalDateTime sevenDaysAgo = LocalDate.now().atStartOfDay().minusDays(7);
+    void execute_prunesPlainLogsAfterSevenDaysAndExpenseHistoryAfterAYear() {
+        LocalDateTime today = LocalDate.now().atStartOfDay();
         logPruneService.execute();
-        verify(logRepository, times(1)).deleteAllByDateBefore(sevenDaysAgo);
-    }
-
-    @Test
-    void execute_doesNotPruneLogsNewerThanSevenDays() {
-        LocalDateTime sevenDaysAgo = LocalDate.now().atStartOfDay().minusDays(7);
-        logPruneService.execute();
-        verify(logRepository, never()).deleteAllByDateBefore(sevenDaysAgo.plusDays(1));
+        verify(logRepository, times(1)).prune(today.minusDays(7), today.minusYears(1));
     }
 }

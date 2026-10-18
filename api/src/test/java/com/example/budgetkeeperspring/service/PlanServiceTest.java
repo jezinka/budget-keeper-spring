@@ -46,7 +46,7 @@ class PlanServiceTest {
         }));
         PlanService service = new PlanService(planRepository, mock(PlannedExpenseRepository.class), mock(ExpenseRepository.class),
                 mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class),
-                mock(RecurringPlannedExpenseRepository.class));
+                mock(RecurringPlannedExpenseRepository.class), mock(LogService.class));
 
         List<PlanAdminSummaryDTO> summaries = service.findAllAdminSummaries();
 
@@ -64,7 +64,7 @@ class PlanServiceTest {
         ExpenseMapper expenseMapper = mock(ExpenseMapper.class);
         PlanMapper planMapper = mock(PlanMapper.class);
         RecurringPlannedExpenseMapper recurringMapper = mock(RecurringPlannedExpenseMapper.class);
-        PlanService service = new PlanService(planRepository, plannedExpenseRepository, expenseRepository, expenseMapper, planMapper, recurringMapper, mock(RecurringPlannedExpenseRepository.class));
+        PlanService service = new PlanService(planRepository, plannedExpenseRepository, expenseRepository, expenseMapper, planMapper, recurringMapper, mock(RecurringPlannedExpenseRepository.class), mock(LogService.class));
 
         Plan plan = new Plan();
         plan.setId(1);
@@ -113,7 +113,7 @@ class PlanServiceTest {
         ExpenseRepository expenseRepository = mock(ExpenseRepository.class);
         PlanService service = new PlanService(planRepository, plannedExpenseRepository, expenseRepository,
                 mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class),
-                mock(RecurringPlannedExpenseRepository.class));
+                mock(RecurringPlannedExpenseRepository.class), mock(LogService.class));
 
         Plan januaryPlan = new Plan();
         januaryPlan.setId(1);
@@ -178,7 +178,7 @@ class PlanServiceTest {
             return dto;
         });
 
-        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), planMapper, mock(RecurringPlannedExpenseMapper.class), mock(RecurringPlannedExpenseRepository.class));
+        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), planMapper, mock(RecurringPlannedExpenseMapper.class), mock(RecurringPlannedExpenseRepository.class), mock(LogService.class));
 
         assertTrue(service.updatePaid(3, true).getPaid());
     }
@@ -225,7 +225,7 @@ class PlanServiceTest {
             return payment;
         });
 
-        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), planMapper, recurringMapper, recurringRepository);
+        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), planMapper, recurringMapper, recurringRepository, mock(LogService.class));
         PlanDTO dto = new PlanDTO();
         dto.setYear(2026);
         dto.setMonth(2);
@@ -261,7 +261,7 @@ class PlanServiceTest {
             payment.setId(4);
             return payment;
         });
-        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class), recurringRepository);
+        PlanService service = new PlanService(planRepository, plannedExpenseRepository, mock(ExpenseRepository.class), mock(ExpenseMapper.class), mock(PlanMapper.class), mock(RecurringPlannedExpenseMapper.class), recurringRepository, mock(LogService.class));
 
         service.convertPlannedExpenseToRecurring(3);
         service.convertPlannedExpenseToRecurring(3);

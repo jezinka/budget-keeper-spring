@@ -97,6 +97,12 @@ public class CategoryService {
     }
 
     public Category findCategoryByConditions(ExpenseDTO expenseDTO) {
+        return findMatchingCondition(expenseDTO)
+                .map(CategoryCondition::getCategory)
+                .orElseGet(this::unknownCategory);
+    }
+
+    public Optional<CategoryCondition> findMatchingCondition(ExpenseDTO expenseDTO) {
         String title = expenseDTO.getTitle().toLowerCase();
         String payee = expenseDTO.getPayee().toLowerCase();
 
@@ -113,9 +119,11 @@ public class CategoryService {
 
                     return title.contains(c.getTitle().toLowerCase()) && payee.contains(c.getPayee().toLowerCase());
                 })
-                .map(CategoryCondition::getCategory)
-                .findFirst()
-                .orElseGet(() -> categoryRepository.findById(UNKNOWN_CATEGORY).orElseThrow(() -> new NotFoundException("Default category not found")));
+                .findFirst();
+    }
+
+    public Category unknownCategory() {
+        return categoryRepository.findById(UNKNOWN_CATEGORY).orElseThrow(() -> new NotFoundException("Default category not found"));
     }
 
     public List<CategoryLevelDTO> getAllLevels() {

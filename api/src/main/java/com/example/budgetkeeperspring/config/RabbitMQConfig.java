@@ -1,5 +1,6 @@
 package com.example.budgetkeeperspring.config;
 
+import com.example.budgetkeeperspring.service.LogService;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -20,11 +21,16 @@ public class RabbitMQConfig {
      * init/definitions.json.
      */
     @Bean
-    public RetryOperationsInterceptor purchaseInfoRetryInterceptor() {
+    public RetryOperationsInterceptor purchaseInfoRetryInterceptor(LogService logService) {
+        RejectAndDontRequeueRecoverer reject = new RejectAndDontRequeueRecoverer();
         return RetryInterceptorBuilder.stateless()
                 .maxAttempts(5)
                 .backOffOptions(1000, 2.0, 16000)
-                .recoverer(new RejectAndDontRequeueRecoverer())
+                .recoverer((message, cause) -> {
+                    Throwable root = cause.getCause() != null ? cause.getCause() : cause;
+                    logService.expense(null, LogService.ERROR, "purchase_info niedopasowane po 5 próbach (→ DLQ): " + root.getMessage());
+                    reject.recover(message, cause);
+                })
                 .build();
     }
 
