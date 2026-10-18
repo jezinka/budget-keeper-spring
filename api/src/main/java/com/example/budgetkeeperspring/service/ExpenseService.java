@@ -44,6 +44,7 @@ public class ExpenseService {
     private final BeneficiaryRepository beneficiaryRepository;
     private final PlanRepository planRepository;
     private final PlannedExpenseRepository plannedExpenseRepository;
+    private final LogService logService;
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
@@ -118,8 +119,7 @@ public class ExpenseService {
 
     /**
      * Create expense resolving category according to expenseDTO.categoryId:
-     * - null: try to find category by conditions (CategoryService.findCategoryByConditions)
-     * - -1: treat as no category (null)
+     * - null: CategoryService.UNKNOWN_CATEGORY
      * - >0: load category by id or throw NotFoundException
      */
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO) {
@@ -138,6 +138,7 @@ public class ExpenseService {
         AtomicReference<Optional<ExpenseDTO>> expense = new AtomicReference<>();
 
         expenseRepository.findById(id).ifPresentOrElse(foundExpense -> {
+            String oldCategory = foundExpense.getCategoryName();
             foundExpense.setAmount(updateExpenseDTO.getAmount());
             foundExpense.setSourceAccount(resolveAccount(updateExpenseDTO.getSourceAccountId()));
             foundExpense.setDestinationAccount(resolveAccount(updateExpenseDTO.getDestinationAccountId()));
@@ -145,17 +146,13 @@ public class ExpenseService {
             if (updateExpenseDTO.getNote() != null && !updateExpenseDTO.getNote().isBlank()) {
                 foundExpense.setNote(updateExpenseDTO.getNote());
             }
-            if (updateExpenseDTO.getCategoryId() == -1) {
-                foundExpense.setCategory(null);
-            } else {
-                categoryRepository.findById(updateExpenseDTO.getCategoryId()).ifPresentOrElse(
-                        foundExpense::setCategory,
-                        () -> {
-                            throw new NotFoundException();
-                        }
-                );
-            }
+            // -1 = "no category" from the GUI: expenses always keep a category, so it means UNKNOWN
+            Long categoryId = updateExpenseDTO.getCategoryId() == -1 ? CategoryService.UNKNOWN_CATEGORY : updateExpenseDTO.getCategoryId();
+            foundExpense.setCategory(categoryRepository.findById(categoryId).orElseThrow(NotFoundException::new));
             expenseRepository.save(foundExpense);
+            if (!oldCategory.equals(foundExpense.getCategoryName())) {
+                logService.expense(id, LogService.USER, "kategoria ręcznie: %s → %s".formatted(oldCategory, foundExpense.getCategoryName()));
+            }
             expense.set(Optional.of(expenseMapper.mapToDto(foundExpense)));
         }, () -> expense.set(Optional.empty()));
 
@@ -176,8 +173,10 @@ public class ExpenseService {
             expense.setBeneficiary(resolveBeneficiary(expense.getBeneficiary().getId()));
 
         });
-        expenseRepository.saveAll(updateExpenses);
+        List<Expense> saved = expenseRepository.saveAll(updateExpenses);
         expenseRepository.deleteById(id);
+        logService.expense(id, LogService.USER, "rozdzielono na: " + saved.stream().map(e -> "#" + e.getId()).toList());
+        saved.forEach(e -> logService.expense(e.getId(), LogService.USER, "powstał z rozdzielenia #" + id));
     }
 
     public List<DailyExpensesDTO> getDailyExpenses(LocalDate begin, LocalDate end) {
@@ -332,6 +331,7 @@ public class ExpenseService {
     public ExpenseDTO updateExcludedFromPlan(Long id, boolean excluded) {
         Expense expense = expenseRepository.findById(id).orElseThrow(NotFoundException::new);
         expense.setExcludedFromPlan(excluded);
+        logService.expense(id, LogService.USER, excluded ? "plan ręcznie: wykluczono z planu" : "plan ręcznie: przywrócono do planu");
         return expenseMapper.mapToDto(expenseRepository.save(expense));
     }
 
@@ -417,6 +417,9 @@ public class ExpenseService {
         Expense matched = candidates.stream().findFirst().get();
         matched.setNote(purchaseInfo.getName());
         expenseRepository.save(matched);
+        logService.expense(matched.getId(), LogService.INFO, "purchase_info dopasowane: '%s' (%s zł, %s)%s".formatted(
+                purchaseInfo.getName(), purchaseInfo.getPrice(), purchaseInfo.getOrderDate(),
+                candidates.size() > 1 ? ", wybrano 1 z " + candidates.size() + " kandydatów" : ""));
         log.info("Matched purchase '{}' to expense id={}", purchaseInfo.getName(), matched.getId());
         return true;
     }

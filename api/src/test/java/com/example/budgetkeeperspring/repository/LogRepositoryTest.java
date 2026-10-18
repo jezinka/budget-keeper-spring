@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,19 +19,19 @@ class LogRepositoryTest {
     LogRepository logRepository;
 
     @Test
-    void deleteAllByDateBefore() {
+    void prune() {
 //given:
-        logRepository.save(Log.builder().id(1L).date(LocalDateTime.now().minusDays(30)).message("should go").build());
-        logRepository.save(Log.builder().id(2L).date(LocalDateTime.now().minusDays(2)).message("should stay").build());
+        LocalDateTime now = LocalDateTime.now();
+        logRepository.save(Log.builder().date(now.minusDays(30)).message("plain old - go").build());
+        logRepository.save(Log.builder().date(now.minusDays(2)).message("plain new - stay").build());
+        logRepository.save(Log.builder().date(now.minusDays(30)).expenseId(5L).message("expense history - stay").build());
+        logRepository.save(Log.builder().date(now.minusYears(2)).expenseId(5L).message("expense ancient - go").build());
 
 //when:
-        logRepository.deleteAllByDateBefore(LocalDateTime.now().minusDays(7));
+        logRepository.prune(now.minusDays(7), now.minusYears(1));
 
 //then:
-        List<Log> allRemainingLogs = logRepository.findAll();
-        assertEquals(1, allRemainingLogs.size());
-        assertEquals(2, allRemainingLogs.get(0).getId().longValue());
-        assertEquals("should stay", allRemainingLogs.get(0).getMessage());
-        assertTrue(allRemainingLogs.stream().noneMatch(l -> l.getMessage().equals("should go")));
+        assertEquals(List.of("plain new - stay", "expense history - stay"),
+                logRepository.findAll().stream().map(Log::getMessage).sorted(Comparator.reverseOrder()).toList());
     }
 }

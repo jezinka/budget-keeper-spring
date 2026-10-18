@@ -6,6 +6,7 @@ import {DATE_TIME_FORMAT, handleError} from "../../Utils";
 
 const LogTable = () => {
     const [logs, setLogs] = useState([]);
+    const [expenseId, setExpenseId] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -42,19 +43,27 @@ const LogTable = () => {
         return className.join(' ');
     }
 
-    return (<Table responsive='sm' striped bordered size="sm">
+    const shown = expenseId === null ? logs : [...logs].filter(log => log.expenseId === expenseId).reverse();
+
+    return (<>
+        {expenseId !== null && <Button variant="outline-secondary" size="sm" className="mb-2"
+                                       onClick={() => setExpenseId(null)}>Historia wydatku #{expenseId} ✕</Button>}
+        <Table responsive='sm' striped bordered size="sm">
         <thead>
         <tr className='table-info'>
             <th>KIEDY</th>
             <th>CO</th>
+            <th>WYDATEK</th>
             <th>WIADOMOŚĆ</th>
             <th style={{textAlign: "center"}}>*</th>
         </tr>
         </thead>
         <tbody>
-        {logs.map(log => <tr key={log.id} className={getClassName(log)}>
+        {shown.map(log => <tr key={log.id} className={getClassName(log)}>
             <td>{DATE_TIME_FORMAT.format(new Date(log.date))}</td>
             <td>{log.level}</td>
+            <td>{log.expenseId && <Button variant="link" size="sm" className="p-0"
+                                          onClick={() => setExpenseId(log.expenseId)}>#{log.expenseId}</Button>}</td>
             <td>{log.message}</td>
             <td style={{textAlign: "center"}}>
                 <Button variant="outline-primary" size="sm"
@@ -63,7 +72,8 @@ const LogTable = () => {
             </td>
         </tr>)}
         </tbody>
-    </Table>)
+    </Table>
+    </>)
 }
 
 export default LogTable;

@@ -15,5 +15,6 @@ public class LogDTO {
     private String date;
     private String level;
     private String message;
+    private Long expenseId;
     private Boolean deleted;
 }

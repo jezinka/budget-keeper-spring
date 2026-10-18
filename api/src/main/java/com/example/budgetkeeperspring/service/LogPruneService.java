@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -20,6 +21,8 @@ public class LogPruneService {
     @Transactional
     public void execute() {
         log.info("Prune old logs");
-        logRepository.deleteAllByDateBefore(LocalDate.now().atStartOfDay().minusDays(7));
+        // expense history is worth keeping longer than pipeline noise; ~3-5 short rows per expense
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        logRepository.prune(today.minusDays(7), today.minusYears(1));
     }
 }

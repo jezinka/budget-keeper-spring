@@ -19,6 +19,6 @@ public interface LogRepository extends JpaRepository<Log, Long> {
     List<Log> findByDeletedIsFalse(Sort sort);
 
     @Modifying
-    @Query("delete from Log l where l.date < :before")
-    void deleteAllByDateBefore(@Param("before") LocalDateTime date);
+    @Query("delete from Log l where l.date < :expenseBefore or (l.expenseId is null and l.date < :before)")
+    void prune(@Param("before") LocalDateTime before, @Param("expenseBefore") LocalDateTime expenseBefore);
 }
