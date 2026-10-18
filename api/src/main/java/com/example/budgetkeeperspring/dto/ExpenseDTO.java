@@ -40,6 +40,9 @@ public class ExpenseDTO {
     private String beneficiaryName;
     private Integer plannedExpenseId;
 
+    /** Transfer to/from an external account: true when its statement has the matching row, null when not a transfer. */
+    private Boolean transferSettled;
+
     public String getDescription() {
         if (note != null) {
             return note;

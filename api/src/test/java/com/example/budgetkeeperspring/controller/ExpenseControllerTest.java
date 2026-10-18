@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.ExpenseDTO;
 import com.example.budgetkeeperspring.dto.MonthCategoryAmountDTO;
+import com.example.budgetkeeperspring.service.AccountTransactionService;
 import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,9 @@ class ExpenseControllerTest {
 
     @MockBean
     BudgetFlowService budgetFlowService;
+
+    @MockBean
+    AccountTransactionService accountTransactionService;
 
     @Autowired
     MockMvc mockMvc;

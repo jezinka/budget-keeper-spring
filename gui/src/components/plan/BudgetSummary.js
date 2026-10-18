@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Table from "react-bootstrap/Table";
-import {Col, Row} from "react-bootstrap";
+import {Col} from "react-bootstrap";
 import {formatNumber} from "../../Utils";
 
 export default function BudgetSummary() {
@@ -67,48 +67,45 @@ export default function BudgetSummary() {
 
     return (
         <>
-            <Row>
-                <Col sm={6}>
-                    <Table responsive='sm' striped bordered size="sm">
-                        <tbody>
-                        <tr>
-                            <td className='table-info'>NA WEJŚCIU</td>
-                            <td>{formatNumber(moneyAmount.start)}</td>
-                        </tr>
-                        <tr>
-                            <td className='table-info'>WPŁYWY</td>
-                            <td>{formatNumber(moneyAmount.incomes)}</td>
-                        </tr>
-                        <tr>
-                            <td className='table-info'>WSZYSTKIE</td>
-                            <td>{formatNumber(moneyAmount.expenses)}</td>
-                        </tr>
-                        <tr>
-                            <td className='table-info'>STAN KONTA</td>
-                            <td>{formatNumber(moneyAmount.accountBalance)}</td>
-                        </tr>
-                        </tbody>
-                    </Table>
-                </Col>
-                <Col sm={6} className={"mt-4"}>
-                    <Table responsive='sm' striped bordered size="sm">
-                        <tbody>
-                        <tr>
-                            <td className='table-info'>PONAD</td>
-                            <td>{formatNumber(overSum)}</td>
-                        </tr>
-                        <tr>
-                            <td className='table-info'>INWESTYCJE</td>
-                            <td>{formatNumber(budgetPlanSummary.investments)}</td>
-                        </tr>
-                        <tr>
-                            <td className='table-info'>WOLNE ŚRODKI</td>
-                            <td>{formatNumber(freeFunds)}</td>
-                        </tr>
-                        </tbody>
-                    </Table>
-                </Col>
-                <Col sm={2}/>
-            </Row>
+            <Col sm={4} className={"mt-4"}>
+                <Table responsive='sm' striped bordered size="sm">
+                    <tbody>
+                    <tr>
+                        <td className='table-info'>NA WEJŚCIU</td>
+                        <td>{formatNumber(moneyAmount.start)}</td>
+                    </tr>
+                    <tr>
+                        <td className='table-info'>WPŁYWY</td>
+                        <td>{formatNumber(moneyAmount.incomes)}</td>
+                    </tr>
+                    <tr>
+                        <td className='table-info'>WSZYSTKIE</td>
+                        <td>{formatNumber(moneyAmount.expenses)}</td>
+                    </tr>
+                    <tr>
+                        <td className='table-info'>STAN KONTA</td>
+                        <td>{formatNumber(moneyAmount.accountBalance)}</td>
+                    </tr>
+                    </tbody>
+                </Table>
+            </Col>
+            <Col sm={4} className={"mt-4"}>
+                <Table responsive='sm' striped bordered size="sm">
+                    <tbody>
+                    <tr>
+                        <td className='table-info'>PONAD</td>
+                        <td>{formatNumber(overSum)}</td>
+                    </tr>
+                    <tr>
+                        <td className='table-info'>INWESTYCJE</td>
+                        <td>{formatNumber(budgetPlanSummary.investments)}</td>
+                    </tr>
+                    <tr>
+                        <td className='table-info'>WOLNE ŚRODKI</td>
+                        <td>{formatNumber(freeFunds)}</td>
+                    </tr>
+                    </tbody>
+                </Table>
+            </Col>
         </>);
 }

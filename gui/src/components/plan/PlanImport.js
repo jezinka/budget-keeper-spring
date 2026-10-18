@@ -22,7 +22,7 @@ function FileUpload({closeHandler, uploadUrl = '/budget/budgetPlan/upload'}) {
                 body: formData,
             });
             if (!response.ok) return alert(await response.text());
-            closeHandler();
+            closeHandler(await response.text());
         } catch (error) {
             alert('Błąd sieci: ' + error.message);
         }

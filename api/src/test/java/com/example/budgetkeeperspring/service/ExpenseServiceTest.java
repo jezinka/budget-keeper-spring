@@ -808,6 +808,31 @@ class ExpenseServiceTest {
     }
 
     @Test
+    void createExpenseFromQueue_titleWithExternalAccountName_goesToThatAccount() {
+        Account revolut = Account.builder().id(4L).name("Revolut").build();
+        Account defaultAccount = Account.builder().id(5L).name("Główne").defaultAccount(true).build();
+        Category category = new Category("Revolut");
+        category.setId(10L);
+
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-70))
+                .title("REVOLUT**0059* Dublin")
+                .transactionDate("2026-07-18")
+                .build();
+
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(accountRepository.findBySinkingFundFalseAndDefaultAccountFalse()).thenReturn(List.of(revolut));
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        expenseService.createExpenseFromQueue(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        assertEquals(defaultAccount, captor.getValue().getSourceAccount());
+        assertEquals(revolut, captor.getValue().getDestinationAccount());
+    }
+
+    @Test
     void createExpense_withCategory_noMatchingAccountNumber_usesNull() {
         Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
         Category category = new Category("Jedzenie");

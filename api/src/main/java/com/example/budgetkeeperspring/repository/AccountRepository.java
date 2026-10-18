@@ -10,6 +10,8 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findBySinkingFundTrue();
 
+    List<Account> findBySinkingFundFalseAndDefaultAccountFalse();
+
     Account findByDefaultAccountTrue();
 
     Account findByName(String accountName);

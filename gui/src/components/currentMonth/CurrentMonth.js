@@ -1,4 +1,4 @@
-import {Badge, Col, Button, Row} from "react-bootstrap";
+import {Badge, Col, Row} from "react-bootstrap";
 import TransactionTable from "../transactionTable/TransactionTable";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
@@ -7,6 +7,7 @@ import {Calendar} from "./Calendar";
 import BudgetSummary from "../plan/BudgetSummary";
 import EditTransactionModal from "../transactionTable/EditTransactionModal";
 import SinkingFundsView from "../sinkingFunds/SinkingFundsView";
+import AccountBalances from "../accounts/AccountBalances";
 import PlanPieChart from "../plan/PlanPieChart";
 
 const CurrentMonth = () => {
@@ -48,10 +49,15 @@ const CurrentMonth = () => {
 
     let body = <>
         <Col sm={8}>
-            <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions} showAddModalHandler={setShowAddModal}/>
+            <TransactionTable transactions={transactions} changeTransactionsHandler={loadTransactions}
+                              showAddModalHandler={setShowAddModal}/>
         </Col>
         <Col sm={4} className="mt-1">
-            <BudgetSummary/>
+            <Row>
+                <BudgetSummary/>
+                <AccountBalances/>
+            </Row>
+
             <Row>
                 <Calendar/>
                 <Col sm={1}/>

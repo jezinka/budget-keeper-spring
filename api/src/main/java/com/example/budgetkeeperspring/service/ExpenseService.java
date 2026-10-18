@@ -47,7 +47,7 @@ public class ExpenseService {
 
     public ExpenseDTO createExpense(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
-        Account account = sinkingFundAccount(expenseDTO);
+        Account account = counterpartAccount(expenseDTO);
         if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
             return createExpense(expenseDTO, category, account, defaultAccount);
         }
@@ -56,7 +56,7 @@ public class ExpenseService {
 
     public ExpenseDTO createExpenseFromQueue(ExpenseDTO expenseDTO, Category category) {
         Account defaultAccount = accountRepository.findByDefaultAccountTrue();
-        Account account = sinkingFundAccount(expenseDTO);
+        Account account = counterpartAccount(expenseDTO);
         boolean automaticCategory = CategoryService.UNKNOWN_CATEGORY != category.getId();
         if (expenseDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
             return createExpense(expenseDTO, category, account, defaultAccount, true, automaticCategory);
@@ -64,15 +64,31 @@ public class ExpenseService {
         return createExpense(expenseDTO, category, defaultAccount, account, true, automaticCategory);
     }
 
+    /**
+     * Account on the other side of the main account: a sinking fund whose number is in the payee,
+     * or an external account (e.g. Revolut top-up) whose name is in the title.
+     */
     @Nullable
-    private Account sinkingFundAccount(ExpenseDTO expenseDTO) {
-        if (expenseDTO == null || expenseDTO.getPayee() == null) {
+    private Account counterpartAccount(ExpenseDTO expenseDTO) {
+        if (expenseDTO == null) {
             return null;
         }
-
-        return accountRepository.findBySinkingFundTrue()
+        if (expenseDTO.getPayee() != null) {
+            Optional<Account> sinkingFund = accountRepository.findBySinkingFundTrue()
+                    .stream()
+                    .filter(a -> expenseDTO.getPayee().contains(a.getAccountNumber()))
+                    .findFirst();
+            if (sinkingFund.isPresent()) {
+                return sinkingFund.get();
+            }
+        }
+        if (expenseDTO.getTitle() == null) {
+            return null;
+        }
+        String title = expenseDTO.getTitle().toLowerCase();
+        return accountRepository.findBySinkingFundFalseAndDefaultAccountFalse()
                 .stream()
-                .filter(a -> expenseDTO.getPayee().contains(a.getAccountNumber()))
+                .filter(a -> a.getName() != null && title.contains(a.getName().toLowerCase()))
                 .findFirst()
                 .orElse(null);
     }

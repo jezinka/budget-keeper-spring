@@ -2,6 +2,7 @@ package com.example.budgetkeeperspring.controller;
 
 import com.example.budgetkeeperspring.dto.*;
 import com.example.budgetkeeperspring.exception.NotFoundException;
+import com.example.budgetkeeperspring.service.AccountTransactionService;
 import com.example.budgetkeeperspring.service.BudgetFlowService;
 import com.example.budgetkeeperspring.service.ExpenseService;
 import com.example.budgetkeeperspring.utils.DateUtils;
@@ -29,11 +30,14 @@ public class ExpenseController {
     public static final String EXPENSES_PATH_ID = "/{id}";
     private final ExpenseService expenseService;
     private final BudgetFlowService budgetFlowService;
+    private final AccountTransactionService accountTransactionService;
 
     @Operation(summary = "Get expenses with filters")
     @PostMapping()
     List<ExpenseDTO> getAllExpenses(@RequestBody HashMap<String, Object> filters) {
-        return expenseService.findAll(filters);
+        List<ExpenseDTO> expenses = expenseService.findAll(filters);
+        accountTransactionService.markSettledTransfers(expenses);
+        return expenses;
     }
 
     @Operation(summary = "Create a new expense")
@@ -52,7 +56,9 @@ public class ExpenseController {
     List<ExpenseDTO> getCurrentMonth() {
         LocalDate begin = getBeginOfCurrentMonth();
         LocalDate end = getEndOfCurrentMonth();
-        return expenseService.findAllByTransactionDateBetween(begin, end);
+        List<ExpenseDTO> expenses = expenseService.findAllByTransactionDateBetween(begin, end);
+        accountTransactionService.markSettledTransfers(expenses);
+        return expenses;
     }
 
     @Operation(summary = "Get expenses for a selected month")
