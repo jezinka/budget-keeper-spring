@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import Main from '../main/Main';
 import Table from 'react-bootstrap/Table';
 import {formatNumber} from '../../Utils';
 import {Col, Modal} from "react-bootstrap";
@@ -50,7 +49,6 @@ const SinkingFundsView = () => {
                     <tr>
                         <th>Konto</th>
                         <th>Stan</th>
-                        <th>Uwagi</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -59,13 +57,11 @@ const SinkingFundsView = () => {
                             <td>{a.name}</td>
                             <td className={a.balance < 0 ? 'text-danger' : ''}
                                 onClick={() => renderTooltip(a)}>{formatNumber(a.balance)}</td>
-                            <td>{a.note}</td>
                         </tr>
                     ))}
                     <tr>
                         <td><b>SUMA:</b></td>
                         <td><b>{formatNumber(accounts.map(a => a.balance).reduce((sum, num) => sum + num, 0))}</b></td>
-                        <td/>
                     </tr>
                     </tbody>
                 </Table>
