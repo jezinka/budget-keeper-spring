@@ -14,6 +14,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 
 import javax.sql.DataSource;
 
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
 
 @Configuration
 public class SecurityConfiguration {
@@ -25,9 +27,10 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                // Tomcat rejestruje też JspServlet, więc String-owe matchery nie wiedzą, czy to ścieżki MVC (CVE-2023-34035).
+                .requestMatchers(antMatcher(HttpMethod.OPTIONS, "/**"))
                 .permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+                .requestMatchers(antMatcher("/swagger-ui/**"), antMatcher("/v3/api-docs/**"), antMatcher("/swagger-ui.html"))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
