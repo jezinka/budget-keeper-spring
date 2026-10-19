@@ -48,19 +48,16 @@ public class BudgetFlowService {
         SankeyDto sankeyDto = new SankeyDto();
         incomeSource(sortedExpenses.validIncomes(), sankeyDto);
 
-        flow.forEach((sankeyName, sankeyLinks) -> {
-            sankeyDto.getNodes().add(new SankeyDto.SankeyNode(sankeyName));
-            sankeyLinks.forEach(target -> {
-                sankeyDto.getNodes().add(new SankeyDto.SankeyNode(target));
-                sankeyDto.getLinks().add(new SankeyDto.SankeyLink(sankeyName, target, categorySums.getOrDefault(target, BigDecimal.ZERO).abs()));
-            });
-        });
+        flow.forEach((sankeyName, sankeyLinks) -> sankeyLinks.forEach(target ->
+                addLink(sankeyDto, sankeyName, target, categorySums.getOrDefault(target, BigDecimal.ZERO).abs())));
         return sankeyDto;
     }
 
     public SankeyDto getMonthly(LocalDate begin, LocalDate end) {
 
         Map<Integer, String> categoryLevels = categoryLevelService.getCategoryLevels();
+        // separate maps: a category may share its name with a level
+        HashMap<String, BigDecimal> levelSums = new HashMap<>();
         HashMap<String, BigDecimal> categorySums = new HashMap<>();
         HashMap<String, Set<String>> flow = new HashMap<>();
 
@@ -74,24 +71,19 @@ public class BudgetFlowService {
                     flow.computeIfAbsent(categoryLevel, k -> new HashSet<>()).add(categoryName);
 
                     categorySums.merge(categoryName, expense.getAmount(), BigDecimal::add);
-                    categorySums.merge(categoryLevel, expense.getAmount(), BigDecimal::add);
-                    categorySums.merge(INCOME, expense.getAmount(), BigDecimal::add);
+                    levelSums.merge(categoryLevel, expense.getAmount(), BigDecimal::add);
                 }
         );
 
         SankeyDto sankeyDto = new SankeyDto();
 
-        if (sortedExpenses.validIncomes().size() > 1) {
-            incomeSource(sortedExpenses.validIncomes(), sankeyDto);
-        }
+        incomeSource(sortedExpenses.validIncomes(), sankeyDto);
 
         flow.forEach((sankeyName, sankeyLinks) -> {
-            sankeyDto.getNodes().add(new SankeyDto.SankeyNode(sankeyName));
-            if (sankeyLinks.size() > 1) {
-                sankeyLinks.forEach(target -> {
-                    sankeyDto.getNodes().add(new SankeyDto.SankeyNode(target));
-                    sankeyDto.getLinks().add(new SankeyDto.SankeyLink(sankeyName, target, categorySums.getOrDefault(target, BigDecimal.ZERO).abs()));
-                });
+            if (sankeyName.equals(INCOME) || sankeyLinks.size() > 1) {
+                Map<String, BigDecimal> sums = sankeyName.equals(INCOME) ? levelSums : categorySums;
+                sankeyLinks.forEach(target ->
+                        addLink(sankeyDto, sankeyName, target, sums.getOrDefault(target, BigDecimal.ZERO).abs()));
             } else {
                 drilldownForSingleCategory(sankeyName, sortedExpenses.validExpenses(), categoryLevels, sankeyDto);
             }
@@ -104,10 +96,7 @@ public class BudgetFlowService {
                 .collect(groupingBy(Expense::getCategoryName,
                         reducing(BigDecimal.ZERO,
                                 Expense::getAmount, BigDecimal::add)))
-                .forEach((name, amount) -> {
-                    sankeyDto.getNodes().add(new SankeyDto.SankeyNode(name + INCOME_SUFIX));
-                    sankeyDto.getLinks().add(new SankeyDto.SankeyLink(name + INCOME_SUFIX, INCOME, amount));
-                });
+                .forEach((name, amount) -> addLink(sankeyDto, name + INCOME_SUFIX, INCOME, amount));
     }
 
     private Result getSortedExpenses(LocalDate begin, LocalDate end) {
@@ -138,11 +127,17 @@ public class BudgetFlowService {
 
     private void drilldownForSingleCategory(String sankeyName, List<Expense> validExpenses, Map<Integer, String> categoryLevels, SankeyDto sankeyDto) {
         validExpenses.stream()
-                .filter(expense -> categoryLevels.get(expense.getCategory().getLevel()).equals(sankeyName))
-                .forEach(expense -> {
-                    String description = expenseMapper.mapToDto(expense).getDescription();
-                    sankeyDto.getLinks().add(new SankeyDto.SankeyLink(sankeyName, description, expense.getAmount().abs()));
-                    sankeyDto.getNodes().add(new SankeyDto.SankeyNode(description));
-                });
+                .filter(expense -> categoryLevels.getOrDefault(expense.getCategory().getLevel(), "Inne").equals(sankeyName))
+                .forEach(expense -> addLink(sankeyDto, sankeyName, expenseMapper.mapToDto(expense).getDescription(), expense.getAmount().abs()));
+    }
+
+    // recharts' Sankey recurses forever on a self-link (e.g. a category named like its level)
+    private static void addLink(SankeyDto sankeyDto, String source, String target, BigDecimal value) {
+        if (source.equals(target)) {
+            return;
+        }
+        sankeyDto.getNodes().add(new SankeyDto.SankeyNode(source));
+        sankeyDto.getNodes().add(new SankeyDto.SankeyNode(target));
+        sankeyDto.getLinks().add(new SankeyDto.SankeyLink(source, target, value));
     }
 }
