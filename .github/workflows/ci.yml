@@ -1,0 +1,36 @@
+name: CI
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-java@v4
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+                  cache: "gradle"
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+                  cache-dependency-path: gui/package-lock.json
+
+            - name: Frontend tests
+              working-directory: gui
+              run: |
+                  npm ci
+                  npm test
+
+            # ponytail: no DB/RabbitMQ services, tests use H2 and exclude Rabbit autoconfig
+            - name: Build and backend tests
+              run: ./gradlew build --no-daemon
