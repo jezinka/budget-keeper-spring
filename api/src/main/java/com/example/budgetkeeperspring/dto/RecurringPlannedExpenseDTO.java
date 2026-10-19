@@ -26,4 +26,5 @@ public class RecurringPlannedExpenseDTO {
     private Integer dueDay;
 
     private Boolean active;
+    private Boolean singlePayment;
 }

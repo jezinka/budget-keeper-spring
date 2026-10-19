@@ -112,6 +112,26 @@ const PlanManager = () => {
         loadSummary();
     }
 
+    async function updateSinglePayment(item, singlePayment) {
+        const response = await fetch(`/budget/plannedExpenses/${item.id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({id: item.id, planId: item.planId, amount: item.amount, singlePayment})
+        });
+        if (!response.ok) return alert(await response.text());
+        loadSummary();
+    }
+
+    async function updateRecurringSinglePayment(payment, singlePayment) {
+        const response = await fetch(`/budget/recurringPlannedExpenses/${payment.id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({...payment, singlePayment})
+        });
+        if (!response.ok) return alert(await response.text());
+        loadRecurringPayments();
+    }
+
     async function updatePaid(id, paid) {
         const response = await fetch(`/budget/plannedExpenses/${id}/paid?paid=${paid}`, {method: "PATCH"});
         if (!response.ok) return alert(await response.text());
@@ -281,6 +301,7 @@ const PlanManager = () => {
                         <thead>
                         <tr>
                             <th>Opłacone</th>
+                            <th title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście.">Przelew</th>
                             <th>Termin</th>
                             <th>Nazwa</th>
                             <th>Plan</th>
@@ -293,6 +314,9 @@ const PlanManager = () => {
                             return <tr key={item.id} className={item.paid ? "table-secondary" : ""}>
                                 <td><Form.Check checked={item.paid}
                                                 onChange={e => updatePaid(item.id, e.target.checked)}/></td>
+                                <td><Form.Check aria-label="Jeden przelew" title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście."
+                                                checked={item.singlePayment !== false}
+                                                onChange={e => updateSinglePayment(item, e.target.checked)}/></td>
                                 <td>{item.dueDate || "-"}</td>
                                 <td>{item.name}</td>
                                 <td>{formatNumber(item.amount)}</td>
@@ -309,7 +333,8 @@ const PlanManager = () => {
                                                 amount: item.amount,
                                                 name: item.name,
                                                 dueDate: item.dueDate,
-                                                paid: item.paid
+                                                paid: item.paid,
+                                                singlePayment: item.singlePayment !== false
                                             })}><Pencil/></Button>
                                     {!item.recurringPaymentId &&
                                         <Button className="me-1" size="sm" variant="outline-secondary"
@@ -321,7 +346,7 @@ const PlanManager = () => {
                         })}</tbody>
                         <tfoot>
                         <tr>
-                            <th colSpan={3}>Razem</th>
+                            <th colSpan={4}>Razem</th>
                             <th>{formatNumber(plannedExpenseTotals.planned)}</th>
                             <th>{formatNumber(plannedExpenseTotals.spent)}</th>
                             <th>{formatNumber(plannedExpenseTotals.difference)}</th>
@@ -482,6 +507,7 @@ const PlanManager = () => {
                         <th>Nazwa</th>
                         <th>Kwota</th>
                         <th>Dzień</th>
+                        <th title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście.">Przelew</th>
                         <th/>
                     </tr>
                     </thead>
@@ -489,6 +515,9 @@ const PlanManager = () => {
                         <td>{payment.name}</td>
                         <td>{formatNumber(payment.amount)}</td>
                         <td>{payment.dueDay}.</td>
+                        <td><Form.Check aria-label="Jeden przelew" title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście."
+                                        checked={payment.singlePayment !== false}
+                                        onChange={e => updateRecurringSinglePayment(payment, e.target.checked)}/></td>
                         <td><Button size="sm" variant="outline-danger"
                                     onClick={() => deleteRecurringPayment(payment.id)}><Trash/></Button></td>
                     </tr>)}</tbody>
@@ -509,6 +538,9 @@ const PlanManager = () => {
                     <Form.Group className="mt-3"><Form.Label column>Termin</Form.Label>
                         <Form.Control type="date" name="dueDate" value={editingPlannedExpense?.dueDate || ""}
                                       onChange={e => updateForm(setEditingPlannedExpense, e)}/></Form.Group>
+                    <Form.Check className="mt-3" id="editSinglePayment" label="Jeden przelew (pokazuj na pulpicie)"
+                                checked={editingPlannedExpense?.singlePayment ?? true}
+                                onChange={e => setEditingPlannedExpense(form => ({...form, singlePayment: e.target.checked}))}/>
                 </Modal.Body>
                 <Modal.Footer><Button variant="secondary" onClick={() => setEditingPlannedExpense(null)}>Anuluj</Button>
                     <Button type="submit">Zapisz</Button></Modal.Footer>

@@ -10,6 +10,7 @@ const summary = {
         {id: 1, name: "Czynsz", amount: 2000, paid: false, dueDate: "2000-01-10"},
         {id: 2, name: "Prąd", amount: 150, paid: true, dueDate: "2000-01-05"},
         {id: 3, name: "Internet", amount: 60, paid: false, dueDate: null},
+        {id: 4, name: "Jedzenie na mieście", amount: 400, paid: false, dueDate: null, singlePayment: false},
     ],
     categories: [
         {categoryName: "Jedzenie", plannedAmount: 1000, underPlanned: true, difference: -120.5},
@@ -19,6 +20,7 @@ const summary = {
     remainingPlannedAmount: 2060,
     remainingPlannedCount: 2,
     unplannedExpenseAmount: 50,
+    plannedVsUnplanned: [{name: "Zaplanowane", amount: 2150}, {name: "Niezaplanowane", amount: 50}],
 };
 
 const responses = {
@@ -29,6 +31,8 @@ const responses = {
         {id: 11, categoryId: 4, transferSettled: false},
         {id: 12, categoryId: 4},
     ],
+    "/budget/expenses/categoryLevelExpensesForMonth": [{name: "Życie", amount: 800}],
+    "/budget/expenses/topExpensesForMonth": [],
 };
 
 describe("Dashboard", () => {
@@ -52,11 +56,23 @@ describe("Dashboard", () => {
         expect(screen.getByText("Czynsz")).toBeTruthy();
         expect(screen.getByText("Internet")).toBeTruthy();
         expect(screen.queryByText("Prąd")).toBeNull();
+        expect(screen.queryByText("Jedzenie na mieście")).toBeNull();
         expect(screen.getByText("2000-01-10").className).toContain("bg-danger");
         expect(screen.getByText("2940,00")).toBeTruthy(); // wolne środki: 5000 - 2060
 
         fireEvent.click(screen.getAllByText("Zapłacone")[0]);
         await waitFor(() => expect(fetch).toHaveBeenCalledWith("/budget/plannedExpenses/1/paid?paid=true", {method: "PATCH"}));
+    });
+
+    it("shows current month pie charts that have data", async () => {
+        render(<Dashboard/>);
+
+        expect(await screen.findByText("Wydatki wg poziomów")).toBeTruthy();
+        expect(screen.getByText("Zaplanowane a poza planem")).toBeTruthy();
+        expect(screen.queryByText("Największe wydatki")).toBeNull();
+        const month = `year=${new Date().getFullYear()}&month=${new Date().getMonth() + 1}`;
+        expect(fetch).toHaveBeenCalledWith(`/budget/expenses/categoryLevelExpensesForMonth?${month}`);
+        expect(fetch).toHaveBeenCalledWith(`/budget/expenses/topExpensesForMonth?${month}`);
     });
 
     it("flags a missing plan", async () => {

@@ -2,6 +2,8 @@ import React, {useEffect, useState} from "react";
 import {Badge, Button, Card, Col, ListGroup, Row} from "react-bootstrap";
 import Main from "../main/Main";
 import {formatNumber, UNKNOWN_CATEGORY} from "../../Utils";
+import ExpensePieChart from "../charts/ExpensePieChart";
+import PlanPieChart from "../plan/PlanPieChart";
 
 const today = () => new Intl.DateTimeFormat('sv-SE').format(new Date());
 
@@ -20,10 +22,14 @@ const Dashboard = () => {
     const [summary, setSummary] = useState(null);
     const [moneyAmount, setMoneyAmount] = useState({});
     const [transactions, setTransactions] = useState([]);
+    const [levelExpenses, setLevelExpenses] = useState([]);
+    const [topExpenses, setTopExpenses] = useState([]);
+
+    const now = new Date();
+    const period = `year=${now.getFullYear()}&month=${now.getMonth() + 1}`;
 
     async function loadSummary() {
-        const now = new Date();
-        const response = await fetch(`/budget/plans/summary?year=${now.getFullYear()}&month=${now.getMonth() + 1}`);
+        const response = await fetch(`/budget/plans/summary?${period}`);
         setSummary(response.ok ? await response.json() : false);
     }
 
@@ -37,10 +43,17 @@ const Dashboard = () => {
         if (response.ok) setTransactions(await response.json());
     }
 
+    async function loadChart(url, setData) {
+        const response = await fetch(url);
+        if (response.ok) setData(await response.json());
+    }
+
     useEffect(() => {
         loadSummary();
         loadMoneyAmount();
         loadTransactions();
+        loadChart(`/budget/expenses/categoryLevelExpensesForMonth?${period}`, setLevelExpenses);
+        loadChart(`/budget/expenses/topExpensesForMonth?${period}`, setTopExpenses);
     }, []);
 
     async function markPaid(id) {
@@ -51,8 +64,9 @@ const Dashboard = () => {
     if (summary === null) return <Main body={<p>Ładowanie…</p>}/>;
     if (summary === false) return <Main body={<p className="text-danger">Nie udało się pobrać podsumowania planu.</p>}/>;
 
+    // Koperty (singlePayment = false) wydaje się wieloma transakcjami, więc nie są przelewem do zrobienia.
     const toPay = summary.plannedExpenses
-        .filter(p => !p.paid)
+        .filter(p => !p.paid && p.singlePayment !== false)
         .sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
     const overruns = summary.categories.filter(c => c.plannedAmount > 0 && c.underPlanned);
     const uncategorized = transactions.filter(t => t.categoryId == null || t.categoryId === UNKNOWN_CATEGORY).length;
@@ -75,9 +89,23 @@ const Dashboard = () => {
             <Stat label="Stan konta" value={formatNumber(moneyAmount.accountBalance)}/>
             <Stat label="Wolne środki" value={formatNumber(freeFunds)} variant={freeFunds < 0 ? 'danger' : 'success'}/>
             <Stat label="Wydatki w miesiącu" value={formatNumber(moneyAmount.expenses)}/>
-            <Stat label={`Do zapłacenia (${summary.remainingPlannedCount})`} value={formatNumber(summary.remainingPlannedAmount)}/>
+            <Stat label={`Zostało w planie (${summary.remainingPlannedCount})`} value={formatNumber(summary.remainingPlannedAmount)}/>
             <Stat label="Poza planem" value={formatNumber(summary.unplannedExpenseAmount)}
                   variant={summary.unplannedExpenseAmount > 0 ? 'warning' : undefined}/>
+        </Row>
+        <Row className="mb-3">
+            {levelExpenses.length > 0 && <Col sm={4}>
+                <h5>Wydatki wg poziomów</h5>
+                <ExpensePieChart data={levelExpenses} hueStep={52} legend/>
+            </Col>}
+            {topExpenses.length > 0 && <Col sm={4}>
+                <h5>Największe wydatki</h5>
+                <ExpensePieChart data={topExpenses}/>
+            </Col>}
+            {summary.plannedVsUnplanned?.length > 0 && <Col sm={4}>
+                <h5>Zaplanowane a poza planem</h5>
+                <PlanPieChart data={summary.plannedVsUnplanned}/>
+            </Col>}
         </Row>
         <Row>
             <Col sm={6}>

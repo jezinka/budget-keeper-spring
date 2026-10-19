@@ -192,7 +192,8 @@ public class PlanService {
         }
         RecurringPlannedExpense recurringPayment = createRecurringPayment(
                 plannedExpense.getName(), plannedExpense.getAmount(),
-                plannedExpense.getDueDate() == null ? plannedExpense.getPlan().getStartDate().getDayOfMonth() : plannedExpense.getDueDate().getDayOfMonth());
+                plannedExpense.getDueDate() == null ? plannedExpense.getPlan().getStartDate().getDayOfMonth() : plannedExpense.getDueDate().getDayOfMonth(),
+                plannedExpense.isSinglePayment());
         plannedExpense.setRecurringPayment(recurringPayment);
         plannedExpenseRepository.save(plannedExpense);
         return recurringPlannedExpenseMapper.mapToDto(recurringPayment);
@@ -205,7 +206,7 @@ public class PlanService {
         validateExpenseForPlan(expense, plan);
         RecurringPlannedExpense recurringPayment = createRecurringPayment(
                 expense.getTitle() == null || expense.getTitle().isBlank() ? "Wydatek cykliczny" : expense.getTitle(),
-                expense.getAmount().abs(), expense.getTransactionDate().getDayOfMonth());
+                expense.getAmount().abs(), expense.getTransactionDate().getDayOfMonth(), true);
         PlannedExpense plannedExpense = plannedExpenseRepository.save(recurringPlannedExpenseMapper.mapToPlannedExpense(plan, recurringPayment));
         expense.setPlannedExpense(plannedExpense);
         expenseRepository.save(expense);
@@ -479,11 +480,12 @@ public class PlanService {
     }
 
 
-    private RecurringPlannedExpense createRecurringPayment(String name, BigDecimal amount, int dueDay) {
+    private RecurringPlannedExpense createRecurringPayment(String name, BigDecimal amount, int dueDay, boolean singlePayment) {
         RecurringPlannedExpense recurringPayment = new RecurringPlannedExpense();
         recurringPayment.setName(name);
         recurringPayment.setAmount(amount);
         recurringPayment.setDueDay(dueDay);
+        recurringPayment.setSinglePayment(singlePayment);
         return recurringPlannedExpenseRepository.save(recurringPayment);
     }
 

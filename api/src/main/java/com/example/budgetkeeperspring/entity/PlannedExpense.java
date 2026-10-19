@@ -38,6 +38,10 @@ public class PlannedExpense {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    // false = koperta (np. jedzenie na mieście) wydawana wieloma transakcjami, nie pokazujemy jej jako przelewu do zrobienia.
+    @Column(name = "single_payment", nullable = false)
+    private boolean singlePayment = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recurring_planned_expense_id")
     private RecurringPlannedExpense recurringPayment;

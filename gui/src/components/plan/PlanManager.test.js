@@ -50,4 +50,17 @@ describe("PlanManager", () => {
         expect(request.headers).toEqual({"Content-Type": "application/json"});
         expect(JSON.parse(request.body)).toEqual({planId: 7, amount: 12.5, name: "Internet", dueDate: "2026-10-15"});
     });
+
+    it("marks a planned expense as an envelope, not a single transfer", async () => {
+        summary.plannedExpenses = [{id: 3, planId: 7, name: "Jedzenie na mieście", amount: 400, paid: false, singlePayment: true, spent: 0, difference: 400}];
+        render(<MemoryRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}><PlanManager/></MemoryRouter>);
+
+        fireEvent.click(await screen.findByLabelText("Jeden przelew"));
+
+        await waitFor(() => expect(fetch).toHaveBeenCalledWith("/budget/plannedExpenses/3", expect.any(Object)));
+        const [, request] = fetch.mock.calls.find(([url]) => url === "/budget/plannedExpenses/3");
+        expect(request.method).toBe("PUT");
+        expect(JSON.parse(request.body)).toEqual({id: 3, planId: 7, amount: 400, singlePayment: false});
+        summary.plannedExpenses = [];
+    });
 });
