@@ -13,7 +13,7 @@ plugins {
 
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.0.13'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.16'
     }
 }
 
@@ -26,38 +26,32 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    implementation group: 'com.google.code.gson', name: 'gson'
     implementation group: 'com.opencsv', name: 'opencsv', version: '5.9'
 
-    compileOnly 'org.springframework.boot:spring-boot-starter-tomcat:3.0.13'
-    compileOnly 'org.projectlombok:lombok:1.18.48'
+    compileOnly 'org.springframework.boot:spring-boot-starter-tomcat'
+    compileOnly 'org.projectlombok:lombok'
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok'
 
-    implementation('org.springframework.boot:spring-boot-starter-web:3.0.13')
-    implementation 'org.springframework.boot:spring-boot-devtools:3.0.13'
-    implementation 'org.springframework.boot:spring-boot-starter-security:3.0.13'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.13'
-    implementation 'org.springframework.security:spring-security-test'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.13'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
-    implementation 'org.mariadb.jdbc:mariadb-java-client:1.5.7'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    implementation 'org.apache.commons:commons-lang3'
 
-    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation 'org.quartz-scheduler:quartz:2.3.2'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.quartz-scheduler:quartz'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
 
-    runtimeOnly 'mysql:mysql-connector-java:8.0.32'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.13'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'com.h2database:h2'
 }
 
 group = 'com.example'

@@ -12,9 +12,12 @@ export function getMonthName(monthNumber, format) {
     return date.toLocaleString('pl-PL', {month: format});
 }
 
-export function handleError() {
-    // TODO: show in log panel; global context??
-    console.log("ERROR!");
+export const ERROR_EVENT = 'budget-error';
+
+// LastLog jest w layoucie każdej strony i nasłuchuje tego zdarzenia.
+export function handleError(message = 'Coś poszło nie tak!') {
+    console.error(message);
+    window.dispatchEvent(new CustomEvent(ERROR_EVENT, {detail: message}));
 }
 
 export function formatNumber(number) {
