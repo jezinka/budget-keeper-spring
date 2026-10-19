@@ -54,6 +54,33 @@ export function toSankeyData(flow) {
     return {nodes: flow.nodes, links};
 }
 
+const NODE_PADDING = 20;
+const ROW_HEIGHT = NODE_PADDING + 10;
+
+// recharts najpierw odejmuje odstępy między węzłami od wysokości, więc przy stałej wysokości
+// i wielu kategoriach w kolumnie węzły kurczą się do zera i podpisy wchodzą na siebie.
+// Liczymy najliczniejszą kolumnę (węzły bez wyjść recharts wyrównuje do ostatniej) i z niej wysokość.
+export function sankeyHeight({nodes, links}) {
+    const depth = nodes.map(() => 0);
+    for (let changed = true; changed;) {
+        changed = false;
+        links.forEach(({source, target}) => {
+            if (depth[target] < depth[source] + 1) {
+                depth[target] = depth[source] + 1;
+                changed = true;
+            }
+        });
+    }
+    const lastColumn = Math.max(...depth);
+    const hasOutgoing = new Set(links.map(link => link.source));
+    const columns = {};
+    nodes.forEach((node, i) => {
+        const column = hasOutgoing.has(i) ? depth[i] : lastColumn;
+        columns[column] = (columns[column] ?? 0) + 1;
+    });
+    return Math.max(400, Math.max(...Object.values(columns)) * ROW_HEIGHT);
+}
+
 const SankeyComponent = ({year, month}) => {
     const [data, setData] = useState({nodes: [], links: []});
 
@@ -85,8 +112,8 @@ const SankeyComponent = ({year, month}) => {
     }
 
     return (
-        <ResponsiveContainer width="100%" height={400}>
-            <Sankey data={data} node={<SankeyNode/>} nodePadding={20}
+        <ResponsiveContainer width="100%" height={sankeyHeight(data)}>
+            <Sankey data={data} node={<SankeyNode/>} nodePadding={NODE_PADDING}
                     margin={{top: 10, right: 10, bottom: 10, left: 10}}
                     link={{stroke: '#91cc75', strokeOpacity: 0.4}}>
                 <Tooltip/>
