@@ -35,4 +35,8 @@ public class RecurringPlannedExpense {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    // false = koperta (np. jedzenie na mieście) wydawana wieloma transakcjami, nie pokazujemy jej jako przelewu do zrobienia.
+    @Column(name = "single_payment", nullable = false)
+    private boolean singlePayment = true;
 }

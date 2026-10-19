@@ -64,8 +64,9 @@ const Dashboard = () => {
     if (summary === null) return <Main body={<p>Ładowanie…</p>}/>;
     if (summary === false) return <Main body={<p className="text-danger">Nie udało się pobrać podsumowania planu.</p>}/>;
 
+    // Koperty (singlePayment = false) wydaje się wieloma transakcjami, więc nie są przelewem do zrobienia.
     const toPay = summary.plannedExpenses
-        .filter(p => !p.paid)
+        .filter(p => !p.paid && p.singlePayment !== false)
         .sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
     const overruns = summary.categories.filter(c => c.plannedAmount > 0 && c.underPlanned);
     const uncategorized = transactions.filter(t => t.categoryId == null || t.categoryId === UNKNOWN_CATEGORY).length;
@@ -88,7 +89,7 @@ const Dashboard = () => {
             <Stat label="Stan konta" value={formatNumber(moneyAmount.accountBalance)}/>
             <Stat label="Wolne środki" value={formatNumber(freeFunds)} variant={freeFunds < 0 ? 'danger' : 'success'}/>
             <Stat label="Wydatki w miesiącu" value={formatNumber(moneyAmount.expenses)}/>
-            <Stat label={`Do zapłacenia (${summary.remainingPlannedCount})`} value={formatNumber(summary.remainingPlannedAmount)}/>
+            <Stat label={`Zostało w planie (${summary.remainingPlannedCount})`} value={formatNumber(summary.remainingPlannedAmount)}/>
             <Stat label="Poza planem" value={formatNumber(summary.unplannedExpenseAmount)}
                   variant={summary.unplannedExpenseAmount > 0 ? 'warning' : undefined}/>
         </Row>

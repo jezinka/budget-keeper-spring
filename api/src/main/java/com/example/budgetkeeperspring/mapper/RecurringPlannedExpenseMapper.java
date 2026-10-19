@@ -25,6 +25,7 @@ public interface RecurringPlannedExpenseMapper {
     @Mapping(source = "recurringPayment", target = "recurringPayment")
     @Mapping(source = "recurringPayment.name", target = "name")
     @Mapping(source = "recurringPayment.amount", target = "amount")
+    @Mapping(source = "recurringPayment.singlePayment", target = "singlePayment")
     @Mapping(target = "paid", ignore = true)
     @Mapping(target = "dueDate", expression = "java(plan.getStartDate().withDayOfMonth(Math.min(recurringPayment.getDueDay(), plan.getEndDate().getDayOfMonth())))")
     PlannedExpense mapToPlannedExpense(Plan plan, RecurringPlannedExpense recurringPayment);

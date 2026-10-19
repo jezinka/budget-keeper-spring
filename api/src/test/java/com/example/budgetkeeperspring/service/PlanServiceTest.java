@@ -254,6 +254,7 @@ class PlanServiceTest {
         plannedExpense.setName("Spotify");
         plannedExpense.setAmount(new BigDecimal("29.00"));
         plannedExpense.setDueDate(LocalDate.of(2026, 9, 10));
+        plannedExpense.setSinglePayment(false);
         when(plannedExpenseRepository.findById(3)).thenReturn(Optional.of(plannedExpense));
         when(plannedExpenseRepository.save(plannedExpense)).thenReturn(plannedExpense);
         when(recurringRepository.save(any())).thenAnswer(invocation -> {
@@ -268,6 +269,7 @@ class PlanServiceTest {
 
         verify(recurringRepository, times(1)).save(any());
         assertEquals(4, plannedExpense.getRecurringPayment().getId());
+        assertFalse(plannedExpense.getRecurringPayment().isSinglePayment());
     }
 
     private Expense expense(BigDecimal amount, Category category) {

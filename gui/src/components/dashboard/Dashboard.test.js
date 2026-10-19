@@ -10,6 +10,7 @@ const summary = {
         {id: 1, name: "Czynsz", amount: 2000, paid: false, dueDate: "2000-01-10"},
         {id: 2, name: "Prąd", amount: 150, paid: true, dueDate: "2000-01-05"},
         {id: 3, name: "Internet", amount: 60, paid: false, dueDate: null},
+        {id: 4, name: "Jedzenie na mieście", amount: 400, paid: false, dueDate: null, singlePayment: false},
     ],
     categories: [
         {categoryName: "Jedzenie", plannedAmount: 1000, underPlanned: true, difference: -120.5},
@@ -55,6 +56,7 @@ describe("Dashboard", () => {
         expect(screen.getByText("Czynsz")).toBeTruthy();
         expect(screen.getByText("Internet")).toBeTruthy();
         expect(screen.queryByText("Prąd")).toBeNull();
+        expect(screen.queryByText("Jedzenie na mieście")).toBeNull();
         expect(screen.getByText("2000-01-10").className).toContain("bg-danger");
         expect(screen.getByText("2940,00")).toBeTruthy(); // wolne środki: 5000 - 2060
 

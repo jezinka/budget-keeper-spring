@@ -35,6 +35,7 @@ public interface PlanMapper {
     @Mapping(source = "dto.name", target = "name")
     @Mapping(source = "dto.paid", target = "paid")
     @Mapping(source = "dto.dueDate", target = "dueDate")
+    @Mapping(source = "dto.singlePayment", target = "singlePayment")
     @Mapping(source = "plan", target = "plan")
     void updatePlannedExpenseFromDto(PlannedExpenseDTO dto, Plan plan, @MappingTarget PlannedExpense plannedExpense);
 }
