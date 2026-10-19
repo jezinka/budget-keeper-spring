@@ -69,6 +69,38 @@ class BudgetFlowServiceTest {
     }
 
     @Test
+    void monthWithSingleIncomeAndSingleLevelKeepsIncomeLinks() {
+        when(expenseRepository.findAllByTransactionDateBetween(BEGIN, END)).thenReturn(List.of(
+                expense("5000", salary, "pensja"), expense("-300", food, "biedronka"), expense("-1500", flat, "czynsz")));
+
+        assertEquals(Set.of("Pensja (in)->Dochody:5000", "Dochody->Życie:1800", "Życie->Jedzenie:300", "Życie->Czynsz:1500"),
+                links(service.getMonthly(BEGIN, END)));
+    }
+
+    @Test
+    void levelMissingFromCategoryLevelsDrillsDownAsInne() {
+        Category unmapped = Category.builder().id(6L).name("Różne").level(9).build();
+        when(expenseRepository.findAllByTransactionDateBetween(BEGIN, END)).thenReturn(List.of(
+                expense("-20", unmapped, "drobne"), expense("-50", cinema, "kino")));
+
+        assertEquals(Set.of("Dochody->Inne:20", "Dochody->Rozrywka:50", "Inne->drobne:20", "Rozrywka->kino:50"),
+                links(service.getMonthly(BEGIN, END)));
+    }
+
+    @Test
+    void selfLinksAreDropped() {
+        Category namedLikeLevel = Category.builder().id(6L).name("Życie").level(1).build();
+        when(expenseRepository.findAllByTransactionDateBetween(BEGIN, END)).thenReturn(List.of(
+                expense("-10", namedLikeLevel, "x"), expense("-300", food, "biedronka"),
+                expense("-50", cinema, "Rozrywka")));
+
+        SankeyDto flow = service.getMonthly(BEGIN, END);
+
+        assertEquals(Set.of("Dochody->Życie:310", "Życie->Jedzenie:300", "Dochody->Rozrywka:50"), links(flow));
+        assertTrue(flow.getLinks().stream().noneMatch(l -> l.getSource().equals(l.getTarget())));
+    }
+
+    @Test
     void yearlyFlowStopsAtCategoryLevels() {
         when(expenseRepository.findAllByTransactionDateBetween(BEGIN, END)).thenReturn(List.of(
                 expense("5000", salary, "pensja"), expense("-300", food, "biedronka"), expense("-50", cinema, "kino")));
@@ -80,6 +112,10 @@ class BudgetFlowServiceTest {
 
     private static Expense expense(String amount, Category category, String title) {
         return Expense.builder().amount(new BigDecimal(amount)).category(category).title(title).transactionDate(BEGIN).build();
+    }
+
+    private static Set<String> links(SankeyDto flow) {
+        return flow.getLinks().stream().map(BudgetFlowServiceTest::link).collect(Collectors.toSet());
     }
 
     private static String link(SankeyLink link) {

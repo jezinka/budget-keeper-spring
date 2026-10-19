@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.example.budgetkeeperspring.service.CategoryLevelService.INVESTMENT_CATEGORY_LEVEL;
 
@@ -262,7 +263,10 @@ public class PlanService {
         expenses.forEach(expense -> validateExpenseForPlan(expense, plannedExpense.getPlan()));
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
         expenses.forEach(expense -> logPlan(expense, "przypisano do", plannedExpense));
-        plannedExpense.setPaid(plannedExpense.isPaid() || expenses.stream().map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(plannedExpense.getAmount()) == 0);
+        BigDecimal assigned = Stream.concat(plannedExpense.getExpenses().stream(), expenses.stream())
+                .distinct()
+                .map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
+        plannedExpense.setPaid(plannedExpense.isPaid() || assigned.compareTo(plannedExpense.getAmount()) >= 0);
         expenseRepository.saveAll(expenses);
     }
 

@@ -90,6 +90,29 @@ class PlanServiceAssignmentTest {
     }
 
     @Test
+    void paymentCompletingEarlierAssignedExpensesMarksPlannedExpenseAsPaid() {
+        Expense earlier = expense(9L, "-1500.00", LocalDate.of(2026, 10, 1));
+        earlier.setPlannedExpense(rent);
+        rent.getExpenses().add(earlier);
+        Expense rest = expense(10L, "-500.00", LocalDate.of(2026, 10, 2));
+        when(expenseRepository.findAllById(List.of(10L))).thenReturn(List.of(rest));
+
+        service.assignExpenseToPlannedExpense(5, 10L);
+
+        assertTrue(rent.isPaid());
+    }
+
+    @Test
+    void overpaymentMarksPlannedExpenseAsPaid() {
+        Expense over = expense(10L, "-2000.01", LocalDate.of(2026, 10, 2));
+        when(expenseRepository.findAllById(List.of(10L))).thenReturn(List.of(over));
+
+        service.assignExpenseToPlannedExpense(5, 10L);
+
+        assertTrue(rent.isPaid());
+    }
+
+    @Test
     void alreadyPaidPlannedExpenseStaysPaid() {
         rent.setPaid(true);
         Expense small = expense(10L, "-10.00", LocalDate.of(2026, 10, 2));
