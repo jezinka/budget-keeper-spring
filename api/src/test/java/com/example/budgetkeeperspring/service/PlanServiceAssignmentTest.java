@@ -157,12 +157,37 @@ class PlanServiceAssignmentTest {
         assertEquals(new BigDecimal("50.00"), created.getAmount());
         assertSame(plan, created.getPlan());
         assertSame(created, second.getPlannedExpense());
+        assertTrue(created.isPaid());
+    }
+
+    @Test
+    void unassigningBelowTheAmountRevertsPaid() {
+        assigned(10L, "-1500.00");
+        Expense second = assigned(11L, "-500.00");
+        rent.setPaid(true);
+
+        service.unassignExpenseFromPlannedExpense(5, 11L);
+
+        assertFalse(rent.isPaid());
+        assertNull(second.getPlannedExpense());
+    }
+
+    @Test
+    void unassigningWhileRestStillCoversTheAmountKeepsPaid() {
+        assigned(10L, "-2000.00");
+        assigned(11L, "-100.00");
+        rent.setPaid(true);
+
+        service.unassignExpenseFromPlannedExpense(5, 11L);
+
+        assertTrue(rent.isPaid());
     }
 
     @Test
     void unassignRejectsExpenseFromAnotherPlannedExpense() {
         PlannedExpense other = new PlannedExpense();
         other.setId(6);
+        other.setAmount(new BigDecimal("10.00"));
         Expense expense = expense(10L, "-10.00", LocalDate.of(2026, 10, 2));
         expense.setPlannedExpense(other);
         when(expenseRepository.findById(10L)).thenReturn(Optional.of(expense));
@@ -182,6 +207,14 @@ class PlanServiceAssignmentTest {
 
         assertEquals(HttpStatus.CONFLICT, status(() -> service.create(dto)));
         verify(planRepository, never()).save(any());
+    }
+
+    private Expense assigned(Long id, String amount) {
+        Expense expense = expense(id, amount, LocalDate.of(2026, 10, 2));
+        expense.setPlannedExpense(rent);
+        rent.getExpenses().add(expense);
+        when(expenseRepository.findById(id)).thenReturn(Optional.of(expense));
+        return expense;
     }
 
     private static Expense expense(Long id, String amount, LocalDate date) {
