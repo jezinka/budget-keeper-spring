@@ -263,10 +263,7 @@ public class PlanService {
         expenses.forEach(expense -> validateExpenseForPlan(expense, plannedExpense.getPlan()));
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
         expenses.forEach(expense -> logPlan(expense, "przypisano do", plannedExpense));
-        BigDecimal assigned = Stream.concat(plannedExpense.getExpenses().stream(), expenses.stream())
-                .distinct()
-                .map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
-        plannedExpense.setPaid(plannedExpense.isPaid() || assigned.compareTo(plannedExpense.getAmount()) >= 0);
+        plannedExpense.setPaid(plannedExpense.isPaid() || isCovered(plannedExpense, Stream.concat(plannedExpense.getExpenses().stream(), expenses.stream())));
         expenseRepository.saveAll(expenses);
     }
 
@@ -279,6 +276,7 @@ public class PlanService {
         plannedExpense.setPlan(plan);
         plannedExpense.setName("Wybrane wydatki");
         plannedExpense.setAmount(expenses.stream().map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add));
+        plannedExpense.setPaid(true);
         plannedExpenseRepository.save(plannedExpense);
         expenses.forEach(expense -> expense.setPlannedExpense(plannedExpense));
         expenseRepository.saveAll(expenses);
@@ -292,9 +290,18 @@ public class PlanService {
         if (expense.getPlannedExpense() == null || !expense.getPlannedExpense().getId().equals(plannedExpenseId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is not assigned to this planned expense");
         }
-        logPlan(expense, "odpięto od", expense.getPlannedExpense());
+        PlannedExpense plannedExpense = expense.getPlannedExpense();
+        logPlan(expense, "odpięto od", plannedExpense);
         expense.setPlannedExpense(null);
+        // Odpięcie cofa "paid" (także ustawione ręcznie), jeśli reszta wydatków nie pokrywa kwoty.
+        plannedExpense.setPaid(isCovered(plannedExpense, plannedExpense.getExpenses().stream().filter(other -> other != expense)));
         expenseRepository.save(expense);
+    }
+
+    private static boolean isCovered(PlannedExpense plannedExpense, Stream<Expense> assignedExpenses) {
+        BigDecimal assigned = assignedExpenses.distinct()
+                .map(Expense::getAmount).map(BigDecimal::abs).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return assigned.compareTo(plannedExpense.getAmount()) >= 0;
     }
 
     private void logPlan(Expense expense, String action, PlannedExpense plannedExpense) {
