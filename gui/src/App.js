@@ -5,6 +5,7 @@ import 'bootstrap/dist/js/bootstrap.min.js'
 
 import {BrowserRouter as Router, Route, Routes,} from "react-router-dom";
 import CurrentMonth from "./components/currentMonth/CurrentMonth";
+import Dashboard from "./components/dashboard/Dashboard";
 import YearAtTheGlance from "./components/year/YearAtTheGlance";
 import AllTransactions from "./components/allTransactions/AllTransactions";
 import LogsView from "./components/logs/LogsView";
@@ -22,7 +23,8 @@ const App = () => {
         <>
             <Router basename="/budget">
                 <Routes>
-                    <Route exact path="/" element={<CurrentMonth/>}/>
+                    <Route exact path="/" element={<Dashboard/>}/>
+                    <Route path="/gui/currentMonth" element={<CurrentMonth/>}/>
                     <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>
                     <Route path="/gui/yearlyView" element={<YearlyView/>}/>
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
