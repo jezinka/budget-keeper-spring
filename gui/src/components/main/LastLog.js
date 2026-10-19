@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Alert from 'react-bootstrap/Alert';
-import {DATE_TIME_FORMAT} from "../../Utils";
+import {DATE_TIME_FORMAT, ERROR_EVENT} from "../../Utils";
 
 export default function LastLog() {
     const [log, setLog] = useState({});
@@ -23,6 +23,14 @@ export default function LastLog() {
 
     useEffect(() => {
         reloadLogs();
+
+        function showError(event) {
+            setVariant("danger");
+            setLog({id: -1, level: 'ERROR', message: event.detail, date: new Date()});
+        }
+
+        window.addEventListener(ERROR_EVENT, showError);
+        return () => window.removeEventListener(ERROR_EVENT, showError);
     }, []);
 
     if (log !== null && log.message !== undefined) {
