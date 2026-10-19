@@ -1,12 +1,12 @@
 import {Col, Row} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import Main from "../main/Main";
-import {formatNumber, getMonthName} from "../../Utils";
-import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
+import {getMonthName} from "../../Utils";
 import MonthYearFilter from "./MonthYearFilter";
 import SankeyComponent from "./SankeyComponent";
 import ExpenseTreeMap from "./ExpenseTreeMap";
 import PlanPieChart from "../plan/PlanPieChart";
+import ExpensePieChart from "../charts/ExpensePieChart";
 
 const MonthlyView = () => {
     const [year, setYear] = useState(new Date().getFullYear());
@@ -62,59 +62,19 @@ const MonthlyView = () => {
                 {expensePieData.length > 0 && (
                     <Col sm={4}>
                         <h4 className="mt-3">Wydatki wg poziomów</h4>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={expensePieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="amount">
-                                    {expensePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 52}, 70%, 50%)`}/>
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => formatNumber(-value)}/>
-                                <Legend/>
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <ExpensePieChart data={expensePieData} hueStep={52} legend/>
                     </Col>
                 )}
                 {topExpenses.length > 0 && (
                     <Col sm={4}>
                         <h4 className="mt-3">Największe wydatki</h4>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={topExpenses}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="amount">
-                                    {topExpenses.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    formatter={(value) => formatNumber(-value)}
-                                    labelFormatter={(label, payload) => payload[0]?.payload?.fullDescription || label}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <ExpensePieChart data={topExpenses}/>
                     </Col>
                 )}
                 {planChart.length > 0 && (
                     <Col sm={4}>
                         <h4 className="mt-3">Zaplanowane a poza planem</h4>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PlanPieChart data={planChart}/>
-                        </ResponsiveContainer>
+                        <PlanPieChart data={planChart}/>
                     </Col>
                 )}
             </Row>

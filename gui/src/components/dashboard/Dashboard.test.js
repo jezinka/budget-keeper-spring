@@ -19,6 +19,7 @@ const summary = {
     remainingPlannedAmount: 2060,
     remainingPlannedCount: 2,
     unplannedExpenseAmount: 50,
+    plannedVsUnplanned: [{name: "Zaplanowane", amount: 2150}, {name: "Niezaplanowane", amount: 50}],
 };
 
 const responses = {
@@ -29,6 +30,8 @@ const responses = {
         {id: 11, categoryId: 4, transferSettled: false},
         {id: 12, categoryId: 4},
     ],
+    "/budget/expenses/categoryLevelExpensesForMonth": [{name: "Życie", amount: 800}],
+    "/budget/expenses/topExpensesForMonth": [],
 };
 
 describe("Dashboard", () => {
@@ -57,6 +60,17 @@ describe("Dashboard", () => {
 
         fireEvent.click(screen.getAllByText("Zapłacone")[0]);
         await waitFor(() => expect(fetch).toHaveBeenCalledWith("/budget/plannedExpenses/1/paid?paid=true", {method: "PATCH"}));
+    });
+
+    it("shows current month pie charts that have data", async () => {
+        render(<Dashboard/>);
+
+        expect(await screen.findByText("Wydatki wg poziomów")).toBeTruthy();
+        expect(screen.getByText("Zaplanowane a poza planem")).toBeTruthy();
+        expect(screen.queryByText("Największe wydatki")).toBeNull();
+        const month = `year=${new Date().getFullYear()}&month=${new Date().getMonth() + 1}`;
+        expect(fetch).toHaveBeenCalledWith(`/budget/expenses/categoryLevelExpensesForMonth?${month}`);
+        expect(fetch).toHaveBeenCalledWith(`/budget/expenses/topExpensesForMonth?${month}`);
     });
 
     it("flags a missing plan", async () => {

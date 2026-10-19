@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row, Table} from "react-bootstrap";
 import {formatNumber, getMonthName, MONTHS_ARRAY, SUM_CATEGORY, SUM_MONTH} from "../../Utils";
-import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import Main from "../main/Main";
 import YearFilter from "./YearFilter";
 import SankeyComponent from "../monthlyView/SankeyComponent";
 import PictorialBar from "./PictorialBar";
 import ExpenseTreeMap from "../monthlyView/ExpenseTreeMap";
 import PlanPieChart from "../plan/PlanPieChart";
+import ExpensePieChart from "../charts/ExpensePieChart";
 
 const YearlyView = () => {
     const [expenses, setExpenses] = useState([]);
@@ -126,50 +126,12 @@ const YearlyView = () => {
             <Row className="mt-4">
                 <Col sm={4}>
                     <h4>Wydatki wg poziomów</h4>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                            <Pie
-                                data={expensePieData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                outerRadius={80}
-                                fill="#8884d8"
-                                dataKey="amount">
-                                {expensePieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={`hsl(${index * 52}, 70%, 50%)`}/>
-                                ))}
-                            </Pie>
-                            <Tooltip formatter={(value) => formatNumber(value)}/>
-                            <Legend/>
-                        </PieChart>
-                    </ResponsiveContainer>
+                    <ExpensePieChart data={expensePieData} hueStep={52} legend/>
                 </Col>
                 {topExpenses.length > 0 && (
                     <Col sm={4}>
                         <h4>Największe wydatki</h4>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={topExpenses}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="amount">
-                                    {topExpenses.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`}/>
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    formatter={(value) => formatNumber(value)}
-                                    labelFormatter={(label, payload) => payload[0]?.payload?.name || label}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <ExpensePieChart data={topExpenses}/>
                     </Col>
                 )}
                 <Col sm={4}>
