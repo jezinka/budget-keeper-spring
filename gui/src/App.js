@@ -23,8 +23,9 @@ const App = () => {
         <>
             <Router basename="/budget">
                 <Routes>
-                    <Route exact path="/" element={<Dashboard/>}/>
+                    <Route exact path="/" element={<CurrentMonth/>}/>
                     <Route path="/gui/currentMonth" element={<CurrentMonth/>}/>
+                    <Route path="/gui/dashboard" element={<Dashboard/>}/>
                     <Route path="/gui/yearAtTheGlance" element={<YearAtTheGlance/>}/>
                     <Route path="/gui/yearlyView" element={<YearlyView/>}/>
                     <Route path="/gui/allTransactions" element={<AllTransactions/>}/>
