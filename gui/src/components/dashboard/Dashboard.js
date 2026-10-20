@@ -75,8 +75,8 @@ const Dashboard = () => {
 
     const actions = [
         summary.plan === null && {text: 'Brak planu na ten miesiąc', href: '/budget/gui/plan', variant: 'danger'},
-        uncategorized > 0 && {text: `Transakcje bez kategorii: ${uncategorized}`, href: '/budget/gui/currentMonth', variant: 'warning'},
-        unsettledTransfers > 0 && {text: `Nierozliczone przelewy: ${unsettledTransfers}`, href: '/budget/gui/currentMonth', variant: 'warning'},
+        uncategorized > 0 && {text: `Transakcje bez kategorii: ${uncategorized}`, href: '/budget', variant: 'warning'},
+        unsettledTransfers > 0 && {text: `Nierozliczone przelewy: ${unsettledTransfers}`, href: '/budget', variant: 'warning'},
         ...overruns.map(c => ({
             text: `Przekroczony plan: ${c.categoryName} o ${formatNumber(-c.difference)}`,
             href: '/budget/gui/plan',
