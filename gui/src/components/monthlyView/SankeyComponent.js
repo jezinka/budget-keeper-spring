@@ -57,10 +57,9 @@ export function toSankeyData(flow) {
 const NODE_PADDING = 20;
 const ROW_HEIGHT = NODE_PADDING + 10;
 
-// recharts najpierw odejmuje odstępy między węzłami od wysokości, więc przy stałej wysokości
-// i wielu kategoriach w kolumnie węzły kurczą się do zera i podpisy wchodzą na siebie.
-// Liczymy najliczniejszą kolumnę (węzły bez wyjść recharts wyrównuje do ostatniej) i z niej wysokość.
-export function sankeyHeight({nodes, links}) {
+// Kolumna węzła tak jak liczy ją recharts: najdłuższa ścieżka od źródła,
+// a węzły bez wyjść (align "justify") lądują w ostatniej kolumnie.
+function columnsOf({nodes, links}) {
     const depth = nodes.map(() => 0);
     for (let changed = true; changed;) {
         changed = false;
@@ -73,12 +72,45 @@ export function sankeyHeight({nodes, links}) {
     }
     const lastColumn = Math.max(...depth);
     const hasOutgoing = new Set(links.map(link => link.source));
-    const columns = {};
-    nodes.forEach((node, i) => {
-        const column = hasOutgoing.has(i) ? depth[i] : lastColumn;
-        columns[column] = (columns[column] ?? 0) + 1;
+    return depth.map((d, i) => hasOutgoing.has(i) ? d : lastColumn);
+}
+
+// recharts najpierw odejmuje odstępy między węzłami od wysokości, więc przy stałej wysokości
+// i wielu kategoriach w kolumnie węzły kurczą się do zera i podpisy wchodzą na siebie.
+export function sankeyHeight(data) {
+    const counts = {};
+    columnsOf(data).forEach(column => counts[column] = (counts[column] ?? 0) + 1);
+    return Math.max(400, Math.max(...Object.values(counts)) * ROW_HEIGHT);
+}
+
+// Układa węzły od największego do najmniejszego w każdej kolumnie; w kolejnych kolumnach
+// najpierw grupuje po rodzicu (żeby linki się nie przeplatały), a w grupie sortuje malejąco.
+// Działa razem z sort={false} i verticalAlign="top", bo inaczej recharts sam przestawia węzły.
+export function sortByValue(data) {
+    const {nodes, links} = data;
+    const columns = columnsOf(data);
+    const inflow = nodes.map(() => 0);
+    const outflow = nodes.map(() => 0);
+    links.forEach(({source, target, value}) => {
+        outflow[source] += value;
+        inflow[target] += value;
     });
-    return Math.max(400, Math.max(...Object.values(columns)) * ROW_HEIGHT);
+    const value = i => Math.max(inflow[i], outflow[i]);
+    const rank = new Map();
+    const parentRank = i => Math.min(...links.filter(link => link.target === i).map(link => rank.get(link.source) ?? Infinity));
+
+    for (let column = 0; column <= Math.max(...columns); column++) {
+        nodes.map((node, i) => i)
+            .filter(i => columns[i] === column)
+            .sort((a, b) => parentRank(a) - parentRank(b) || value(b) - value(a))
+            .forEach(i => rank.set(i, rank.size));
+    }
+    const order = [...rank.keys()];
+    const newIndex = new Map(order.map((oldIndex, i) => [oldIndex, i]));
+    return {
+        nodes: order.map(i => nodes[i]),
+        links: links.map(link => ({...link, source: newIndex.get(link.source), target: newIndex.get(link.target)}))
+    };
 }
 
 const SankeyComponent = ({year, month}) => {
@@ -97,7 +129,7 @@ const SankeyComponent = ({year, month}) => {
             }
             const flow = await response.json();
             if (!ignore) {
-                setData(toSankeyData(flow));
+                setData(sortByValue(toSankeyData(flow)));
             }
         }
 
@@ -113,7 +145,7 @@ const SankeyComponent = ({year, month}) => {
 
     return (
         <ResponsiveContainer width="100%" height={sankeyHeight(data)}>
-            <Sankey data={data} node={<SankeyNode/>} nodePadding={NODE_PADDING}
+            <Sankey data={data} node={<SankeyNode/>} nodePadding={NODE_PADDING} sort={false} verticalAlign="top"
                     margin={{top: 10, right: 10, bottom: 10, left: 10}}
                     link={{stroke: '#91cc75', strokeOpacity: 0.4}}>
                 <Tooltip/>

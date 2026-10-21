@@ -7,8 +7,8 @@ const Navigation = () => {
         <Nav variant="pills" activeKey={useLocation().pathname}
              className="flex-column">
             <Container fluid className="mt-2">
-                <Nav.Link href="/budget">Pulpit</Nav.Link>
-                <Nav.Link href="/budget/gui/currentMonth">Miesiąc</Nav.Link>
+                <Nav.Link href="/budget">Miesiąc</Nav.Link>
+                <Nav.Link href="/budget/gui/dashboard">Pulpit</Nav.Link>
                 <Nav.Link href="/budget/gui/monthlyView">Widok miesięczny</Nav.Link>
                 <Nav.Link href="/budget/gui/yearAtTheGlance">Cały rok</Nav.Link>
                 <Nav.Link href="/budget/gui/plan">Plan</Nav.Link>
