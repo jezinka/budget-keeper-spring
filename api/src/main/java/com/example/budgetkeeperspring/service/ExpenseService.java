@@ -66,22 +66,24 @@ public class ExpenseService {
     }
 
     /**
-     * Account on the other side of the main account: a sinking fund whose number is in the payee,
-     * or an external account (e.g. Revolut top-up) whose name is in the title.
+     * Account on the other side of the main account: a sinking fund whose number is in the title or
+     * payee (the bank writes it in groups, "41 1090 1968 ...", so spaces are ignored), or an external
+     * account (e.g. Revolut top-up) whose name is in the title.
      */
     @Nullable
     private Account counterpartAccount(ExpenseDTO expenseDTO) {
         if (expenseDTO == null) {
             return null;
         }
-        if (expenseDTO.getPayee() != null) {
-            Optional<Account> sinkingFund = accountRepository.findBySinkingFundTrue()
-                    .stream()
-                    .filter(a -> expenseDTO.getPayee().contains(a.getAccountNumber()))
-                    .findFirst();
-            if (sinkingFund.isPresent()) {
-                return sinkingFund.get();
-            }
+        String digits = (Objects.toString(expenseDTO.getTitle(), "") + Objects.toString(expenseDTO.getPayee(), ""))
+                .replaceAll("\\s", "");
+        Optional<Account> sinkingFund = accountRepository.findBySinkingFundTrue()
+                .stream()
+                .filter(a -> a.getAccountNumber() != null && !a.getAccountNumber().isBlank()
+                        && digits.contains(a.getAccountNumber().replaceAll("\\s", "")))
+                .findFirst();
+        if (sinkingFund.isPresent()) {
+            return sinkingFund.get();
         }
         if (expenseDTO.getTitle() == null) {
             return null;
