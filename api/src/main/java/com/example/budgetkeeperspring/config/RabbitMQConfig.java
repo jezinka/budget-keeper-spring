@@ -21,14 +21,17 @@ public class RabbitMQConfig {
     /**
      * The shop mail usually beats the bank mail by a few minutes (both inboxes are polled), so wait
      * ~18 min: 12 attempts, backoff 1s doubling up to 5 min. The listener thread blocks meanwhile;
-     * other purchases just queue behind it.
+     * other purchases just queue behind it. Prefetch 1 keeps them unsent until then: RabbitMQ's 30 min
+     * consumer_timeout counts from delivery, and two prefetched messages would wait ~37 min in total.
      * After all retries are exhausted, RejectAndDontRequeueRecoverer sends the message to DLQ.
      * Queue topology (purchase_info → purchase_info.dlx → purchase_info.dlq) is defined in
      * init/definitions.json.
      */
     @Bean
     public SimpleRabbitListenerContainerFactory purchaseInfoListenerFactory(ConnectionFactory connectionFactory, LogService logService) {
-        return retryThenReject(connectionFactory, logService, "purchase_info niedopasowane", 12, 300_000);
+        SimpleRabbitListenerContainerFactory factory = retryThenReject(connectionFactory, logService, "purchase_info niedopasowane", 12, 300_000);
+        factory.setPrefetchCount(1);
+        return factory;
     }
 
     /**
