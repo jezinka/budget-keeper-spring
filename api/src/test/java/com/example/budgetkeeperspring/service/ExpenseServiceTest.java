@@ -811,6 +811,32 @@ class ExpenseServiceTest {
     }
 
     @Test
+    void createExpenseFromQueue_spacedAccountNumberInTitle_goesToSinkingFund() {
+        Account sinkingAccount = Account.builder().id(20L).name("Wakacje").accountNumber("41109019680000000167375433").sinkingFund(true).build();
+        Account defaultAccount = Account.builder().id(1L).name("Główne").defaultAccount(true).build();
+        Category category = new Category("Cel");
+        category.setId(10L);
+
+        ExpenseDTO dto = ExpenseDTO.builder()
+                .amount(BigDecimal.valueOf(-200))
+                .title("Wpłata automatyczna na cel 41 1090 1968 0000 0001 6737 5433")
+                .payee("Odbiorca:PAULINA KACZMAREK")
+                .transactionDate("2026-11-01")
+                .build();
+
+        when(accountRepository.findByDefaultAccountTrue()).thenReturn(defaultAccount);
+        when(accountRepository.findBySinkingFundTrue()).thenReturn(List.of(sinkingAccount));
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        expenseService.createExpenseFromQueue(dto, category);
+
+        ArgumentCaptor<Expense> captor = ArgumentCaptor.forClass(Expense.class);
+        verify(expenseRepository).save(captor.capture());
+        assertEquals(defaultAccount, captor.getValue().getSourceAccount());
+        assertEquals(sinkingAccount, captor.getValue().getDestinationAccount());
+    }
+
+    @Test
     void createExpenseFromQueue_titleWithExternalAccountName_goesToThatAccount() {
         Account revolut = Account.builder().id(4L).name("Revolut").build();
         Account defaultAccount = Account.builder().id(5L).name("Główne").defaultAccount(true).build();
