@@ -21,6 +21,8 @@ services:
     build: "."
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
+      # bank dates are Polish local time; in UTC, mails sent just after midnight fail @PastOrPresent
+      TZ: Europe/Warsaw
     expose:
       - 8080
     ports:
