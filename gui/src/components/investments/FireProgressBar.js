@@ -1,4 +1,5 @@
 import React from 'react';
+import {Col, Row} from 'react-bootstrap';
 import {formatNumber} from '../../Utils';
 
 const W = 900;
@@ -26,16 +27,16 @@ const FireProgressBar = ({fireStages = [], currentValue}) => {
     const pct = currentValue ? ((Number(currentValue) / maxThreshold) * 100).toFixed(1) : null;
 
     return (
-        <div className="mt-4">
-            <div className="d-flex justify-content-between align-items-baseline mb-1">
-                <small className="text-muted">Etapy FIRE</small>
+        <Col className="mt-4">
+            <Row className="g-0 justify-content-between align-items-baseline mb-1">
+                <Col xs="auto"><small className="text-muted">Etapy FIRE</small></Col>
                 {pct && (
-                    <small className="text-muted" style={{fontSize: '0.72rem'}}>
+                    <Col xs="auto"><small className="text-muted" style={{fontSize: '0.72rem'}}>
                         {formatNumber(currentValue)} PLN &nbsp;·&nbsp; {pct}% celu
                         &nbsp;·&nbsp; {crossed.length} / {fireStages.length}
-                    </small>
+                    </small></Col>
                 )}
-            </div>
+            </Row>
 
             <svg viewBox={`0 0 ${W} 80`} style={{width: '100%', overflow: 'visible'}}>
                 {/* Background track */}
@@ -96,7 +97,7 @@ const FireProgressBar = ({fireStages = [], currentValue}) => {
                     />
                 )}
             </svg>
-        </div>
+        </Col>
     );
 };
 

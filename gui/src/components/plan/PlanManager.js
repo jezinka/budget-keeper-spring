@@ -5,7 +5,7 @@ import MonthYearFilter from "../monthlyView/MonthYearFilter";
 import PlanImport from "./PlanImport";
 import PlanPieChart from "./PlanPieChart";
 import {formatNumber, getMonthName} from "../../Utils";
-import {ArrowCounterclockwise, ArrowRepeat, Pencil, Plus, ShieldExclamation, Trash} from "react-bootstrap-icons";
+import {ArrowCounterclockwise, ArrowRepeat, CalendarPlus, Pencil, Plus, PlusLg, ShieldExclamation, Trash, Upload} from "react-bootstrap-icons";
 import {useLocation} from "react-router-dom";
 
 const PlanManager = () => {
@@ -18,6 +18,7 @@ const PlanManager = () => {
     const [selectedPlannedExpense, setSelectedPlannedExpense] = useState(null);
     const [unplannedFilters, setUnplannedFilters] = useState({description: "", category: ""});
     const [showImport, setShowImport] = useState(false);
+    const [showAddPlannedExpense, setShowAddPlannedExpense] = useState(false);
     const [editingPlannedExpense, setEditingPlannedExpense] = useState(null);
     const [selectedExpenseIds, setSelectedExpenseIds] = useState([]);
     const [selectedTargetId, setSelectedTargetId] = useState("");
@@ -86,6 +87,7 @@ const PlanManager = () => {
         });
         if (!response.ok) return alert(await response.text());
         setPlannedExpenseForm({amount: "", name: "", dueDate: ""});
+        setShowAddPlannedExpense(false);
         loadSummary();
     }
 
@@ -109,16 +111,6 @@ const PlanManager = () => {
         });
         if (!response.ok) return alert(await response.text());
         setEditingPlannedExpense(null);
-        loadSummary();
-    }
-
-    async function updateSinglePayment(item, singlePayment) {
-        const response = await fetch(`/budget/plannedExpenses/${item.id}`, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({id: item.id, planId: item.planId, amount: item.amount, singlePayment})
-        });
-        if (!response.ok) return alert(await response.text());
         loadSummary();
     }
 
@@ -241,8 +233,7 @@ const PlanManager = () => {
             .filter(expense => expense.plannedExpenseId === item.id)
             .reduce((sum, expense) => sum + Math.abs(Number(expense.amount)), 0);
         return {...item, spent, difference: Number(item.amount) - spent};
-    }).sort((first, second) => Number(first.paid) - Number(second.paid) ||
-        (first.dueDate || "9999-12-31").localeCompare(second.dueDate || "9999-12-31")), [summary]);
+    }).sort((first, second) => first.difference - second.difference), [summary]);
 
     const sortedPlannedExpenses = useMemo(() => [...(summary?.plannedExpenses || [])].sort(
         (first, second) => (first.name || "Bez nazwy").localeCompare(second.name || "Bez nazwy", "pl", {
@@ -274,87 +265,18 @@ const PlanManager = () => {
 
     const body = <Col sm={11}>
         <h2>Plan na {getMonthName(month, "long")} {year}</h2>
-        <MonthYearFilter year={year} month={month} onYearChange={setYear} onMonthChange={setMonth}/>
+        <MonthYearFilter year={year} month={month} onYearChange={setYear} onMonthChange={setMonth}>
+            {!summary?.plan ? <Button size="sm" onClick={createPlan}><PlusLg/> Utwórz plan</Button> : <>
+                <Button size="sm" onClick={() => setShowAddPlannedExpense(true)}><PlusLg/> Dodaj do planu</Button>
+                <Button size="sm" variant="outline-secondary" onClick={() => setShowImport(true)}><Upload/> Import CSV</Button>
+                <Button size="sm" variant="outline-secondary" onClick={() => setShowRecurring(true)}><ArrowRepeat/> Cykliczne</Button>
+                <Button size="sm" variant="outline-primary" onClick={applyRecurringPayments}><CalendarPlus/> Dodaj cykliczne</Button>
+            </>}
+        </MonthYearFilter>
 
-        {!summary?.plan ? <Button onClick={createPlan}>Utwórz plan</Button> : <>
-            <Form className="row g-2 mb-4" onSubmit={addPlannedExpense}>
-                <Col sm={2}><Form.Control required min="0.01" step="0.01" type="number" placeholder="Kwota"
-                                          name="amount" value={plannedExpenseForm.amount}
-                                          onChange={e => updateForm(setPlannedExpenseForm, e)}/></Col>
-                <Col sm={3}><Form.Control placeholder="Nazwa" name="name" value={plannedExpenseForm.name}
-                                          onChange={e => updateForm(setPlannedExpenseForm, e)}/></Col>
-                <Col sm={2}><Form.Control aria-label="Termin planowanego wydatku" type="date" name="dueDate" value={plannedExpenseForm.dueDate}
-                                          onChange={e => updateForm(setPlannedExpenseForm, e)}/></Col>
-                <Col sm={2}><Button type="submit">Dodaj do planu</Button></Col>
-                <Col sm={2}><Button type="button" variant="outline-secondary" onClick={() => setShowImport(true)}>Import
-                    CSV</Button></Col>
-                <Col sm={2}><Button type="button" variant="outline-secondary"
-                                    onClick={() => setShowRecurring(true)}>Cykliczne</Button></Col>
-                <Col sm={2}><Button type="button" variant="outline-primary" onClick={applyRecurringPayments}>Dodaj
-                    cykliczne</Button></Col>
-            </Form>
-
+        {summary?.plan && <>
             <Row>
                 <Col md={7}>
-                    <h4>Zaplanowane wydatki</h4>
-                    <Table responsive striped bordered size="sm">
-                        <thead>
-                        <tr>
-                            <th>Opłacone</th>
-                            <th title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście.">Przelew</th>
-                            <th>Termin</th>
-                            <th>Nazwa</th>
-                            <th>Plan</th>
-                            <th>Wydane</th>
-                            <th>Różnica</th>
-                            <th/>
-                        </tr>
-                        </thead>
-                        <tbody>{plannedExpenseRows.map(item => {
-                            return <tr key={item.id} className={item.paid ? "table-secondary" : ""}>
-                                <td><Form.Check checked={item.paid}
-                                                onChange={e => updatePaid(item.id, e.target.checked)}/></td>
-                                <td><Form.Check aria-label="Jeden przelew" title="Jeden przelew — pokazuj na pulpicie w „Do zapłacenia”. Odznacz dla kopert typu jedzenie na mieście."
-                                                checked={item.singlePayment !== false}
-                                                onChange={e => updateSinglePayment(item, e.target.checked)}/></td>
-                                <td>{item.dueDate || "-"}</td>
-                                <td>{item.name}</td>
-                                <td>{formatNumber(item.amount)}</td>
-                                <td
-                                    onClick={() => setSelectedPlannedExpense({
-                                        id: item.id, expenses: summary.plannedExpenseTransactions.filter(
-                                            expense => expense.plannedExpenseId === item.id)
-                                    })}>{formatNumber(item.spent)}</td>
-                                <td>{formatNumber(item.difference)}</td>
-                                <td><Button className="me-1" size="sm" variant="outline-primary"
-                                            onClick={() => setEditingPlannedExpense({
-                                                id: item.id,
-                                                planId: item.planId,
-                                                amount: item.amount,
-                                                name: item.name,
-                                                dueDate: item.dueDate,
-                                                paid: item.paid,
-                                                singlePayment: item.singlePayment !== false
-                                            })}><Pencil/></Button>
-                                    {!item.recurringPaymentId &&
-                                        <Button className="me-1" size="sm" variant="outline-secondary"
-                                                title="Utwórz płatność cykliczną"
-                                                onClick={() => convertPlannedExpenseToRecurring(item.id)}><ArrowRepeat/></Button>}
-                                    <Button size="sm" variant="outline-danger"
-                                            onClick={() => deletePlannedExpense(item.id)}><Trash/></Button></td>
-                            </tr>;
-                        })}</tbody>
-                        <tfoot>
-                        <tr>
-                            <th colSpan={4}>Razem</th>
-                            <th>{formatNumber(plannedExpenseTotals.planned)}</th>
-                            <th>{formatNumber(plannedExpenseTotals.spent)}</th>
-                            <th>{formatNumber(plannedExpenseTotals.difference)}</th>
-                            <th/>
-                        </tr>
-                        </tfoot>
-                    </Table>
-
                     <h4>Poza planem</h4>
                     <Form.Check className="mb-2" label="Pokaż wykluczone" checked={showExcluded}
                                 onChange={e => setShowExcluded(e.target.checked)}/>
@@ -400,22 +322,22 @@ const PlanManager = () => {
                                 <td>
                                     {expense.excludedFromPlan ? <Button size="sm" variant="outline-secondary"
                                                                         onClick={() => updateExcludedFromPlan(expense.id, false)}><ArrowCounterclockwise/></Button> :
-                                        <div className="d-flex gap-1">
+                                        <Row className="g-1 flex-nowrap">
                                             {summary.plannedExpenses.length > 0 &&
-                                                <Form.Select size="sm" defaultValue=""
+                                                <Col><Form.Select size="sm" defaultValue=""
                                                              onChange={e => e.target.value && markAsPlanned(expense.id, e.target.value)}>
                                                     <option value="">Przypisz do...</option>
                                                     {sortedPlannedExpenses
                                                         .map(item => <option key={item.id}
                                                                              value={item.id}>{item.name || "Bez nazwy"}</option>)}
-                                                </Form.Select>}
-                                            <Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button>
-                                            <Button size="sm" variant="outline-secondary"
+                                                </Form.Select></Col>}
+                                            <Col xs="auto"><Button size="sm" onClick={() => markAsPlanned(expense.id)}><Plus/></Button></Col>
+                                            <Col xs="auto"><Button size="sm" variant="outline-secondary"
                                                     title="Utwórz płatność cykliczną"
-                                                    onClick={() => convertUnplannedExpenseToRecurring(expense.id)}><ArrowRepeat/></Button>
-                                            <Button size="sm" variant="outline-secondary"
-                                                    onClick={() => updateExcludedFromPlan(expense.id, true)}><ShieldExclamation/></Button>
-                                        </div>}
+                                                    onClick={() => convertUnplannedExpenseToRecurring(expense.id)}><ArrowRepeat/></Button></Col>
+                                            <Col xs="auto"><Button size="sm" variant="outline-secondary"
+                                                    onClick={() => updateExcludedFromPlan(expense.id, true)}><ShieldExclamation/></Button></Col>
+                                        </Row>}
                                 </td>
                             </tr>)}</tbody>
                         <tfoot>
@@ -426,18 +348,73 @@ const PlanManager = () => {
                         </tr>
                         </tfoot>
                     </Table>
-                    {selectedExpenseIds.length > 0 && <div className="d-flex gap-1 mb-3">
-                        <Form.Select size="sm" value={selectedTargetId}
+                    {selectedExpenseIds.length > 0 && <Row className="g-1 mb-3 flex-nowrap">
+                        <Col><Form.Select size="sm" value={selectedTargetId}
                                      onChange={e => setSelectedTargetId(e.target.value)}>
                             <option value="">Przypisz do...</option>
                             {sortedPlannedExpenses.map(item => <option key={item.id}
                                                                         value={item.id}>{item.name || "Bez nazwy"}</option>)}
-                        </Form.Select>
-                        <Button size="sm" disabled={!selectedTargetId} onClick={assignSelectedExpenses}>Przypisz
-                            wszystkie do planowanego wydatku</Button>
-                        <Button size="sm" variant="outline-primary" onClick={createPlannedExpenseFromSelectedExpenses}>Utwórz
-                            nowy z przypisanymi wszystkimi zaznaczonymi</Button>
-                    </div>}
+                        </Form.Select></Col>
+                        <Col xs="auto"><Button size="sm" disabled={!selectedTargetId} onClick={assignSelectedExpenses}>Przypisz
+                            wszystkie do planowanego wydatku</Button></Col>
+                        <Col xs="auto"><Button size="sm" variant="outline-primary" onClick={createPlannedExpenseFromSelectedExpenses}>Utwórz
+                            nowy z przypisanymi wszystkimi zaznaczonymi</Button></Col>
+                    </Row>}
+                    <h4>Zaplanowane wydatki</h4>
+                    <Table responsive striped bordered size="sm">
+                        <thead>
+                        <tr>
+                            <th>Opłacone</th>
+                            <th>Termin</th>
+                            <th>Nazwa</th>
+                            <th>Plan</th>
+                            <th>Wydane</th>
+                            <th>Różnica</th>
+                            <th/>
+                        </tr>
+                        </thead>
+                        <tbody>{plannedExpenseRows.map(item => {
+                            return <tr key={item.id} className={item.paid ? "table-secondary" : ""}>
+                                <td><Form.Check checked={item.paid}
+                                                onChange={e => updatePaid(item.id, e.target.checked)}/></td>
+                                <td>{item.dueDate || "-"}</td>
+                                <td>{item.name}</td>
+                                <td>{formatNumber(item.amount)}</td>
+                                <td
+                                    onClick={() => setSelectedPlannedExpense({
+                                        id: item.id, expenses: summary.plannedExpenseTransactions.filter(
+                                            expense => expense.plannedExpenseId === item.id)
+                                    })}>{formatNumber(item.spent)}</td>
+                                <td>{formatNumber(item.difference)}</td>
+                                <td><Button className="me-1" size="sm" variant="outline-primary" title="Edytuj"
+                                            onClick={() => setEditingPlannedExpense({
+                                                id: item.id,
+                                                planId: item.planId,
+                                                amount: item.amount,
+                                                name: item.name,
+                                                dueDate: item.dueDate,
+                                                paid: item.paid,
+                                                singlePayment: item.singlePayment !== false
+                                            })}><Pencil/></Button>
+                                    {!item.recurringPaymentId &&
+                                        <Button className="me-1" size="sm" variant="outline-secondary"
+                                                title="Utwórz płatność cykliczną"
+                                                onClick={() => convertPlannedExpenseToRecurring(item.id)}><ArrowRepeat/></Button>}
+                                    <Button size="sm" variant="outline-danger"
+                                            onClick={() => deletePlannedExpense(item.id)}><Trash/></Button></td>
+                            </tr>;
+                        })}</tbody>
+                        <tfoot>
+                        <tr>
+                            <th colSpan={3}>Razem</th>
+                            <th>{formatNumber(plannedExpenseTotals.planned)}</th>
+                            <th>{formatNumber(plannedExpenseTotals.spent)}</th>
+                            <th>{formatNumber(plannedExpenseTotals.difference)}</th>
+                            <th/>
+                        </tr>
+                        </tfoot>
+                    </Table>
+
                 </Col>
                 <Col md={5}>
                     <h4>Plan a rzeczywistość</h4>
@@ -523,6 +500,25 @@ const PlanManager = () => {
                     </tr>)}</tbody>
                 </Table>
             </Modal.Body>
+        </Modal>
+        <Modal show={showAddPlannedExpense} onHide={() => setShowAddPlannedExpense(false)}>
+            <Form onSubmit={addPlannedExpense}>
+                <Modal.Header closeButton><Modal.Title>Dodaj do planu</Modal.Title></Modal.Header>
+                <Modal.Body>
+                    <Form.Group className="mb-3" controlId="addAmount"><Form.Label column>Kwota</Form.Label>
+                        <Form.Control required min="0.01" step="0.01" type="number" name="amount"
+                                      value={plannedExpenseForm.amount}
+                                      onChange={e => updateForm(setPlannedExpenseForm, e)}/></Form.Group>
+                    <Form.Group className="mb-3" controlId="addName"><Form.Label column>Nazwa</Form.Label>
+                        <Form.Control name="name" value={plannedExpenseForm.name}
+                                      onChange={e => updateForm(setPlannedExpenseForm, e)}/></Form.Group>
+                    <Form.Group controlId="addDueDate"><Form.Label column>Termin</Form.Label>
+                        <Form.Control type="date" name="dueDate" value={plannedExpenseForm.dueDate}
+                                      onChange={e => updateForm(setPlannedExpenseForm, e)}/></Form.Group>
+                </Modal.Body>
+                <Modal.Footer><Button variant="secondary" onClick={() => setShowAddPlannedExpense(false)}>Anuluj</Button>
+                    <Button type="submit">Dodaj</Button></Modal.Footer>
+            </Form>
         </Modal>
         <Modal show={editingPlannedExpense !== null} onHide={() => setEditingPlannedExpense(null)}>
             <Form onSubmit={updatePlannedExpense}>

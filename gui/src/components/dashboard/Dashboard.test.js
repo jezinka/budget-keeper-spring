@@ -2,7 +2,7 @@ import React from "react";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import Dashboard from "./Dashboard";
 
-vi.mock("../main/Main", () => ({default: ({body}) => <div>{body}</div>}));
+vi.mock("../main/Main", () => ({default: ({body}) => <>{body}</>}));
 
 const summary = {
     plan: {id: 7, year: 2026, month: 10},

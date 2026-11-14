@@ -39,10 +39,11 @@ describe("PlanManager", () => {
         const user = userEvent.setup();
         render(<MemoryRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}><PlanManager/></MemoryRouter>);
 
-        await user.type(await screen.findByPlaceholderText("Kwota"), "12.50");
-        await user.type(screen.getByPlaceholderText("Nazwa"), "Internet");
-        fireEvent.change(screen.getByLabelText("Termin planowanego wydatku"), {target: {value: "2026-10-15"}});
-        await user.click(screen.getByRole("button", {name: "Dodaj do planu"}));
+        await user.click(await screen.findByRole("button", {name: "Dodaj do planu"}));
+        await user.type(await screen.findByLabelText("Kwota"), "12.50");
+        await user.type(screen.getByLabelText("Nazwa"), "Internet");
+        fireEvent.change(screen.getByLabelText("Termin"), {target: {value: "2026-10-15"}});
+        await user.click(screen.getByRole("button", {name: "Dodaj"}));
 
         await waitFor(() => expect(fetch).toHaveBeenCalledWith("/budget/plannedExpenses", expect.any(Object)));
         const [, request] = fetch.mock.calls.find(([url]) => url === "/budget/plannedExpenses");
@@ -55,12 +56,14 @@ describe("PlanManager", () => {
         summary.plannedExpenses = [{id: 3, planId: 7, name: "Jedzenie na mieście", amount: 400, paid: false, singlePayment: true, spent: 0, difference: 400}];
         render(<MemoryRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}><PlanManager/></MemoryRouter>);
 
-        fireEvent.click(await screen.findByLabelText("Jeden przelew"));
+        fireEvent.click(await screen.findByTitle("Edytuj"));
+        fireEvent.click(await screen.findByLabelText("Jeden przelew (pokazuj na pulpicie)"));
+        fireEvent.click(screen.getByRole("button", {name: "Zapisz"}));
 
         await waitFor(() => expect(fetch).toHaveBeenCalledWith("/budget/plannedExpenses/3", expect.any(Object)));
         const [, request] = fetch.mock.calls.find(([url]) => url === "/budget/plannedExpenses/3");
         expect(request.method).toBe("PUT");
-        expect(JSON.parse(request.body)).toEqual({id: 3, planId: 7, amount: 400, singlePayment: false});
+        expect(JSON.parse(request.body)).toMatchObject({id: 3, planId: 7, amount: 400, singlePayment: false});
         summary.plannedExpenses = [];
     });
 });

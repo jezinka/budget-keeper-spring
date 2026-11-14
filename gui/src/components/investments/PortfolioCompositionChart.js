@@ -1,4 +1,5 @@
 import React, {useMemo} from 'react';
+import {Col, Row} from 'react-bootstrap';
 import {Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,} from 'recharts';
 import {formatNumber} from '../../Utils';
 
@@ -13,7 +14,7 @@ const CustomTooltip = ({active, payload, label}) => {
     const d = payload[0].payload;
     const isLoss = d.profit < 0;
     return (
-        <div style={{
+        <Col style={{
             background: '#fff',
             border: '1px solid #ccc',
             padding: '8px 12px',
@@ -36,7 +37,7 @@ const CustomTooltip = ({active, payload, label}) => {
                         ({d.pctProfit.toFixed(1)}%)</p>
                 </>
             )}
-        </div>
+        </Col>
     );
 };
 
@@ -74,17 +75,17 @@ const PortfolioCompositionChart = ({snapshots}) => {
     const last = data[data.length - 1];
 
     return (
-        <div>
+        <Col>
             <h6 className="text-muted">Struktura portfela: wkład własny vs zysk</h6>
-            <div className="d-flex gap-3 mb-2" style={{fontSize: '0.8rem'}}>
-                <span style={{color: '#4e79a7'}}>■ Wkład własny</span>
-                <span style={{color: '#10d57a'}}>■ Zysk</span>
+            <Row className="g-3 mb-2" style={{fontSize: '0.8rem'}}>
+                <Col xs="auto" style={{color: '#4e79a7'}}>■ Wkład własny</Col>
+                <Col xs="auto" style={{color: '#10d57a'}}>■ Zysk</Col>
                 {last.pctProfit >= 0 && (
-                    <span className="text-muted ms-2">
+                    <Col xs="auto" className="text-muted ms-2">
                         Aktualnie: {last.pctInvested.toFixed(1)}% wkład / {last.pctProfit.toFixed(1)}% zysk
-                    </span>
+                    </Col>
                 )}
-            </div>
+            </Row>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data} margin={{top: 10, right: 20, left: 10, bottom: 10}}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false}/>
@@ -116,7 +117,7 @@ const PortfolioCompositionChart = ({snapshots}) => {
                     </Bar>
                 </BarChart>
             </ResponsiveContainer>
-        </div>
+        </Col>
     );
 };
 

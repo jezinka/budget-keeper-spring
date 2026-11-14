@@ -2,7 +2,7 @@ import {Col, Form, Row} from "react-bootstrap";
 import React from "react";
 import {FIRST_YEAR, getMonthName} from "../../Utils";
 
-const MonthYearFilter = ({year, month, onYearChange, onMonthChange}) => {
+const MonthYearFilter = ({year, month, onYearChange, onMonthChange, children}) => {
 
     const handleYearChange = (event) => {
         onYearChange(parseInt(event.target.value));
@@ -36,6 +36,7 @@ const MonthYearFilter = ({year, month, onYearChange, onMonthChange}) => {
                     </Form.Select>
                 </Form.Group>
             </Col>
+            {children && <Col xs="auto" className="d-flex align-items-end gap-1">{children}</Col>}
         </Row>
     );
 }

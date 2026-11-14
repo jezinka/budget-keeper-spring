@@ -1,20 +1,21 @@
 import React from 'react';
+import {Col, Row} from 'react-bootstrap';
 import {formatNumber} from '../../Utils';
 
 const Stat = ({label, value, sub, color}) => (
-    <div style={{minWidth: 110}}>
-        <div style={{fontSize: '0.7rem', color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.04em'}}>
+    <Col xs="auto" style={{minWidth: 110}}>
+        <Col style={{fontSize: '0.7rem', color: '#6c757d', textTransform: 'uppercase', letterSpacing: '0.04em'}}>
             {label}
-        </div>
-        <div style={{fontSize: '1.05rem', fontWeight: 600, color: color || '#212529'}}>
+        </Col>
+        <Col style={{fontSize: '1.05rem', fontWeight: 600, color: color || '#212529'}}>
             {value}
-        </div>
-        {sub && <div style={{fontSize: '0.7rem', color: '#adb5bd'}}>{sub}</div>}
-    </div>
+        </Col>
+        {sub && <Col style={{fontSize: '0.7rem', color: '#adb5bd'}}>{sub}</Col>}
+    </Col>
 );
 
 const Divider = () => (
-    <div style={{width: 1, background: '#dee2e6', margin: '0 12px', alignSelf: 'stretch'}}/>
+    <Col xs="auto" style={{width: 1, background: '#dee2e6', margin: '0 12px', alignSelf: 'stretch'}}/>
 );
 
 const formatDate = (dateStr) => {
@@ -57,7 +58,7 @@ const PortfolioStats = ({snapshots}) => {
     const worst = returns.length ? returns.reduce((a, b) => b.ret < a.ret ? b : a) : null;
 
     return (
-        <div className="d-flex flex-wrap gap-3 align-items-center py-2 px-1 mb-2"
+        <Row className="g-0 gap-3 align-items-center py-2 px-1 mb-2"
              style={{borderBottom: '1px solid #dee2e6'}}>
             <Stat
                 label="Wartość"
@@ -104,7 +105,7 @@ const PortfolioStats = ({snapshots}) => {
                     color="#dc3545"
                 />
             </>}
-        </div>
+        </Row>
     );
 };
 

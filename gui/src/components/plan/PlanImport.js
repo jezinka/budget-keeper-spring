@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {Col} from 'react-bootstrap';
 
 function FileUpload({closeHandler, uploadUrl = '/budget/budgetPlan/upload'}) {
     const [file, setFile] = useState(null);
@@ -29,10 +30,10 @@ function FileUpload({closeHandler, uploadUrl = '/budget/budgetPlan/upload'}) {
     };
 
     return (
-        <div>
+        <Col>
             <input type="file" onChange={handleFileChange}/>
             <button onClick={handleUpload}>Importuj</button>
-        </div>
+        </Col>
     );
 }
 

@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+import {Col} from 'react-bootstrap';
 
 const PictorialBar = ({year}) => {
     const [targetAmount, setTargetAmount] = useState(0);
@@ -22,8 +23,8 @@ const PictorialBar = ({year}) => {
     const completion = targetAmount > 0 ? ((actualAmount / targetAmount) * 100).toFixed(1) : "0.0";
 
     return (
-        <div>
-            <div style={{
+        <Col>
+            <Col style={{
                 display: "grid",
                 gridTemplateColumns: `repeat(${COLUMNS}, 8px)`,
                 gap: "1px",
@@ -31,7 +32,7 @@ const PictorialBar = ({year}) => {
                 marginBottom: "5px"
             }}>
                 {Array.from({length: totalSquares}).map((_, index) => (
-                    <div
+                    <Col
                         key={index}
                         title={`${SQUARE_VALUE} zł`}
                         style={{
@@ -42,12 +43,12 @@ const PictorialBar = ({year}) => {
                         }}
                     />
                 ))}
-            </div>
-            <div style={{fontSize: "14px"}}>
+            </Col>
+            <Col style={{fontSize: "14px"}}>
                 Odłożono: <strong>{actualAmount.toLocaleString("pl-PL")} zł</strong> / Cel: {targetAmount.toLocaleString("pl-PL")} zł ({completion}%)
-            </div>
-            <div style={{fontSize: "12px", color: "#666"}}>1 kwadrat = {SQUARE_VALUE} zł</div>
-        </div>
+            </Col>
+            <Col style={{fontSize: "12px", color: "#666"}}>1 kwadrat = {SQUARE_VALUE} zł</Col>
+        </Col>
     );
 }
 export default PictorialBar

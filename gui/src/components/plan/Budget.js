@@ -204,7 +204,7 @@ export default function Budget() {
                         <Modal.Title>Edytuj cel</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <div className="mb-3">
+                        <Col className="mb-3">
                             <label className="form-label">Kwota</label>
                             <input
                                 className="form-control"
@@ -213,7 +213,7 @@ export default function Budget() {
                                 value={editAmount}
                                 onChange={e => setEditAmount(e.target.value)}
                             />
-                        </div>
+                        </Col>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={closeEditModal}>Anuluj</Button>
