@@ -183,7 +183,7 @@ public class ExpenseController {
         LocalDate end = getEndOfSelectedMonth(year, month);
         return expenseService.getExpensesForTimePeriodCategory(begin, end, categories);
     }
-    @Operation(summary = "Get top expenses for a selected month and category")
+    @Operation(summary = "Get top expenses for a selected month and year")
     @GetMapping("/getExpensesForMonth")
     List<TreeMapExpenseDto> getExpensesForMonth(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
         LocalDate begin = getBeginOfSelectedMonth(year, month);
