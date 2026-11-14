@@ -574,10 +574,10 @@ public class ExpenseService {
     }
 
     public List<TreeMapExpenseDto> getExpensesForTimePeriod(LocalDate begin, LocalDate end) {
-        var sums = expenseRepository.findAllByTransactionDateBetween(begin, end)
+        var sums = expenseRepository.findAllByTransactionDateBetweenWithoutLevels(begin, end, List.of(INCOME_CATEGORY_LEVEL))
                 .stream()
                 .filter(e -> e.getCategory() != null && e.getCategory().getLevel() != null)
-                .collect(groupingBy(e -> e.getCategory().getLevel(), groupingBy(Expense::getCategoryName, groupingBy(expense -> expense.getTitle().toLowerCase(),
+                .collect(groupingBy(e -> e.getCategory().getLevel(), groupingBy(Expense::getCategoryName, groupingBy(this::normalizeTitle,
                         reducing(BigDecimal.ZERO,
                                 Expense::getAmount, BigDecimal::add)))));
 
@@ -595,6 +595,15 @@ public class ExpenseService {
                     return new TreeMapExpenseDto(levelName, categoryChildren);
                 })
                 .toList();
+    }
+
+    private String normalizeTitle(Expense expense) {
+        if (expense.getNote() != null && !expense.getNote().isBlank()) {
+            return expense.getNote();
+        }
+        return expense.getTitle()
+                .toLowerCase()
+                .replaceAll("ref:\\d+", "");
     }
 
     private Account resolveAccount(Long id) {

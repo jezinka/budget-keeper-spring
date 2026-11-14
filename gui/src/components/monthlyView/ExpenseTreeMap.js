@@ -50,7 +50,9 @@ const ExpenseTreeMap = ({expenses}) => {
             type="nest"
             content={renderCustomizedTreemapNode}
             stroke="#fff"
-            fill="#8884d8">
+            fill="#8884d8"
+            nodeInset={6}
+            nodeGap={6}>
             <Tooltip/>
         </Treemap>
     </ResponsiveContainer>);
